@@ -114,6 +114,11 @@ class TrueNasPeerClient implements IJsonRpcClient {
       _handleNotification('sharing.nfs.changed', params.asMap);
     });
 
+    // Real-time data updates (reporting.realtime collection)
+    _peer!.registerMethod('collection_update', (params) {
+      _handleNotification('collection_update', params.asMap);
+    });
+
     _logger.fine('Registered TrueNAS notification handlers');
   }
 

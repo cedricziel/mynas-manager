@@ -185,10 +185,21 @@ void main() {
       test('should handle TrueNAS notifications', () async {
         // Setup notification listener
         final notifications = <JsonRpcNotification>[];
-        client.notifications.listen(notifications.add);
+        late StreamSubscription subscription;
+        final notificationCompleter = Completer<void>();
+
+        subscription = client.notifications.listen((notification) {
+          notifications.add(notification);
+          if (notification.method == 'pool.changed') {
+            notificationCompleter.complete();
+          }
+        });
 
         // Wait for client to be ready
-        await Future.delayed(Duration(milliseconds: 100));
+        await Future.delayed(Duration(milliseconds: 50));
+
+        // Clear any existing notifications
+        notifications.clear();
 
         // Send a pool.changed notification
         incomingController.add(
@@ -199,32 +210,32 @@ void main() {
           }),
         );
 
-        // Give time for processing
-        await Future.delayed(Duration(milliseconds: 50));
+        // Wait for notification to be processed
+        await notificationCompleter.future.timeout(Duration(seconds: 1));
+        await subscription.cancel();
 
-        // Debug: print actual notifications
-        print('Notifications received: ${notifications.length}');
-        for (int i = 0; i < notifications.length; i++) {
-          print(
-            '  [$i] method: ${notifications[i].method}, params: ${notifications[i].params}',
-          );
-        }
-
-        expect(notifications.length, greaterThanOrEqualTo(1));
-        // Find the pool.changed notification
-        final poolNotification = notifications.firstWhere(
-          (n) => n.method == 'pool.changed',
-          orElse: () => throw StateError('No pool.changed notification found'),
-        );
-        expect(poolNotification.method, equals('pool.changed'));
-        expect(poolNotification.params?['pool_id'], equals('tank'));
+        expect(notifications.length, equals(1));
+        expect(notifications[0].method, equals('pool.changed'));
+        expect(notifications[0].params?['pool_id'], equals('tank'));
       });
 
       test('should handle collection_update notifications', () async {
         final notifications = <JsonRpcNotification>[];
-        client.notifications.listen(notifications.add);
+        late StreamSubscription subscription;
+        final notificationCompleter = Completer<void>();
 
-        await Future.delayed(Duration(milliseconds: 100));
+        subscription = client.notifications.listen((notification) {
+          notifications.add(notification);
+          if (notification.method == 'collection_update') {
+            notificationCompleter.complete();
+          }
+        });
+
+        // Wait for client to be ready
+        await Future.delayed(Duration(milliseconds: 50));
+
+        // Clear any existing notifications
+        notifications.clear();
 
         // Send a collection_update notification like TrueNAS does
         incomingController.add(
@@ -242,28 +253,14 @@ void main() {
           }),
         );
 
-        await Future.delayed(Duration(milliseconds: 50));
+        // Wait for notification to be processed
+        await notificationCompleter.future.timeout(Duration(seconds: 1));
+        await subscription.cancel();
 
-        // Debug: print actual notifications
-        print(
-          'Collection update notifications received: ${notifications.length}',
-        );
-        for (int i = 0; i < notifications.length; i++) {
-          print(
-            '  [$i] method: ${notifications[i].method}, params: ${notifications[i].params}',
-          );
-        }
-
-        expect(notifications.length, greaterThanOrEqualTo(1));
-        // Find the collection_update notification
-        final updateNotification = notifications.firstWhere(
-          (n) => n.method == 'collection_update',
-          orElse: () =>
-              throw StateError('No collection_update notification found'),
-        );
-        expect(updateNotification.method, equals('collection_update'));
+        expect(notifications.length, equals(1));
+        expect(notifications[0].method, equals('collection_update'));
         expect(
-          updateNotification.params?['collection'],
+          notifications[0].params?['collection'],
           equals('reporting.realtime'),
         );
       });
