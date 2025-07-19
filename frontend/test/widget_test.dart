@@ -16,6 +16,6 @@ void main() {
     await tester.pumpWidget(const ProviderScope(child: MyNasApp()));
 
     // Verify that login screen loads
-    expect(find.text('Welcome to MyNAS'), findsOneWidget);
+    expect(find.text('MyNAS Manager'), findsOneWidget);
   });
 }

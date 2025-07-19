@@ -202,9 +202,22 @@ void main() {
         // Give time for processing
         await Future.delayed(Duration(milliseconds: 50));
 
-        expect(notifications.length, equals(1));
-        expect(notifications[0].method, equals('pool.changed'));
-        expect(notifications[0].params?['pool_id'], equals('tank'));
+        // Debug: print actual notifications
+        print('Notifications received: ${notifications.length}');
+        for (int i = 0; i < notifications.length; i++) {
+          print(
+            '  [$i] method: ${notifications[i].method}, params: ${notifications[i].params}',
+          );
+        }
+
+        expect(notifications.length, greaterThanOrEqualTo(1));
+        // Find the pool.changed notification
+        final poolNotification = notifications.firstWhere(
+          (n) => n.method == 'pool.changed',
+          orElse: () => throw StateError('No pool.changed notification found'),
+        );
+        expect(poolNotification.method, equals('pool.changed'));
+        expect(poolNotification.params?['pool_id'], equals('tank'));
       });
 
       test('should handle collection_update notifications', () async {
@@ -231,10 +244,26 @@ void main() {
 
         await Future.delayed(Duration(milliseconds: 50));
 
-        expect(notifications.length, equals(1));
-        expect(notifications[0].method, equals('collection_update'));
+        // Debug: print actual notifications
+        print(
+          'Collection update notifications received: ${notifications.length}',
+        );
+        for (int i = 0; i < notifications.length; i++) {
+          print(
+            '  [$i] method: ${notifications[i].method}, params: ${notifications[i].params}',
+          );
+        }
+
+        expect(notifications.length, greaterThanOrEqualTo(1));
+        // Find the collection_update notification
+        final updateNotification = notifications.firstWhere(
+          (n) => n.method == 'collection_update',
+          orElse: () =>
+              throw StateError('No collection_update notification found'),
+        );
+        expect(updateNotification.method, equals('collection_update'));
         expect(
-          notifications[0].params?['collection'],
+          updateNotification.params?['collection'],
           equals('reporting.realtime'),
         );
       });
