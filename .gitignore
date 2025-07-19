@@ -1,0 +1,42 @@
+/.claude
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment files
+.env
+.env.*
+!.env.example
+!.env.mock
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+*.tmp
+*.temp
+*.swp
+*~
+
+# Build artifacts
+build/
+dist/
+out/
+
+# Coverage
+coverage/
+*.lcov
+
+# Dependencies
+node_modules/
+
+# Dart/Flutter specific ignores are in respective directories

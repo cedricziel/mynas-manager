@@ -1,0 +1,74 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Flutter
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: '3.32.4'
+        channel: 'stable'
+    
+    - name: Install dependencies
+      run: |
+        cd shared && dart pub get && cd ..
+        cd backend && dart pub get && cd ..
+        cd frontend && flutter pub get && cd ..
+    
+    - name: Generate code
+      run: |
+        cd shared && dart run build_runner build --delete-conflicting-outputs && cd ..
+        cd frontend && dart run build_runner build --delete-conflicting-outputs && cd ..
+    
+    - name: Build web release
+      run: |
+        cd frontend
+        flutter build web --release --base-href=/mynas-manager/
+        cd ..
+        tar -czf mynas-manager-web-${{ github.ref_name }}.tar.gz -C frontend/build/web .
+    
+    - name: Build backend release
+      run: |
+        cd backend
+        dart compile exe bin/server.dart -o mynas-manager-server
+        cd ..
+        tar -czf mynas-manager-backend-${{ github.ref_name }}-linux-x64.tar.gz -C backend mynas-manager-server
+    
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        draft: false
+        prerelease: false
+        files: |
+          mynas-manager-web-${{ github.ref_name }}.tar.gz
+          mynas-manager-backend-${{ github.ref_name }}-linux-x64.tar.gz
+        body: |
+          ## MyNAS Manager ${{ github.ref_name }}
+          
+          ### Installation
+          
+          #### Backend
+          1. Download `mynas-manager-backend-${{ github.ref_name }}-linux-x64.tar.gz`
+          2. Extract: `tar -xzf mynas-manager-backend-${{ github.ref_name }}-linux-x64.tar.gz`
+          3. Configure: Create `.env` file with your TrueNAS credentials
+          4. Run: `./mynas-manager-server`
+          
+          #### Frontend
+          1. Download `mynas-manager-web-${{ github.ref_name }}.tar.gz`
+          2. Extract to your web server directory
+          3. Configure your web server to serve the files
+          
+          ### License
+          This software is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0)
