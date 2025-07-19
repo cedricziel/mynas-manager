@@ -27,7 +27,8 @@ class TrueNasVersionManager implements IVersionManager {
       
       // Method 1: Try system.info (most common)
       try {
-        result = await _jsonRpcClient.call('system.info');
+        // system.info requires empty params array
+        result = await _jsonRpcClient.call('system.info', {});
         if (result is Map<String, dynamic> && result.containsKey('version')) {
           result = result['version'];
         }

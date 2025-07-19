@@ -361,6 +361,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.0"
+  mockito:
+    dependency: "direct dev"
+    description:
+      name: mockito
+      sha256: c83b003125f9f74ceab80912231cc34e89e8541a7b5f2c4ecdff857d0b74afa9
+      url: "https://pub.dev"
+    source: hosted
+    version: "5.5.0-dev"
   mynas_shared:
     dependency: "direct main"
     description:
@@ -472,6 +480,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.1"
+  source_gen:
+    dependency: transitive
+    description:
+      name: source_gen
+      sha256: fc787b1f89ceac9580c3616f899c9a447413cbdac1df071302127764c023a134
+      url: "https://pub.dev"
+    source: hosted
+    version: "3.0.0"
   source_map_stack_trace:
     dependency: transitive
     description:
@@ -505,7 +521,7 @@ packages:
     source: hosted
     version: "1.12.1"
   stream_channel:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: stream_channel
       sha256: "969e04c80b8bcdf826f8f16579c7b14d780458bd97f56d107d3950fdbeef059d"
