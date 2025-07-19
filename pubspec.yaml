@@ -1,0 +1,12 @@
+name: mynas_manager
+description: MyNAS Manager - A user-friendly management interface for TrueNAS SCALE
+license: AGPL-3.0
+publish_to: none
+
+workspace:
+  - backend
+  - frontend
+  - shared
+
+environment:
+  sdk: ^3.8.1

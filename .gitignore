@@ -39,4 +39,8 @@ coverage/
 # Dependencies
 node_modules/
 
-# Dart/Flutter specific ignores are in respective directories
+# Dart/Flutter workspace files
+pubspec.lock
+.dart_tool/
+
+# Package-specific build directories are handled by individual .gitignore files

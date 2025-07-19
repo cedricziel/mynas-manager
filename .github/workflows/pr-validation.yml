@@ -49,10 +49,14 @@ jobs:
         flutter-version: '3.32.4'
         channel: 'stable'
     
+    - name: Install workspace dependencies
+      run: dart pub get
+    
     - name: Build and check size
       run: |
-        cd frontend
-        flutter pub get
+        cd shared
+        dart run build_runner build --delete-conflicting-outputs
+        cd ../frontend
         dart run build_runner build --delete-conflicting-outputs
         flutter build web --release
         

@@ -38,10 +38,8 @@ mynas-manager/
 ### 1. Install Dependencies
 
 ```bash
-# Install dependencies for all projects
-cd shared && dart pub get && cd ..
-cd backend && dart pub get && cd ..
-cd frontend && flutter pub get && cd ..
+# Install dependencies for all packages (from root directory)
+dart pub get
 ```
 
 ### 2. Configure Backend
@@ -101,6 +99,13 @@ cd shared && dart test && cd ..
 cd backend && dart test && cd ..
 cd frontend && flutter test && cd ..
 ```
+
+## Workspace Structure
+
+This project uses Dart pub workspaces for monorepo management, which provides:
+- Single dependency resolution across all packages
+- Improved performance and faster analysis
+- Simplified dependency management
 
 ## Architecture
 

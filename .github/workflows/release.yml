@@ -21,11 +21,8 @@ jobs:
         flutter-version: '3.32.4'
         channel: 'stable'
     
-    - name: Install dependencies
-      run: |
-        cd shared && dart pub get && cd ..
-        cd backend && dart pub get && cd ..
-        cd frontend && flutter pub get && cd ..
+    - name: Install workspace dependencies
+      run: dart pub get
     
     - name: Generate code
       run: |
