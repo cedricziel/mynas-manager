@@ -1,5 +1,20 @@
 version: 2
 updates:
+  # Root workspace dependencies (dart_pre_commit, etc.)
+  - package-ecosystem: "pub"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "workspace"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
   # Enable version updates for Dart/Flutter dependencies
   - package-ecosystem: "pub"
     directory: "/backend"
