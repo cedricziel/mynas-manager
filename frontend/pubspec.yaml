@@ -54,7 +54,7 @@ dependencies:
   flutter_adaptive_scaffold: ^0.2.6
   
   # Charts
-  fl_chart: ^0.70.0
+  fl_chart: ^1.0.0
   
   # Desktop UI
   flutter_box_transform: ^0.4.5
