@@ -3,9 +3,44 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mynas_frontend/providers/window_manager_provider.dart';
 import 'package:mynas_frontend/models/window_state.dart';
+import 'package:mynas_frontend/widgets/apps/storage_app.dart';
 
 class Dock extends ConsumerWidget {
   const Dock({super.key});
+
+  void _openStorageApp(WidgetRef ref) {
+    final windowManager = ref.read(windowManagerProvider.notifier);
+    
+    // Check if storage window is already open
+    final existingWindows = ref.read(windowManagerProvider).windows
+        .where((w) => w.id == 'storage-app');
+    final existingWindow = existingWindows.isNotEmpty ? existingWindows.first : null;
+    
+    if (existingWindow != null) {
+      // Focus existing window
+      windowManager.focusWindow('storage-app');
+      if (existingWindow.isMinimized) {
+        windowManager.restoreWindow('storage-app');
+      }
+      return;
+    }
+    
+    // Create new storage window
+    final window = WindowState(
+      id: 'storage-app',
+      title: 'Storage Manager',
+      icon: Icons.storage,
+      content: const StorageApp(),
+      position: const Offset(100, 100),
+      size: const Size(1200, 800),
+      minSize: const Size(800, 600),
+      canResize: true,
+      canClose: true,
+      isFocused: true,
+    );
+    
+    windowManager.openWindow(window);
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -39,6 +74,13 @@ class Dock extends ConsumerWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
+                    // Storage app launcher
+                    _DockItem(
+                      icon: Icons.storage,
+                      label: 'Storage',
+                      onTap: () => _openStorageApp(ref),
+                    ),
+                    
                     // Static app launcher
                     _DockItem(
                       icon: Icons.apps,

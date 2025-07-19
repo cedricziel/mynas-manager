@@ -273,7 +273,9 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
             _buildActivityCard(
               'Resilver in Progress',
               'VDev replacement ongoing',
-              '${resilver.progressPercentage.toStringAsFixed(1)}% complete',
+              resilver.percentComplete != null 
+                  ? '${resilver.percentComplete!.toStringAsFixed(1)}% complete'
+                  : 'In progress...',
               Icons.autorenew,
               Colors.blue,
               theme,
@@ -285,13 +287,15 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
             ...scrubHistory.take(3).map((scrub) => Padding(
               padding: const EdgeInsets.only(bottom: 12),
               child: _buildActivityCard(
-                'Scrub ${scrub.state}',
-                'Started ${StorageUtils.formatRelativeTime(scrub.startTime)}',
-                scrub.endTime != null 
-                    ? 'Completed in ${StorageUtils.formatDuration(scrub.endTime!.difference(scrub.startTime))}'
+                'Scrub ${scrub.status.name}',
+                scrub.startTime != null 
+                    ? 'Started ${StorageUtils.formatRelativeTime(scrub.startTime!)}'
+                    : 'Scheduled',
+                scrub.endTime != null && scrub.startTime != null
+                    ? 'Completed in ${StorageUtils.formatDuration(scrub.endTime!.difference(scrub.startTime!))}'
                     : 'In progress...',
                 Icons.cleaning_services,
-                _getScrubColor(scrub.state),
+                _getScrubColor(scrub.status.name),
                 theme,
               ),
             )),
@@ -765,7 +769,7 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
             ),
             const SizedBox(height: 16),
             LinearProgressIndicator(
-              value: resilver.progressPercentage / 100,
+              value: resilver.percentComplete != null ? resilver.percentComplete! / 100 : null,
               backgroundColor: theme.colorScheme.surfaceContainerHighest,
               valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
             ),
@@ -774,12 +778,14 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  '${resilver.progressPercentage.toStringAsFixed(1)}% complete',
+                  resilver.percentComplete != null 
+                      ? '${resilver.percentComplete!.toStringAsFixed(1)}% complete'
+                      : 'Processing...',
                   style: theme.textTheme.bodyMedium,
                 ),
-                if (resilver.estimatedCompletion != null)
+                if (resilver.estimatedEndTime != null)
                   Text(
-                    'ETA: ${StorageUtils.formatRelativeTime(resilver.estimatedCompletion!)}',
+                    'ETA: ${StorageUtils.formatRelativeTime(resilver.estimatedEndTime!)}',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: theme.colorScheme.onSurfaceVariant,
                     ),

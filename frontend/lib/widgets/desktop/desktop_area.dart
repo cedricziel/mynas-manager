@@ -43,7 +43,7 @@ class DesktopArea extends ConsumerWidget {
   }
 
   void _openApp(WidgetRef ref, String id, String title, IconData icon, Widget content) {
-    ref.read(windowManagerProvider.notifier).openWindow(
+    ref.read(windowManagerProvider.notifier).openWindowWithParams(
       id: id,
       title: title,
       icon: icon,

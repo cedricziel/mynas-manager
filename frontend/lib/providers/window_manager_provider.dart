@@ -33,7 +33,34 @@ class WindowManagerState {
 class WindowManagerNotifier extends StateNotifier<WindowManagerState> {
   WindowManagerNotifier() : super(const WindowManagerState());
 
-  void openWindow({
+  void openWindow(WindowState window) {
+    // Check if window already exists
+    final existingIndex = state.windows.indexWhere((w) => w.id == window.id);
+    if (existingIndex != -1) {
+      // Focus existing window
+      focusWindow(window.id);
+      return;
+    }
+
+    // Create new window with proper z-index and focus
+    final newWindow = window.copyWith(
+      zIndex: state.nextZIndex,
+      isFocused: true,
+    );
+
+    // Unfocus all other windows
+    final updatedWindows = state.windows.map((w) => 
+      w.copyWith(isFocused: false)
+    ).toList();
+
+    state = state.copyWith(
+      windows: [...updatedWindows, newWindow],
+      nextZIndex: state.nextZIndex + 1,
+      focusedWindowId: window.id,
+    );
+  }
+
+  void openWindowWithParams({
     required String id,
     required String title,
     required Widget content,
