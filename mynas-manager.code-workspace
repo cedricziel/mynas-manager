@@ -1,0 +1,149 @@
+{
+  "folders": [
+    {
+      "name": "🌐 Root",
+      "path": "."
+    },
+    {
+      "name": "🔧 Backend",
+      "path": "backend"
+    },
+    {
+      "name": "🎨 Frontend",
+      "path": "frontend"
+    },
+    {
+      "name": "📦 Shared",
+      "path": "shared"
+    }
+  ],
+  "settings": {
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll": "explicit",
+      "source.organizeImports": "explicit"
+    },
+    "dart.lineLength": 120,
+    "[dart]": {
+      "editor.rulers": [120],
+      "editor.selectionHighlight": false,
+      "editor.suggest.snippetsPreventQuickSuggestions": false,
+      "editor.suggestSelection": "first",
+      "editor.tabCompletion": "onlySnippets",
+      "editor.wordBasedSuggestions": "off"
+    },
+    "files.exclude": {
+      "**/.dart_tool": true,
+      "**/.flutter-plugins": true,
+      "**/.flutter-plugins-dependencies": true,
+      "**/.packages": true,
+      "**/.pub-cache": true,
+      "**/build": true
+    },
+    "search.exclude": {
+      "**/.dart_tool": true,
+      "**/.flutter-plugins": true,
+      "**/.flutter-plugins-dependencies": true,
+      "**/build": true,
+      "**/coverage": true,
+      "**/*.g.dart": true,
+      "**/*.freezed.dart": true
+    },
+    "dart.previewLsp": true,
+    "dart.debugExternalPackageLibraries": false,
+    "dart.debugSdkLibraries": false,
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.patterns": {
+      "pubspec.yaml": ".flutter-plugins, .packages, pubspec.lock, .dart_tool, .flutter-plugins-dependencies"
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "dart-code.dart-code",
+      "dart-code.flutter",
+      "nash.awesome-flutter-snippets",
+      "alexisvt.flutter-snippets",
+      "robert-brunhage.flutter-riverpod-snippets",
+      "bendixma.dart-data-class-generator",
+      "felixangelov.bloc"
+    ]
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Frontend (Chrome)",
+        "request": "launch",
+        "type": "dart",
+        "program": "frontend/lib/main.dart",
+        "deviceId": "chrome",
+        "args": ["--web-port", "3000"]
+      },
+      {
+        "name": "Frontend (Desktop)",
+        "request": "launch",
+        "type": "dart",
+        "program": "frontend/lib/main.dart",
+        "deviceId": "macos"
+      },
+      {
+        "name": "Backend",
+        "request": "launch",
+        "type": "dart",
+        "program": "backend/bin/server.dart",
+        "args": ["--port", "8080"]
+      }
+    ],
+    "compounds": [
+      {
+        "name": "Full Stack",
+        "configurations": ["Backend", "Frontend (Chrome)"],
+        "stopAll": true
+      }
+    ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Get Dependencies (All)",
+        "type": "shell",
+        "command": "dart pub get && cd backend && dart pub get && cd ../frontend && flutter pub get && cd ../shared && dart pub get",
+        "group": {
+          "kind": "build",
+          "isDefault": true
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Run Tests (All)",
+        "type": "shell",
+        "command": "cd shared && dart test && cd ../backend && dart test && cd ../frontend && flutter test",
+        "group": {
+          "kind": "test",
+          "isDefault": true
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Generate Code",
+        "type": "shell",
+        "command": "dart run build_runner build --delete-conflicting-outputs",
+        "options": {
+          "cwd": "${workspaceFolder}"
+        },
+        "problemMatcher": []
+      },
+      {
+        "label": "Watch Code Generation",
+        "type": "shell",
+        "command": "dart run build_runner watch --delete-conflicting-outputs",
+        "options": {
+          "cwd": "${workspaceFolder}"
+        },
+        "isBackground": true,
+        "problemMatcher": []
+      }
+    ]
+  }
+}
