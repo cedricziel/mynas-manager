@@ -1,6 +1,7 @@
 name: mynas_backend
 description: Backend server for MyNAS Manager
 version: 1.0.0
+license: AGPL-3.0
 
 environment:
   sdk: ^3.8.1
@@ -13,6 +14,7 @@ dependencies:
   shelf_web_socket: ^2.0.0
   json_rpc_2: ^3.0.2
   web_socket_channel: ^3.0.1
+  stream_channel: ^2.1.2
   http: ^1.2.2
   dio: ^5.7.0
   args: ^2.6.0
@@ -26,3 +28,4 @@ dev_dependencies:
   test: ^1.24.0
   build_runner: ^2.4.9
   shelf_hotreload: ^1.4.1
+  mockito: ^5.4.4

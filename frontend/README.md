@@ -1,16 +1,60 @@
-# mynas_frontend
+# MyNAS Manager Frontend
 
-A new Flutter project.
+Flutter web application providing a desktop-like interface for managing TrueNAS SCALE servers.
 
-## Getting Started
+## Features
 
-This project is a starting point for a Flutter application.
+- Desktop-style window management system
+- Real-time system monitoring dashboard
+- Storage pool management interface
+- Responsive design for various screen sizes
+- macOS-inspired login screen
 
-A few resources to get you started if this is your first Flutter project:
+## Development
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Setup
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+1. Install dependencies:
+```bash
+flutter pub get
+```
+
+2. Run code generation:
+```bash
+dart run build_runner build --delete-conflicting-outputs
+```
+
+3. Run the application:
+```bash
+flutter run -d chrome --web-port 3000
+```
+
+### Testing
+
+Run tests:
+```bash
+flutter test
+```
+
+## Architecture
+
+- `lib/` - Application source code
+  - `providers/` - Riverpod state management
+  - `screens/` - Main application screens
+  - `widgets/` - Reusable UI components
+  - `models/` - Data models
+  - `services/` - Backend communication
+  - `utils/` - Utility functions
+- `test/` - Unit and widget tests
+
+## Technologies
+
+- Flutter Web
+- Riverpod for state management
+- Go Router for navigation
+- Material Design 3
+- WebSocket for real-time updates
+
+## License
+
+This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).

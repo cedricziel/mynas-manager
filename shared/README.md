@@ -1,39 +1,51 @@
-<!-- 
-This README describes the package. If you publish this package to pub.dev,
-this README's contents appear on the landing page for your package.
+# MyNAS Shared
 
-For information about how to write a good package README, see the guide for
-[writing package pages](https://dart.dev/tools/pub/writing-package-pages). 
-
-For general information about developing packages, see the Dart guide for
-[creating packages](https://dart.dev/guides/libraries/create-packages)
-and the Flutter guide for
-[developing packages and plugins](https://flutter.dev/to/develop-packages). 
--->
-
-TODO: Put a short description of the package here that helps potential users
-know whether this package might be useful for them.
+Shared models and utilities for MyNAS Manager used by both frontend and backend.
 
 ## Features
 
-TODO: List what your package can do. Maybe include images, gifs, or videos.
-
-## Getting started
-
-TODO: List prerequisites and provide or point to information on how to
-start using the package.
+- Common data models using Freezed
+- JSON serialization with json_serializable  
+- Shared constants and utilities
+- Type-safe communication between frontend and backend
 
 ## Usage
 
-TODO: Include short and useful examples for package users. Add longer examples
-to `/example` folder. 
+This package is used internally by the MyNAS Manager frontend and backend. It contains:
 
-```dart
-const like = 'sample';
+### Models
+- `Pool` - Storage pool information
+- `Dataset` - Dataset configuration
+- `Share` - Network share details
+- `SystemInfo` - System information
+- And many more...
+
+### Utilities
+- Storage formatting helpers
+- Common constants
+- Shared enums and types
+
+## Development
+
+### Setup
+
+1. Install dependencies:
+```bash
+dart pub get
 ```
 
-## Additional information
+2. Generate code:
+```bash
+dart run build_runner build --delete-conflicting-outputs
+```
 
-TODO: Tell users more about the package: where to find more information, how to 
-contribute to the package, how to file issues, what response they can expect 
-from the package authors, and more.
+### Testing
+
+Run tests:
+```bash
+dart test
+```
+
+## License
+
+This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).

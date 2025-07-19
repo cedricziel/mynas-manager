@@ -134,4 +134,4 @@ cd frontend && flutter test && cd ..
 
 ## License
 
-This project is open source. See LICENSE file for details.
+This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0). See LICENSE file for details.
