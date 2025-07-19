@@ -1,15 +1,14 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:logging/logging.dart';
-import 'package:mynas_backend/services/truenas_client.dart';
+import 'package:mynas_backend/interfaces/truenas_api_client.dart';
 import 'package:mynas_shared/mynas_shared.dart';
 
 class WebSocketHandler {
   final _logger = Logger('WebSocketHandler');
   final WebSocketChannel _channel;
-  final TrueNasClient _trueNasClient;
+  final ITrueNasApiClient _trueNasClient;
   late final json_rpc.Peer _peer;
 
   WebSocketHandler(WebSocketChannel webSocket, this._trueNasClient)
@@ -61,12 +60,6 @@ class WebSocketHandler {
   // TrueNAS connection methods
   Future<Map<String, dynamic>> _connectToTrueNAS(json_rpc.Parameters params) async {
     final url = params['url'].asString;
-    String? apiKey;
-    try {
-      apiKey = params['apiKey'].asString;
-    } catch (_) {
-      apiKey = null;
-    }
     
     // TODO: Create WebSocket connection to TrueNAS
     return {'connected': true, 'url': url};

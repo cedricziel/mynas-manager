@@ -8,6 +8,9 @@ import '../interfaces/version_manager.dart';
 import '../interfaces/event_manager.dart';
 import '../interfaces/json_rpc_client.dart';
 import '../interfaces/rate_limiter.dart';
+import '../exceptions/truenas_exceptions.dart';
+import '../utils/error_handler.dart';
+import '../utils/retry_handler.dart';
 
 /// Main TrueNAS WebSocket API client with dependency injection
 class TrueNasWebSocketClient implements ITrueNasApiClient {
@@ -49,38 +52,65 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
 
   @override
   Future<void> connect(String uri) async {
-    _logger.info('Connecting to TrueNAS at: $uri');
-    
-    try {
-      // Connect WebSocket
-      await _connectionManager.connect(uri);
-      
-      // Detect version
-      await _versionManager.detectVersion();
-      
-      // Check compatibility
-      if (!_versionManager.isVersionCompatible()) {
-        throw Exception('TrueNAS version ${_versionManager.currentVersion} is not compatible');
-      }
-      
-      _logger.info('Successfully connected to TrueNAS ${_versionManager.currentVersion}');
-    } catch (e) {
-      _logger.severe('Failed to connect to TrueNAS: $e');
-      rethrow;
-    }
+    return TrueNasErrorHandler.handleOperation(
+      () async {
+        // Connect WebSocket with retry
+        await RetryHandler.execute(
+          () => _connectionManager.connect(uri),
+          config: RetryConfig.critical,
+          operationName: 'connect_websocket',
+        );
+        
+        // Detect version with retry
+        await RetryHandler.execute(
+          () => _versionManager.detectVersion(),
+          config: RetryConfig.apiCalls,
+          operationName: 'detect_version',
+        );
+        
+        // Check compatibility
+        if (!_versionManager.isVersionCompatible()) {
+          throw TrueNasVersionException(
+            'TrueNAS version ${_versionManager.currentVersion} is not compatible',
+            requiredVersion: '25.04.0', // Minimum supported version
+            actualVersion: _versionManager.currentVersion?.toString() ?? 'unknown',
+            code: 'VERSION_INCOMPATIBLE',
+          );
+        }
+        
+        _logger.info('Successfully connected to TrueNAS ${_versionManager.currentVersion}');
+      },
+      operationName: 'connect_to_truenas',
+      timeout: const Duration(seconds: 30),
+    );
   }
 
   @override
   Future<void> disconnect() async {
-    _logger.info('Disconnecting from TrueNAS');
-    
-    try {
-      await _authManager.logout();
-      await _eventManager.unsubscribe();
-      await _connectionManager.disconnect();
-    } catch (e) {
-      _logger.warning('Error during disconnect: $e');
-    }
+    return TrueNasErrorHandler.handleOperation(
+      () async {
+        // Graceful logout (don't fail if already logged out)
+        try {
+          await _authManager.logout();
+        } catch (e) {
+          _logger.warning('Logout failed (continuing): $e');
+        }
+        
+        // Unsubscribe from events (don't fail if not subscribed)
+        try {
+          await _eventManager.unsubscribe();
+        } catch (e) {
+          _logger.warning('Event unsubscribe failed (continuing): $e');
+        }
+        
+        // Disconnect WebSocket
+        await _connectionManager.disconnect();
+        
+        _logger.info('Successfully disconnected from TrueNAS');
+      },
+      operationName: 'disconnect_from_truenas',
+      timeout: const Duration(seconds: 10),
+    );
   }
 
   @override
@@ -91,20 +121,49 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
     await _connectionManager.dispose();
   }
 
-  // Helper method for making rate-limited API calls
+  // Helper method for making rate-limited API calls with comprehensive error handling
   Future<T> _call<T>(String method, [Map<String, dynamic>? params]) async {
-    await _rateLimiter.waitForPermission();
-    _rateLimiter.recordRequest();
-    
-    try {
-      return await _jsonRpcClient.call<T>(method, params);
-    } catch (e) {
-      // Check if it's a rate limit error and record violation
-      if (e.toString().contains('rate') || e.toString().contains('limit')) {
-        _rateLimiter.recordViolation();
-      }
-      rethrow;
-    }
+    return TrueNasErrorHandler.handleOperation(
+      () async {
+        // Validate authentication state
+        if (!_authManager.isAuthenticated) {
+          throw TrueNasAuthenticationException(
+            'Authentication required for method: $method',
+            code: 'NOT_AUTHENTICATED',
+          );
+        }
+
+        // Validate connection state
+        if (!_connectionManager.isConnected) {
+          throw TrueNasConnectionException(
+            'WebSocket connection required for method: $method',
+            code: 'NOT_CONNECTED',
+          );
+        }
+
+        // Apply rate limiting
+        await _rateLimiter.waitForPermission();
+        _rateLimiter.recordRequest();
+        
+        return await RetryHandler.execute(
+          () => _jsonRpcClient.call<T>(method, params),
+          config: RetryConfig.apiCalls,
+          operationName: method,
+          shouldRetry: (exception) {
+            // Record rate limit violations
+            if (exception is TrueNasRateLimitException) {
+              _rateLimiter.recordViolation();
+              return true;
+            }
+            // Use default retry logic for other exceptions
+            return false;
+          },
+        );
+      },
+      operationName: 'api_call_$method',
+      context: {'method': method, 'params': params},
+      timeout: const Duration(seconds: 30),
+    );
   }
 
   // System Information

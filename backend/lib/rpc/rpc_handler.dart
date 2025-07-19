@@ -2,27 +2,49 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:shelf/shelf.dart';
 import 'package:logging/logging.dart';
-import 'package:mynas_backend/services/truenas_client.dart';
+import 'package:mynas_backend/interfaces/truenas_api_client.dart';
 import 'package:mynas_shared/mynas_shared.dart';
+import '../exceptions/truenas_exceptions.dart';
+import '../utils/error_handler.dart';
 
 class RpcHandler {
   final _logger = Logger('RpcHandler');
-  final TrueNasClient _trueNasClient;
+  final ITrueNasApiClient _trueNasClient;
 
   RpcHandler(this._trueNasClient);
 
   Future<Response> handle(Request request) async {
+    dynamic requestId;
+    
     try {
       final body = await request.readAsString();
-      final jsonRequest = jsonDecode(body);
       
-      // Handle JSON-RPC request manually
+      // Validate JSON format
+      Map<String, dynamic> jsonRequest;
+      try {
+        jsonRequest = jsonDecode(body) as Map<String, dynamic>;
+      } catch (e) {
+        _logger.warning('JSON parse error: $e');
+        return _errorResponse(null, -32700, 'Parse error', 'Invalid JSON format');
+      }
+      
+      // Extract request components
       final method = jsonRequest['method'] as String?;
       final params = jsonRequest['params'] ?? {};
-      final id = jsonRequest['id'];
+      requestId = jsonRequest['id'];
       
-      if (method == null) {
-        return _errorResponse(id, -32600, 'Invalid Request');
+      // Validate JSON-RPC format
+      if (jsonRequest['jsonrpc'] != '2.0') {
+        return _errorResponse(requestId, -32600, 'Invalid Request', 'Missing or invalid jsonrpc version');
+      }
+      
+      if (method == null || method.isEmpty) {
+        return _errorResponse(requestId, -32600, 'Invalid Request', 'Missing method field');
+      }
+      
+      // Validate parameters format
+      if (params is! Map<String, dynamic> && params is! List) {
+        return _errorResponse(requestId, -32602, 'Invalid params', 'Parameters must be object or array');
       }
       
       try {
@@ -31,17 +53,20 @@ class RpcHandler {
           jsonEncode({
             'jsonrpc': '2.0',
             'result': result,
-            'id': id,
+            'id': requestId,
           }),
           headers: {'content-type': 'application/json'},
         );
+      } on TrueNasException catch (e) {
+        _logger.warning('TrueNAS error for $method: $e');
+        return _mapTrueNasExceptionToResponse(e, requestId);
       } catch (e) {
-        _logger.severe('Method error: $e');
-        return _errorResponse(id, -32603, 'Internal error', e.toString());
+        _logger.severe('Unexpected error for $method: $e');
+        return _errorResponse(requestId, -32603, 'Internal error', e.toString());
       }
     } catch (e) {
-      _logger.severe('RPC error: $e');
-      return _errorResponse(null, -32700, 'Parse error');
+      _logger.severe('Request handling error: $e');
+      return _errorResponse(requestId, -32603, 'Internal error', 'Failed to process request');
     }
   }
   
@@ -58,6 +83,56 @@ class RpcHandler {
       }),
       headers: {'content-type': 'application/json'},
     );
+  }
+
+  /// Maps TrueNAS exceptions to appropriate JSON-RPC error responses
+  Response _mapTrueNasExceptionToResponse(TrueNasException exception, dynamic requestId) {
+    switch (exception.runtimeType) {
+      case TrueNasAuthenticationException:
+        return _errorResponse(requestId, 401, 'Authentication required', exception.message);
+      
+      case TrueNasAuthorizationException:
+        return _errorResponse(requestId, 403, 'Insufficient permissions', exception.message);
+      
+      case TrueNasNotFoundException:
+        final notFound = exception as TrueNasNotFoundException;
+        return _errorResponse(requestId, 404, 'Resource not found', 
+          '${notFound.resourceType} with id ${notFound.resourceId} not found');
+      
+      case TrueNasValidationException:
+        final validation = exception as TrueNasValidationException;
+        return _errorResponse(requestId, -32602, 'Invalid params', 
+          jsonEncode(validation.validationErrors));
+      
+      case TrueNasRateLimitException:
+        final rateLimit = exception as TrueNasRateLimitException;
+        return _errorResponse(requestId, 429, 'Rate limit exceeded', 
+          'Retry after ${rateLimit.retryAfter.inSeconds} seconds');
+      
+      case TrueNasConnectionException:
+        return _errorResponse(requestId, -32603, 'Connection error', exception.message);
+      
+      case TrueNasNetworkException:
+        return _errorResponse(requestId, -32603, 'Network error', exception.message);
+      
+      case TrueNasTimeoutException:
+        final timeout = exception as TrueNasTimeoutException;
+        return _errorResponse(requestId, -32603, 'Request timeout', 
+          'Operation timed out after ${timeout.timeout.inSeconds} seconds');
+      
+      case TrueNasVersionException:
+        final version = exception as TrueNasVersionException;
+        return _errorResponse(requestId, -32603, 'Version incompatible', 
+          'Required: ${version.requiredVersion}, Found: ${version.actualVersion}');
+      
+      case TrueNasServerException:
+        final server = exception as TrueNasServerException;
+        final code = server.statusCode ?? -32603;
+        return _errorResponse(requestId, code, 'Server error', exception.message);
+      
+      default:
+        return _errorResponse(requestId, -32603, 'Internal error', exception.message);
+    }
   }
 
   Future<dynamic> _handleMethod(String method, Map<String, dynamic> params) async {

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:logging/logging.dart';
 import 'package:mynas_shared/mynas_shared.dart';
@@ -28,7 +27,7 @@ class TrueNasClient {
     try {
       final response = await _dio.get('/system/info');
       final uptimeResponse = await _dio.get('/system/uptime');
-      final cpuResponse = await _dio.get('/reporting/get_data', data: {
+      await _dio.get('/reporting/get_data', data: {
         'graphs': [{'name': 'cpu'}],
         'reporting_query': {'start': '-1h', 'end': 'now'}
       });
