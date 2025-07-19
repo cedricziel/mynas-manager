@@ -104,23 +104,29 @@ cd frontend && flutter test && cd ..
 
 The application can be containerized for easy deployment.
 
-### Building the Docker Image
+### Using Pre-built Images
+
+Pre-built Docker images are available from GitHub Container Registry:
 
 ```bash
-docker build -t mynas-manager .
-```
+# Pull the latest image
+docker pull ghcr.io/cedricziel/mynas-manager:latest
 
-### Running with Docker
-
-```bash
-# Using docker run
+# Run the container
 docker run -p 80:80 \
   -e TRUENAS_URL=ws://your-truenas-ip/api/current \
   -e TRUENAS_API_KEY=your-api-key \
-  mynas-manager
+  ghcr.io/cedricziel/mynas-manager:latest
+```
 
-# Using docker-compose
-docker-compose up
+### Building from Source
+
+```bash
+# Build locally
+docker build -t mynas-manager .
+
+# Using docker-compose for development
+docker-compose up --build
 ```
 
 ### Environment Variables
