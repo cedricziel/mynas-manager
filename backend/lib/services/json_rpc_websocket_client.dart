@@ -100,9 +100,25 @@ class JsonRpcWebSocketClient implements IJsonRpcClient {
         // Use object format for methods that support it
         request['params'] = params;
       }
+    } else if (_requiresEmptyParams(method)) {
+      // Some methods require an empty array even when no parameters
+      request['params'] = [];
     }
     
     return request;
+  }
+
+  bool _requiresEmptyParams(String method) {
+    // TrueNAS methods that require empty array [] even when no parameters
+    const emptyParamMethods = {
+      'pool.query',
+      'dataset.query',
+      'share.query',
+      'auth.me',
+      'system.info',
+      'alert.list',
+    };
+    return emptyParamMethods.contains(method);
   }
 
   bool _shouldUseArrayParams(String method) {
