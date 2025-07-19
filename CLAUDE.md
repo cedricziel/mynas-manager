@@ -98,8 +98,13 @@ mynas-manager/
 **Backend Configuration**
 Create `.env` file in backend directory:
 ```env
-TRUENAS_URL=http://your-truenas-ip/api/v2.0
+# TrueNAS WebSocket URL (new JSON-RPC API)
+TRUENAS_URL=ws://your-truenas-ip/api/current
+
+# Authentication (use either API key OR username/password)
 TRUENAS_API_KEY=your-api-key-here
+# TRUENAS_USERNAME=root
+# TRUENAS_PASSWORD=your-password
 ```
 
 **Frontend Configuration**
@@ -119,7 +124,10 @@ TRUENAS_API_KEY=your-api-key-here
 - ✅ WebSocket communication working
 - ✅ Desktop UI with window management
 - ✅ macOS-style login screen
-- ⚠️ ResizableWindow has a callback signature issue that needs fixing
+- ✅ Comprehensive TrueNAS SCALE API client with dependency injection
+- ✅ Modern JSON-RPC 2.0 over WebSocket support
+- ✅ TrueNAS 25.04+ compatibility with version detection
+- ✅ Rate limiting and authentication management
 - 🔄 App launcher pending implementation
 - 🔄 Migration of existing screens to window apps pending
 

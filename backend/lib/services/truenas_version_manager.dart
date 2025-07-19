@@ -22,14 +22,40 @@ class TrueNasVersionManager implements IVersionManager {
     _logger.info('Detecting TrueNAS version');
 
     try {
-      // Try the new system.version method first
+      // Try different version detection methods in order of preference
       dynamic result;
+      
+      // Method 1: Try system.info (most common)
       try {
-        result = await _jsonRpcClient.call('system.version');
+        result = await _jsonRpcClient.call('system.info');
+        if (result is Map<String, dynamic> && result.containsKey('version')) {
+          result = result['version'];
+        }
       } catch (e) {
-        _logger.fine('system.version failed, trying core.get_version: $e');
-        // Fallback to legacy method
-        result = await _jsonRpcClient.call('core.get_version');
+        _logger.fine('system.info failed: $e');
+        
+        // Method 2: Try system.version
+        try {
+          result = await _jsonRpcClient.call('system.version');
+        } catch (e2) {
+          _logger.fine('system.version failed: $e2');
+          
+          // Method 3: Try core.get_version (legacy)
+          try {
+            result = await _jsonRpcClient.call('core.get_version');
+          } catch (e3) {
+            _logger.fine('core.get_version failed: $e3');
+            
+            // Method 4: Try system.general.version
+            try {
+              result = await _jsonRpcClient.call('system.general.version');
+            } catch (e4) {
+              _logger.warning('All version detection methods failed. Assuming default version.');
+              // Fallback to a reasonable default
+              result = 'TrueNAS-SCALE-24.04.0';
+            }
+          }
+        }
       }
 
       String versionString;

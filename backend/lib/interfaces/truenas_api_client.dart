@@ -50,12 +50,56 @@ abstract class ITrueNasApiClient {
   /// Export a pool
   Future<bool> exportPool(String poolId, {bool destroy = false});
 
+  // Pool Health & Monitoring
+  /// Get detailed pool status and health information
+  Future<Map<String, dynamic>> getPoolStatus(String poolId);
+  
+  /// Get pool usage statistics
+  Future<Map<String, dynamic>> getPoolUsage(String poolId);
+
+  // Pool Scrub Management
+  /// List all scrub tasks for pools
+  Future<List<PoolScrubTask>> listScrubTasks({String? poolId});
+  
+  /// Get specific scrub task details
+  Future<PoolScrubTask> getScrubTask(String taskId);
+  
+  /// Create a new scrub task
+  Future<PoolScrubTask> createScrubTask({
+    required String poolId,
+    required String schedule,
+    String? description,
+    bool enabled = true,
+  });
+  
+  /// Update an existing scrub task
+  Future<PoolScrubTask> updateScrubTask(String taskId, Map<String, dynamic> updates);
+  
+  /// Delete a scrub task
+  Future<bool> deleteScrubTask(String taskId);
+  
+  /// Run a scrub task manually
+  Future<PoolScrub> runScrub(String poolId);
+  
+  /// Get current/recent scrub status for a pool
+  Future<List<PoolScrub>> getScrubHistory(String poolId, {int? limit});
+
+  // Pool Resilver Management
+  /// Get resilver status for a pool
+  Future<PoolResilver?> getResilverStatus(String poolId);
+  
+  /// Update resilver configuration
+  Future<bool> updateResilverConfig(String poolId, Map<String, dynamic> config);
+
   // Dataset Management
   /// List datasets, optionally filtered by pool
   Future<List<Dataset>> listDatasets({String? poolId});
   
   /// Get a specific dataset by ID
   Future<Dataset> getDataset(String id);
+  
+  /// Get detailed dataset information including space usage
+  Future<Map<String, dynamic>> getDatasetDetails(String id);
   
   /// Create a new dataset
   Future<Dataset> createDataset({
@@ -70,6 +114,51 @@ abstract class ITrueNasApiClient {
   
   /// Delete a dataset
   Future<bool> deleteDataset(String id, {bool recursive = false});
+
+  // Dataset Snapshot Management
+  /// Get snapshot count for a dataset
+  Future<SnapshotCount> getDatasetSnapshotCount(String datasetId);
+  
+  /// List snapshots for a dataset
+  Future<List<Snapshot>> listDatasetSnapshots(String datasetId);
+
+  // Snapshot Task Management
+  /// List all snapshot tasks
+  Future<List<SnapshotTask>> listSnapshotTasks({String? datasetId});
+  
+  /// Get specific snapshot task details
+  Future<SnapshotTask> getSnapshotTask(String taskId);
+  
+  /// Create a new snapshot task
+  Future<SnapshotTask> createSnapshotTask({
+    required String dataset,
+    required String schedule,
+    required String namingSchema,
+    required int lifetimeValue,
+    required String lifetimeUnit,
+    bool enabled = true,
+    bool recursive = false,
+    bool excludeEmpty = false,
+  });
+  
+  /// Update an existing snapshot task
+  Future<SnapshotTask> updateSnapshotTask(String taskId, Map<String, dynamic> updates);
+  
+  /// Delete a snapshot task
+  Future<bool> deleteSnapshotTask(String taskId);
+  
+  /// Run a snapshot task manually
+  Future<Snapshot> runSnapshotTask(String taskId);
+  
+  /// Create a manual snapshot
+  Future<Snapshot> createSnapshot({
+    required String dataset,
+    required String name,
+    bool recursive = false,
+  });
+  
+  /// Delete specific snapshots
+  Future<bool> deleteSnapshots(String dataset, List<String> snapshotNames);
 
   // Share Management
   /// List shares, optionally filtered by type

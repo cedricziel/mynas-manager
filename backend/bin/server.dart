@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:args/args.dart';
 import 'package:logging/logging.dart';
+import 'package:dotenv/dotenv.dart';
 import 'package:mynas_backend/server.dart';
 
 void main(List<String> args) async {
@@ -14,9 +15,26 @@ void main(List<String> args) async {
   final host = results['host'] as String;
   final verbose = results['verbose'] as bool;
 
+  // Setup logging first
   _setupLogging(verbose);
 
-  final server = Server();
+  // Load environment variables from .env file
+  final env = DotEnv(includePlatformEnvironment: true);
+  try {
+    env.load(['.env']);
+    Logger.root.info('Loaded .env file successfully');
+    Logger.root.info('TrueNAS URL: ${env['TRUENAS_URL'] ?? 'not set'}');
+  } catch (e) {
+    Logger.root.warning('No .env file found, using system environment variables only: $e');
+  }
+
+  // Pass environment to server if available
+  final server = Server(
+    trueNasUrl: env['TRUENAS_URL'],
+    trueNasApiKey: env['TRUENAS_API_KEY'],
+    trueNasUsername: env['TRUENAS_USERNAME'],
+    trueNasPassword: env['TRUENAS_PASSWORD'],
+  );
   
   try {
     await server.start(host: host, port: port);

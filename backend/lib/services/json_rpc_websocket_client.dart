@@ -92,10 +92,42 @@ class JsonRpcWebSocketClient implements IJsonRpcClient {
     };
     
     if (params != null && params.isNotEmpty) {
-      request['params'] = params;
+      // TrueNAS expects parameters in different formats depending on the method
+      if (_shouldUseArrayParams(method)) {
+        // Convert to array format for methods that require it
+        request['params'] = _convertToArrayParams(method, params);
+      } else {
+        // Use object format for methods that support it
+        request['params'] = params;
+      }
     }
     
     return request;
+  }
+
+  bool _shouldUseArrayParams(String method) {
+    // Methods that require array-style parameters
+    const arrayParamMethods = {
+      'auth.login',
+      'auth.login_with_api_key',
+      'auth.token',
+      'auth.logout',
+      'auth.me',
+    };
+    return arrayParamMethods.contains(method);
+  }
+
+  List<dynamic> _convertToArrayParams(String method, Map<String, dynamic> params) {
+    switch (method) {
+      case 'auth.login':
+        return [params['username'], params['password']];
+      case 'auth.login_with_api_key':
+      case 'auth.token':
+        return [params['api_key'] ?? params['token']];
+      default:
+        // Default: convert to array of values
+        return params.values.toList();
+    }
   }
 
   void _handleMessage(String message) {
