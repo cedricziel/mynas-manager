@@ -19,6 +19,13 @@ class TrueNasClientFactory {
     // Create connection manager
     final connectionManager = WebSocketConnectionManager();
     
+    // Configure authentication headers if API key is provided
+    if (apiKey != null) {
+      connectionManager.setAuthHeaders({
+        'Authorization': 'Bearer $apiKey',
+      });
+    }
+    
     // Create JSON-RPC client
     final jsonRpcClient = JsonRpcWebSocketClient(
       connectionManager: connectionManager,

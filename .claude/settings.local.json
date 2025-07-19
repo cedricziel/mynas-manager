@@ -8,7 +8,8 @@
       "WebFetch(domain:github.com)",
       "Bash(touch:*)",
       "Bash(git add:*)",
-      "Bash(dart analyze:*)"
+      "Bash(dart analyze:*)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": []
   }

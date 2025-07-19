@@ -23,6 +23,9 @@ abstract class IConnectionManager {
   /// Connect to the specified WebSocket URI
   Future<void> connect(String uri);
   
+  /// Set authentication headers for the WebSocket connection
+  void setAuthHeaders(Map<String, String> headers);
+  
   /// Disconnect from the WebSocket
   Future<void> disconnect();
   

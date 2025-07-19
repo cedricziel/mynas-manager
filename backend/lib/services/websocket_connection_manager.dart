@@ -17,6 +17,7 @@ class WebSocketConnectionManager implements IConnectionManager {
   
   ConnectionState _state = ConnectionState.disconnected;
   String? _uri;
+  Map<String, String>? _headers;
   int _reconnectAttempts = 0;
   
   // Configuration
@@ -58,6 +59,13 @@ class WebSocketConnectionManager implements IConnectionManager {
     }
   }
 
+  // Add method to set authentication headers
+  @override
+  void setAuthHeaders(Map<String, String> headers) {
+    _headers = headers;
+    _logger.fine('Authentication headers set');
+  }
+
   Future<void> _connectWebSocket() async {
     if (_uri == null) {
       throw StateError('URI not set');
@@ -66,6 +74,7 @@ class WebSocketConnectionManager implements IConnectionManager {
     try {
       _channel = IOWebSocketChannel.connect(
         _uri!,
+        headers: _headers,
         connectTimeout: _connectionTimeout,
       );
 

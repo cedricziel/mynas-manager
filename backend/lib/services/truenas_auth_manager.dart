@@ -93,34 +93,21 @@ class TrueNasAuthManager implements IAuthManager {
     _setState(AuthState.authenticating);
 
     try {
-      // Try the new auth method first
+      // For WebSocket API with headers, we assume authentication is handled
+      // by the Authorization header in the WebSocket connection.
+      // We'll validate by calling a simple authenticated method.
+      
       try {
-        final result = await _jsonRpcClient.call('auth.login_with_api_key', {
-          'api_key': apiKey,
-        });
-
-        if (result is bool && result) {
-          _logger.info('API key authentication successful');
-          _setState(AuthState.authenticated);
-          return AuthResult.success(method: AuthMethod.apiKey);
-        }
-      } catch (e) {
-        _logger.fine('New API key auth method failed, trying legacy method: $e');
-      }
-
-      // Fallback to legacy method
-      final result = await _jsonRpcClient.call('auth.token', {
-        'token': apiKey,
-      });
-
-      if (result is bool && result) {
-        _logger.info('API key authentication successful (legacy method)');
+        // Test authentication by calling auth.me
+        await _jsonRpcClient.call('auth.me');
+        _logger.info('API key authentication successful (header-based)');
         _setState(AuthState.authenticated);
         return AuthResult.success(method: AuthMethod.apiKey);
-      } else {
-        _logger.warning('API key authentication failed');
+      } catch (e) {
+        // If auth.me fails, the API key might be invalid or headers not working
+        _logger.warning('API key authentication failed - auth.me test failed: $e');
         _setState(AuthState.error);
-        return AuthResult.failure('API key authentication failed');
+        return AuthResult.failure('API key authentication failed: $e');
       }
     } catch (e) {
       _logger.severe('API key authentication failed: $e');
