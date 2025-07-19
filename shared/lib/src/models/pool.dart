@@ -4,7 +4,7 @@ part 'pool.freezed.dart';
 part 'pool.g.dart';
 
 @freezed
-class Pool with _$Pool {
+sealed class Pool with _$Pool {
   const factory Pool({
     required String id,
     required String name,
@@ -22,7 +22,7 @@ class Pool with _$Pool {
 }
 
 @freezed
-class PoolVdev with _$PoolVdev {
+sealed class PoolVdev with _$PoolVdev {
   const factory PoolVdev({
     required String type,
     required String status,

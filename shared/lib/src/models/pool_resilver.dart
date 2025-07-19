@@ -4,7 +4,7 @@ part 'pool_resilver.freezed.dart';
 part 'pool_resilver.g.dart';
 
 @freezed
-class PoolResilver with _$PoolResilver {
+sealed class PoolResilver with _$PoolResilver {
   const factory PoolResilver({
     required String pool,
     required ResilverStatus status,

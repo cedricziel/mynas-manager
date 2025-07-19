@@ -4,7 +4,7 @@ part 'share.freezed.dart';
 part 'share.g.dart';
 
 @freezed
-class Share with _$Share {
+sealed class Share with _$Share {
   const factory Share({
     required String id,
     required String name,

@@ -4,7 +4,7 @@ part 'system_info.freezed.dart';
 part 'system_info.g.dart';
 
 @freezed
-class SystemInfo with _$SystemInfo {
+sealed class SystemInfo with _$SystemInfo {
   const factory SystemInfo({
     required String hostname,
     required String version,
@@ -20,7 +20,7 @@ class SystemInfo with _$SystemInfo {
 }
 
 @freezed
-class MemoryInfo with _$MemoryInfo {
+sealed class MemoryInfo with _$MemoryInfo {
   const factory MemoryInfo({
     required int total,
     required int used,
@@ -33,7 +33,7 @@ class MemoryInfo with _$MemoryInfo {
 }
 
 @freezed
-class Alert with _$Alert {
+sealed class Alert with _$Alert {
   const factory Alert({
     required String id,
     required AlertLevel level,

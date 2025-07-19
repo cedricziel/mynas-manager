@@ -1,5 +1,5 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
 // ignore_for_file: type=lint
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
@@ -9,736 +9,586 @@ part of 'pool_scrub.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
-
-PoolScrub _$PoolScrubFromJson(Map<String, dynamic> json) {
-  return _PoolScrub.fromJson(json);
-}
 
 /// @nodoc
 mixin _$PoolScrub {
-  String get id => throw _privateConstructorUsedError;
-  String get pool => throw _privateConstructorUsedError;
-  ScrubStatus get status => throw _privateConstructorUsedError;
-  DateTime? get startTime => throw _privateConstructorUsedError;
-  DateTime? get endTime => throw _privateConstructorUsedError;
-  int? get duration => throw _privateConstructorUsedError; // seconds
-  int? get bytesProcessed => throw _privateConstructorUsedError;
-  int? get bytesPerSecond => throw _privateConstructorUsedError;
-  int? get errorsFound => throw _privateConstructorUsedError;
-  String get description => throw _privateConstructorUsedError;
-  bool get enabled => throw _privateConstructorUsedError;
-  String? get schedule => throw _privateConstructorUsedError;
+
+ String get id; String get pool; ScrubStatus get status; DateTime? get startTime; DateTime? get endTime; int? get duration;// seconds
+ int? get bytesProcessed; int? get bytesPerSecond; int? get errorsFound; String get description; bool get enabled; String? get schedule;
+/// Create a copy of PoolScrub
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$PoolScrubCopyWith<PoolScrub> get copyWith => _$PoolScrubCopyWithImpl<PoolScrub>(this as PoolScrub, _$identity);
 
   /// Serializes this PoolScrub to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of PoolScrub
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $PoolScrubCopyWith<PoolScrub> get copyWith =>
-      throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PoolScrub&&(identical(other.id, id) || other.id == id)&&(identical(other.pool, pool) || other.pool == pool)&&(identical(other.status, status) || other.status == status)&&(identical(other.startTime, startTime) || other.startTime == startTime)&&(identical(other.endTime, endTime) || other.endTime == endTime)&&(identical(other.duration, duration) || other.duration == duration)&&(identical(other.bytesProcessed, bytesProcessed) || other.bytesProcessed == bytesProcessed)&&(identical(other.bytesPerSecond, bytesPerSecond) || other.bytesPerSecond == bytesPerSecond)&&(identical(other.errorsFound, errorsFound) || other.errorsFound == errorsFound)&&(identical(other.description, description) || other.description == description)&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.schedule, schedule) || other.schedule == schedule));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,pool,status,startTime,endTime,duration,bytesProcessed,bytesPerSecond,errorsFound,description,enabled,schedule);
+
+@override
+String toString() {
+  return 'PoolScrub(id: $id, pool: $pool, status: $status, startTime: $startTime, endTime: $endTime, duration: $duration, bytesProcessed: $bytesProcessed, bytesPerSecond: $bytesPerSecond, errorsFound: $errorsFound, description: $description, enabled: $enabled, schedule: $schedule)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $PoolScrubCopyWith<$Res> {
-  factory $PoolScrubCopyWith(PoolScrub value, $Res Function(PoolScrub) then) =
-      _$PoolScrubCopyWithImpl<$Res, PoolScrub>;
-  @useResult
-  $Res call({
-    String id,
-    String pool,
-    ScrubStatus status,
-    DateTime? startTime,
-    DateTime? endTime,
-    int? duration,
-    int? bytesProcessed,
-    int? bytesPerSecond,
-    int? errorsFound,
-    String description,
-    bool enabled,
-    String? schedule,
-  });
-}
+abstract mixin class $PoolScrubCopyWith<$Res>  {
+  factory $PoolScrubCopyWith(PoolScrub value, $Res Function(PoolScrub) _then) = _$PoolScrubCopyWithImpl;
+@useResult
+$Res call({
+ String id, String pool, ScrubStatus status, DateTime? startTime, DateTime? endTime, int? duration, int? bytesProcessed, int? bytesPerSecond, int? errorsFound, String description, bool enabled, String? schedule
+});
 
+
+
+
+}
 /// @nodoc
-class _$PoolScrubCopyWithImpl<$Res, $Val extends PoolScrub>
+class _$PoolScrubCopyWithImpl<$Res>
     implements $PoolScrubCopyWith<$Res> {
-  _$PoolScrubCopyWithImpl(this._value, this._then);
+  _$PoolScrubCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final PoolScrub _self;
+  final $Res Function(PoolScrub) _then;
 
-  /// Create a copy of PoolScrub
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? pool = null,
-    Object? status = null,
-    Object? startTime = freezed,
-    Object? endTime = freezed,
-    Object? duration = freezed,
-    Object? bytesProcessed = freezed,
-    Object? bytesPerSecond = freezed,
-    Object? errorsFound = freezed,
-    Object? description = null,
-    Object? enabled = null,
-    Object? schedule = freezed,
-  }) {
-    return _then(
-      _value.copyWith(
-            id: null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                      as String,
-            pool: null == pool
-                ? _value.pool
-                : pool // ignore: cast_nullable_to_non_nullable
-                      as String,
-            status: null == status
-                ? _value.status
-                : status // ignore: cast_nullable_to_non_nullable
-                      as ScrubStatus,
-            startTime: freezed == startTime
-                ? _value.startTime
-                : startTime // ignore: cast_nullable_to_non_nullable
-                      as DateTime?,
-            endTime: freezed == endTime
-                ? _value.endTime
-                : endTime // ignore: cast_nullable_to_non_nullable
-                      as DateTime?,
-            duration: freezed == duration
-                ? _value.duration
-                : duration // ignore: cast_nullable_to_non_nullable
-                      as int?,
-            bytesProcessed: freezed == bytesProcessed
-                ? _value.bytesProcessed
-                : bytesProcessed // ignore: cast_nullable_to_non_nullable
-                      as int?,
-            bytesPerSecond: freezed == bytesPerSecond
-                ? _value.bytesPerSecond
-                : bytesPerSecond // ignore: cast_nullable_to_non_nullable
-                      as int?,
-            errorsFound: freezed == errorsFound
-                ? _value.errorsFound
-                : errorsFound // ignore: cast_nullable_to_non_nullable
-                      as int?,
-            description: null == description
-                ? _value.description
-                : description // ignore: cast_nullable_to_non_nullable
-                      as String,
-            enabled: null == enabled
-                ? _value.enabled
-                : enabled // ignore: cast_nullable_to_non_nullable
-                      as bool,
-            schedule: freezed == schedule
-                ? _value.schedule
-                : schedule // ignore: cast_nullable_to_non_nullable
-                      as String?,
-          )
-          as $Val,
-    );
-  }
+/// Create a copy of PoolScrub
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? pool = null,Object? status = null,Object? startTime = freezed,Object? endTime = freezed,Object? duration = freezed,Object? bytesProcessed = freezed,Object? bytesPerSecond = freezed,Object? errorsFound = freezed,Object? description = null,Object? enabled = null,Object? schedule = freezed,}) {
+  return _then(_self.copyWith(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,pool: null == pool ? _self.pool : pool // ignore: cast_nullable_to_non_nullable
+as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as ScrubStatus,startTime: freezed == startTime ? _self.startTime : startTime // ignore: cast_nullable_to_non_nullable
+as DateTime?,endTime: freezed == endTime ? _self.endTime : endTime // ignore: cast_nullable_to_non_nullable
+as DateTime?,duration: freezed == duration ? _self.duration : duration // ignore: cast_nullable_to_non_nullable
+as int?,bytesProcessed: freezed == bytesProcessed ? _self.bytesProcessed : bytesProcessed // ignore: cast_nullable_to_non_nullable
+as int?,bytesPerSecond: freezed == bytesPerSecond ? _self.bytesPerSecond : bytesPerSecond // ignore: cast_nullable_to_non_nullable
+as int?,errorsFound: freezed == errorsFound ? _self.errorsFound : errorsFound // ignore: cast_nullable_to_non_nullable
+as int?,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String,enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
+as bool,schedule: freezed == schedule ? _self.schedule : schedule // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
 }
 
-/// @nodoc
-abstract class _$$PoolScrubImplCopyWith<$Res>
-    implements $PoolScrubCopyWith<$Res> {
-  factory _$$PoolScrubImplCopyWith(
-    _$PoolScrubImpl value,
-    $Res Function(_$PoolScrubImpl) then,
-  ) = __$$PoolScrubImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    String id,
-    String pool,
-    ScrubStatus status,
-    DateTime? startTime,
-    DateTime? endTime,
-    int? duration,
-    int? bytesProcessed,
-    int? bytesPerSecond,
-    int? errorsFound,
-    String description,
-    bool enabled,
-    String? schedule,
-  });
 }
 
-/// @nodoc
-class __$$PoolScrubImplCopyWithImpl<$Res>
-    extends _$PoolScrubCopyWithImpl<$Res, _$PoolScrubImpl>
-    implements _$$PoolScrubImplCopyWith<$Res> {
-  __$$PoolScrubImplCopyWithImpl(
-    _$PoolScrubImpl _value,
-    $Res Function(_$PoolScrubImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of PoolScrub
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? pool = null,
-    Object? status = null,
-    Object? startTime = freezed,
-    Object? endTime = freezed,
-    Object? duration = freezed,
-    Object? bytesProcessed = freezed,
-    Object? bytesPerSecond = freezed,
-    Object? errorsFound = freezed,
-    Object? description = null,
-    Object? enabled = null,
-    Object? schedule = freezed,
-  }) {
-    return _then(
-      _$PoolScrubImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                  as String,
-        pool: null == pool
-            ? _value.pool
-            : pool // ignore: cast_nullable_to_non_nullable
-                  as String,
-        status: null == status
-            ? _value.status
-            : status // ignore: cast_nullable_to_non_nullable
-                  as ScrubStatus,
-        startTime: freezed == startTime
-            ? _value.startTime
-            : startTime // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
-        endTime: freezed == endTime
-            ? _value.endTime
-            : endTime // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
-        duration: freezed == duration
-            ? _value.duration
-            : duration // ignore: cast_nullable_to_non_nullable
-                  as int?,
-        bytesProcessed: freezed == bytesProcessed
-            ? _value.bytesProcessed
-            : bytesProcessed // ignore: cast_nullable_to_non_nullable
-                  as int?,
-        bytesPerSecond: freezed == bytesPerSecond
-            ? _value.bytesPerSecond
-            : bytesPerSecond // ignore: cast_nullable_to_non_nullable
-                  as int?,
-        errorsFound: freezed == errorsFound
-            ? _value.errorsFound
-            : errorsFound // ignore: cast_nullable_to_non_nullable
-                  as int?,
-        description: null == description
-            ? _value.description
-            : description // ignore: cast_nullable_to_non_nullable
-                  as String,
-        enabled: null == enabled
-            ? _value.enabled
-            : enabled // ignore: cast_nullable_to_non_nullable
-                  as bool,
-        schedule: freezed == schedule
-            ? _value.schedule
-            : schedule // ignore: cast_nullable_to_non_nullable
-                  as String?,
-      ),
-    );
-  }
+/// Adds pattern-matching-related methods to [PoolScrub].
+extension PoolScrubPatterns on PoolScrub {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _PoolScrub value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _PoolScrub() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _PoolScrub value)  $default,){
+final _that = this;
+switch (_that) {
+case _PoolScrub():
+return $default(_that);}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _PoolScrub value)?  $default,){
+final _that = this;
+switch (_that) {
+case _PoolScrub() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String pool,  ScrubStatus status,  DateTime? startTime,  DateTime? endTime,  int? duration,  int? bytesProcessed,  int? bytesPerSecond,  int? errorsFound,  String description,  bool enabled,  String? schedule)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _PoolScrub() when $default != null:
+return $default(_that.id,_that.pool,_that.status,_that.startTime,_that.endTime,_that.duration,_that.bytesProcessed,_that.bytesPerSecond,_that.errorsFound,_that.description,_that.enabled,_that.schedule);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String pool,  ScrubStatus status,  DateTime? startTime,  DateTime? endTime,  int? duration,  int? bytesProcessed,  int? bytesPerSecond,  int? errorsFound,  String description,  bool enabled,  String? schedule)  $default,) {final _that = this;
+switch (_that) {
+case _PoolScrub():
+return $default(_that.id,_that.pool,_that.status,_that.startTime,_that.endTime,_that.duration,_that.bytesProcessed,_that.bytesPerSecond,_that.errorsFound,_that.description,_that.enabled,_that.schedule);}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String pool,  ScrubStatus status,  DateTime? startTime,  DateTime? endTime,  int? duration,  int? bytesProcessed,  int? bytesPerSecond,  int? errorsFound,  String description,  bool enabled,  String? schedule)?  $default,) {final _that = this;
+switch (_that) {
+case _PoolScrub() when $default != null:
+return $default(_that.id,_that.pool,_that.status,_that.startTime,_that.endTime,_that.duration,_that.bytesProcessed,_that.bytesPerSecond,_that.errorsFound,_that.description,_that.enabled,_that.schedule);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$PoolScrubImpl implements _PoolScrub {
-  const _$PoolScrubImpl({
-    required this.id,
-    required this.pool,
-    required this.status,
-    required this.startTime,
-    required this.endTime,
-    required this.duration,
-    required this.bytesProcessed,
-    required this.bytesPerSecond,
-    required this.errorsFound,
-    required this.description,
-    this.enabled = false,
-    this.schedule,
-  });
 
-  factory _$PoolScrubImpl.fromJson(Map<String, dynamic> json) =>
-      _$$PoolScrubImplFromJson(json);
+class _PoolScrub implements PoolScrub {
+  const _PoolScrub({required this.id, required this.pool, required this.status, required this.startTime, required this.endTime, required this.duration, required this.bytesProcessed, required this.bytesPerSecond, required this.errorsFound, required this.description, this.enabled = false, this.schedule});
+  factory _PoolScrub.fromJson(Map<String, dynamic> json) => _$PoolScrubFromJson(json);
 
-  @override
-  final String id;
-  @override
-  final String pool;
-  @override
-  final ScrubStatus status;
-  @override
-  final DateTime? startTime;
-  @override
-  final DateTime? endTime;
-  @override
-  final int? duration;
-  // seconds
-  @override
-  final int? bytesProcessed;
-  @override
-  final int? bytesPerSecond;
-  @override
-  final int? errorsFound;
-  @override
-  final String description;
-  @override
-  @JsonKey()
-  final bool enabled;
-  @override
-  final String? schedule;
+@override final  String id;
+@override final  String pool;
+@override final  ScrubStatus status;
+@override final  DateTime? startTime;
+@override final  DateTime? endTime;
+@override final  int? duration;
+// seconds
+@override final  int? bytesProcessed;
+@override final  int? bytesPerSecond;
+@override final  int? errorsFound;
+@override final  String description;
+@override@JsonKey() final  bool enabled;
+@override final  String? schedule;
 
-  @override
-  String toString() {
-    return 'PoolScrub(id: $id, pool: $pool, status: $status, startTime: $startTime, endTime: $endTime, duration: $duration, bytesProcessed: $bytesProcessed, bytesPerSecond: $bytesPerSecond, errorsFound: $errorsFound, description: $description, enabled: $enabled, schedule: $schedule)';
-  }
+/// Create a copy of PoolScrub
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$PoolScrubCopyWith<_PoolScrub> get copyWith => __$PoolScrubCopyWithImpl<_PoolScrub>(this, _$identity);
 
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$PoolScrubImpl &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.pool, pool) || other.pool == pool) &&
-            (identical(other.status, status) || other.status == status) &&
-            (identical(other.startTime, startTime) ||
-                other.startTime == startTime) &&
-            (identical(other.endTime, endTime) || other.endTime == endTime) &&
-            (identical(other.duration, duration) ||
-                other.duration == duration) &&
-            (identical(other.bytesProcessed, bytesProcessed) ||
-                other.bytesProcessed == bytesProcessed) &&
-            (identical(other.bytesPerSecond, bytesPerSecond) ||
-                other.bytesPerSecond == bytesPerSecond) &&
-            (identical(other.errorsFound, errorsFound) ||
-                other.errorsFound == errorsFound) &&
-            (identical(other.description, description) ||
-                other.description == description) &&
-            (identical(other.enabled, enabled) || other.enabled == enabled) &&
-            (identical(other.schedule, schedule) ||
-                other.schedule == schedule));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    pool,
-    status,
-    startTime,
-    endTime,
-    duration,
-    bytesProcessed,
-    bytesPerSecond,
-    errorsFound,
-    description,
-    enabled,
-    schedule,
-  );
-
-  /// Create a copy of PoolScrub
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$PoolScrubImplCopyWith<_$PoolScrubImpl> get copyWith =>
-      __$$PoolScrubImplCopyWithImpl<_$PoolScrubImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$PoolScrubImplToJson(this);
-  }
+@override
+Map<String, dynamic> toJson() {
+  return _$PoolScrubToJson(this, );
 }
 
-abstract class _PoolScrub implements PoolScrub {
-  const factory _PoolScrub({
-    required final String id,
-    required final String pool,
-    required final ScrubStatus status,
-    required final DateTime? startTime,
-    required final DateTime? endTime,
-    required final int? duration,
-    required final int? bytesProcessed,
-    required final int? bytesPerSecond,
-    required final int? errorsFound,
-    required final String description,
-    final bool enabled,
-    final String? schedule,
-  }) = _$PoolScrubImpl;
-
-  factory _PoolScrub.fromJson(Map<String, dynamic> json) =
-      _$PoolScrubImpl.fromJson;
-
-  @override
-  String get id;
-  @override
-  String get pool;
-  @override
-  ScrubStatus get status;
-  @override
-  DateTime? get startTime;
-  @override
-  DateTime? get endTime;
-  @override
-  int? get duration; // seconds
-  @override
-  int? get bytesProcessed;
-  @override
-  int? get bytesPerSecond;
-  @override
-  int? get errorsFound;
-  @override
-  String get description;
-  @override
-  bool get enabled;
-  @override
-  String? get schedule;
-
-  /// Create a copy of PoolScrub
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$PoolScrubImplCopyWith<_$PoolScrubImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PoolScrub&&(identical(other.id, id) || other.id == id)&&(identical(other.pool, pool) || other.pool == pool)&&(identical(other.status, status) || other.status == status)&&(identical(other.startTime, startTime) || other.startTime == startTime)&&(identical(other.endTime, endTime) || other.endTime == endTime)&&(identical(other.duration, duration) || other.duration == duration)&&(identical(other.bytesProcessed, bytesProcessed) || other.bytesProcessed == bytesProcessed)&&(identical(other.bytesPerSecond, bytesPerSecond) || other.bytesPerSecond == bytesPerSecond)&&(identical(other.errorsFound, errorsFound) || other.errorsFound == errorsFound)&&(identical(other.description, description) || other.description == description)&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.schedule, schedule) || other.schedule == schedule));
 }
 
-PoolScrubTask _$PoolScrubTaskFromJson(Map<String, dynamic> json) {
-  return _PoolScrubTask.fromJson(json);
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,pool,status,startTime,endTime,duration,bytesProcessed,bytesPerSecond,errorsFound,description,enabled,schedule);
+
+@override
+String toString() {
+  return 'PoolScrub(id: $id, pool: $pool, status: $status, startTime: $startTime, endTime: $endTime, duration: $duration, bytesProcessed: $bytesProcessed, bytesPerSecond: $bytesPerSecond, errorsFound: $errorsFound, description: $description, enabled: $enabled, schedule: $schedule)';
 }
+
+
+}
+
+/// @nodoc
+abstract mixin class _$PoolScrubCopyWith<$Res> implements $PoolScrubCopyWith<$Res> {
+  factory _$PoolScrubCopyWith(_PoolScrub value, $Res Function(_PoolScrub) _then) = __$PoolScrubCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String pool, ScrubStatus status, DateTime? startTime, DateTime? endTime, int? duration, int? bytesProcessed, int? bytesPerSecond, int? errorsFound, String description, bool enabled, String? schedule
+});
+
+
+
+
+}
+/// @nodoc
+class __$PoolScrubCopyWithImpl<$Res>
+    implements _$PoolScrubCopyWith<$Res> {
+  __$PoolScrubCopyWithImpl(this._self, this._then);
+
+  final _PoolScrub _self;
+  final $Res Function(_PoolScrub) _then;
+
+/// Create a copy of PoolScrub
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? pool = null,Object? status = null,Object? startTime = freezed,Object? endTime = freezed,Object? duration = freezed,Object? bytesProcessed = freezed,Object? bytesPerSecond = freezed,Object? errorsFound = freezed,Object? description = null,Object? enabled = null,Object? schedule = freezed,}) {
+  return _then(_PoolScrub(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,pool: null == pool ? _self.pool : pool // ignore: cast_nullable_to_non_nullable
+as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
+as ScrubStatus,startTime: freezed == startTime ? _self.startTime : startTime // ignore: cast_nullable_to_non_nullable
+as DateTime?,endTime: freezed == endTime ? _self.endTime : endTime // ignore: cast_nullable_to_non_nullable
+as DateTime?,duration: freezed == duration ? _self.duration : duration // ignore: cast_nullable_to_non_nullable
+as int?,bytesProcessed: freezed == bytesProcessed ? _self.bytesProcessed : bytesProcessed // ignore: cast_nullable_to_non_nullable
+as int?,bytesPerSecond: freezed == bytesPerSecond ? _self.bytesPerSecond : bytesPerSecond // ignore: cast_nullable_to_non_nullable
+as int?,errorsFound: freezed == errorsFound ? _self.errorsFound : errorsFound // ignore: cast_nullable_to_non_nullable
+as int?,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String,enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
+as bool,schedule: freezed == schedule ? _self.schedule : schedule // ignore: cast_nullable_to_non_nullable
+as String?,
+  ));
+}
+
+
+}
+
 
 /// @nodoc
 mixin _$PoolScrubTask {
-  String get id => throw _privateConstructorUsedError;
-  String get pool => throw _privateConstructorUsedError;
-  String get description => throw _privateConstructorUsedError;
-  String get schedule => throw _privateConstructorUsedError; // cron expression
-  bool get enabled => throw _privateConstructorUsedError;
-  DateTime? get nextRun => throw _privateConstructorUsedError;
-  DateTime? get lastRun => throw _privateConstructorUsedError;
-  Map<String, dynamic>? get options => throw _privateConstructorUsedError;
+
+ String get id; String get pool; String get description; String get schedule;// cron expression
+ bool get enabled; DateTime? get nextRun; DateTime? get lastRun; Map<String, dynamic>? get options;
+/// Create a copy of PoolScrubTask
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$PoolScrubTaskCopyWith<PoolScrubTask> get copyWith => _$PoolScrubTaskCopyWithImpl<PoolScrubTask>(this as PoolScrubTask, _$identity);
 
   /// Serializes this PoolScrubTask to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of PoolScrubTask
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $PoolScrubTaskCopyWith<PoolScrubTask> get copyWith =>
-      throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PoolScrubTask&&(identical(other.id, id) || other.id == id)&&(identical(other.pool, pool) || other.pool == pool)&&(identical(other.description, description) || other.description == description)&&(identical(other.schedule, schedule) || other.schedule == schedule)&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.nextRun, nextRun) || other.nextRun == nextRun)&&(identical(other.lastRun, lastRun) || other.lastRun == lastRun)&&const DeepCollectionEquality().equals(other.options, options));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,pool,description,schedule,enabled,nextRun,lastRun,const DeepCollectionEquality().hash(options));
+
+@override
+String toString() {
+  return 'PoolScrubTask(id: $id, pool: $pool, description: $description, schedule: $schedule, enabled: $enabled, nextRun: $nextRun, lastRun: $lastRun, options: $options)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $PoolScrubTaskCopyWith<$Res> {
-  factory $PoolScrubTaskCopyWith(
-    PoolScrubTask value,
-    $Res Function(PoolScrubTask) then,
-  ) = _$PoolScrubTaskCopyWithImpl<$Res, PoolScrubTask>;
-  @useResult
-  $Res call({
-    String id,
-    String pool,
-    String description,
-    String schedule,
-    bool enabled,
-    DateTime? nextRun,
-    DateTime? lastRun,
-    Map<String, dynamic>? options,
-  });
-}
+abstract mixin class $PoolScrubTaskCopyWith<$Res>  {
+  factory $PoolScrubTaskCopyWith(PoolScrubTask value, $Res Function(PoolScrubTask) _then) = _$PoolScrubTaskCopyWithImpl;
+@useResult
+$Res call({
+ String id, String pool, String description, String schedule, bool enabled, DateTime? nextRun, DateTime? lastRun, Map<String, dynamic>? options
+});
 
+
+
+
+}
 /// @nodoc
-class _$PoolScrubTaskCopyWithImpl<$Res, $Val extends PoolScrubTask>
+class _$PoolScrubTaskCopyWithImpl<$Res>
     implements $PoolScrubTaskCopyWith<$Res> {
-  _$PoolScrubTaskCopyWithImpl(this._value, this._then);
+  _$PoolScrubTaskCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final PoolScrubTask _self;
+  final $Res Function(PoolScrubTask) _then;
 
-  /// Create a copy of PoolScrubTask
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? pool = null,
-    Object? description = null,
-    Object? schedule = null,
-    Object? enabled = null,
-    Object? nextRun = freezed,
-    Object? lastRun = freezed,
-    Object? options = freezed,
-  }) {
-    return _then(
-      _value.copyWith(
-            id: null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                      as String,
-            pool: null == pool
-                ? _value.pool
-                : pool // ignore: cast_nullable_to_non_nullable
-                      as String,
-            description: null == description
-                ? _value.description
-                : description // ignore: cast_nullable_to_non_nullable
-                      as String,
-            schedule: null == schedule
-                ? _value.schedule
-                : schedule // ignore: cast_nullable_to_non_nullable
-                      as String,
-            enabled: null == enabled
-                ? _value.enabled
-                : enabled // ignore: cast_nullable_to_non_nullable
-                      as bool,
-            nextRun: freezed == nextRun
-                ? _value.nextRun
-                : nextRun // ignore: cast_nullable_to_non_nullable
-                      as DateTime?,
-            lastRun: freezed == lastRun
-                ? _value.lastRun
-                : lastRun // ignore: cast_nullable_to_non_nullable
-                      as DateTime?,
-            options: freezed == options
-                ? _value.options
-                : options // ignore: cast_nullable_to_non_nullable
-                      as Map<String, dynamic>?,
-          )
-          as $Val,
-    );
-  }
+/// Create a copy of PoolScrubTask
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? pool = null,Object? description = null,Object? schedule = null,Object? enabled = null,Object? nextRun = freezed,Object? lastRun = freezed,Object? options = freezed,}) {
+  return _then(_self.copyWith(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,pool: null == pool ? _self.pool : pool // ignore: cast_nullable_to_non_nullable
+as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String,schedule: null == schedule ? _self.schedule : schedule // ignore: cast_nullable_to_non_nullable
+as String,enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
+as bool,nextRun: freezed == nextRun ? _self.nextRun : nextRun // ignore: cast_nullable_to_non_nullable
+as DateTime?,lastRun: freezed == lastRun ? _self.lastRun : lastRun // ignore: cast_nullable_to_non_nullable
+as DateTime?,options: freezed == options ? _self.options : options // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,
+  ));
 }
 
-/// @nodoc
-abstract class _$$PoolScrubTaskImplCopyWith<$Res>
-    implements $PoolScrubTaskCopyWith<$Res> {
-  factory _$$PoolScrubTaskImplCopyWith(
-    _$PoolScrubTaskImpl value,
-    $Res Function(_$PoolScrubTaskImpl) then,
-  ) = __$$PoolScrubTaskImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    String id,
-    String pool,
-    String description,
-    String schedule,
-    bool enabled,
-    DateTime? nextRun,
-    DateTime? lastRun,
-    Map<String, dynamic>? options,
-  });
 }
 
-/// @nodoc
-class __$$PoolScrubTaskImplCopyWithImpl<$Res>
-    extends _$PoolScrubTaskCopyWithImpl<$Res, _$PoolScrubTaskImpl>
-    implements _$$PoolScrubTaskImplCopyWith<$Res> {
-  __$$PoolScrubTaskImplCopyWithImpl(
-    _$PoolScrubTaskImpl _value,
-    $Res Function(_$PoolScrubTaskImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of PoolScrubTask
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? pool = null,
-    Object? description = null,
-    Object? schedule = null,
-    Object? enabled = null,
-    Object? nextRun = freezed,
-    Object? lastRun = freezed,
-    Object? options = freezed,
-  }) {
-    return _then(
-      _$PoolScrubTaskImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                  as String,
-        pool: null == pool
-            ? _value.pool
-            : pool // ignore: cast_nullable_to_non_nullable
-                  as String,
-        description: null == description
-            ? _value.description
-            : description // ignore: cast_nullable_to_non_nullable
-                  as String,
-        schedule: null == schedule
-            ? _value.schedule
-            : schedule // ignore: cast_nullable_to_non_nullable
-                  as String,
-        enabled: null == enabled
-            ? _value.enabled
-            : enabled // ignore: cast_nullable_to_non_nullable
-                  as bool,
-        nextRun: freezed == nextRun
-            ? _value.nextRun
-            : nextRun // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
-        lastRun: freezed == lastRun
-            ? _value.lastRun
-            : lastRun // ignore: cast_nullable_to_non_nullable
-                  as DateTime?,
-        options: freezed == options
-            ? _value._options
-            : options // ignore: cast_nullable_to_non_nullable
-                  as Map<String, dynamic>?,
-      ),
-    );
-  }
+/// Adds pattern-matching-related methods to [PoolScrubTask].
+extension PoolScrubTaskPatterns on PoolScrubTask {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _PoolScrubTask value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _PoolScrubTask() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _PoolScrubTask value)  $default,){
+final _that = this;
+switch (_that) {
+case _PoolScrubTask():
+return $default(_that);}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _PoolScrubTask value)?  $default,){
+final _that = this;
+switch (_that) {
+case _PoolScrubTask() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String pool,  String description,  String schedule,  bool enabled,  DateTime? nextRun,  DateTime? lastRun,  Map<String, dynamic>? options)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _PoolScrubTask() when $default != null:
+return $default(_that.id,_that.pool,_that.description,_that.schedule,_that.enabled,_that.nextRun,_that.lastRun,_that.options);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String pool,  String description,  String schedule,  bool enabled,  DateTime? nextRun,  DateTime? lastRun,  Map<String, dynamic>? options)  $default,) {final _that = this;
+switch (_that) {
+case _PoolScrubTask():
+return $default(_that.id,_that.pool,_that.description,_that.schedule,_that.enabled,_that.nextRun,_that.lastRun,_that.options);}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String pool,  String description,  String schedule,  bool enabled,  DateTime? nextRun,  DateTime? lastRun,  Map<String, dynamic>? options)?  $default,) {final _that = this;
+switch (_that) {
+case _PoolScrubTask() when $default != null:
+return $default(_that.id,_that.pool,_that.description,_that.schedule,_that.enabled,_that.nextRun,_that.lastRun,_that.options);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$PoolScrubTaskImpl implements _PoolScrubTask {
-  const _$PoolScrubTaskImpl({
-    required this.id,
-    required this.pool,
-    required this.description,
-    required this.schedule,
-    this.enabled = true,
-    required this.nextRun,
-    required this.lastRun,
-    final Map<String, dynamic>? options,
-  }) : _options = options;
 
-  factory _$PoolScrubTaskImpl.fromJson(Map<String, dynamic> json) =>
-      _$$PoolScrubTaskImplFromJson(json);
+class _PoolScrubTask implements PoolScrubTask {
+  const _PoolScrubTask({required this.id, required this.pool, required this.description, required this.schedule, this.enabled = true, required this.nextRun, required this.lastRun, final  Map<String, dynamic>? options}): _options = options;
+  factory _PoolScrubTask.fromJson(Map<String, dynamic> json) => _$PoolScrubTaskFromJson(json);
 
-  @override
-  final String id;
-  @override
-  final String pool;
-  @override
-  final String description;
-  @override
-  final String schedule;
-  // cron expression
-  @override
-  @JsonKey()
-  final bool enabled;
-  @override
-  final DateTime? nextRun;
-  @override
-  final DateTime? lastRun;
-  final Map<String, dynamic>? _options;
-  @override
-  Map<String, dynamic>? get options {
-    final value = _options;
-    if (value == null) return null;
-    if (_options is EqualUnmodifiableMapView) return _options;
-    // ignore: implicit_dynamic_type
-    return EqualUnmodifiableMapView(value);
-  }
-
-  @override
-  String toString() {
-    return 'PoolScrubTask(id: $id, pool: $pool, description: $description, schedule: $schedule, enabled: $enabled, nextRun: $nextRun, lastRun: $lastRun, options: $options)';
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$PoolScrubTaskImpl &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.pool, pool) || other.pool == pool) &&
-            (identical(other.description, description) ||
-                other.description == description) &&
-            (identical(other.schedule, schedule) ||
-                other.schedule == schedule) &&
-            (identical(other.enabled, enabled) || other.enabled == enabled) &&
-            (identical(other.nextRun, nextRun) || other.nextRun == nextRun) &&
-            (identical(other.lastRun, lastRun) || other.lastRun == lastRun) &&
-            const DeepCollectionEquality().equals(other._options, _options));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    pool,
-    description,
-    schedule,
-    enabled,
-    nextRun,
-    lastRun,
-    const DeepCollectionEquality().hash(_options),
-  );
-
-  /// Create a copy of PoolScrubTask
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$PoolScrubTaskImplCopyWith<_$PoolScrubTaskImpl> get copyWith =>
-      __$$PoolScrubTaskImplCopyWithImpl<_$PoolScrubTaskImpl>(this, _$identity);
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$PoolScrubTaskImplToJson(this);
-  }
+@override final  String id;
+@override final  String pool;
+@override final  String description;
+@override final  String schedule;
+// cron expression
+@override@JsonKey() final  bool enabled;
+@override final  DateTime? nextRun;
+@override final  DateTime? lastRun;
+ final  Map<String, dynamic>? _options;
+@override Map<String, dynamic>? get options {
+  final value = _options;
+  if (value == null) return null;
+  if (_options is EqualUnmodifiableMapView) return _options;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(value);
 }
 
-abstract class _PoolScrubTask implements PoolScrubTask {
-  const factory _PoolScrubTask({
-    required final String id,
-    required final String pool,
-    required final String description,
-    required final String schedule,
-    final bool enabled,
-    required final DateTime? nextRun,
-    required final DateTime? lastRun,
-    final Map<String, dynamic>? options,
-  }) = _$PoolScrubTaskImpl;
 
-  factory _PoolScrubTask.fromJson(Map<String, dynamic> json) =
-      _$PoolScrubTaskImpl.fromJson;
+/// Create a copy of PoolScrubTask
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$PoolScrubTaskCopyWith<_PoolScrubTask> get copyWith => __$PoolScrubTaskCopyWithImpl<_PoolScrubTask>(this, _$identity);
 
-  @override
-  String get id;
-  @override
-  String get pool;
-  @override
-  String get description;
-  @override
-  String get schedule; // cron expression
-  @override
-  bool get enabled;
-  @override
-  DateTime? get nextRun;
-  @override
-  DateTime? get lastRun;
-  @override
-  Map<String, dynamic>? get options;
-
-  /// Create a copy of PoolScrubTask
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$PoolScrubTaskImplCopyWith<_$PoolScrubTaskImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+@override
+Map<String, dynamic> toJson() {
+  return _$PoolScrubTaskToJson(this, );
 }
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PoolScrubTask&&(identical(other.id, id) || other.id == id)&&(identical(other.pool, pool) || other.pool == pool)&&(identical(other.description, description) || other.description == description)&&(identical(other.schedule, schedule) || other.schedule == schedule)&&(identical(other.enabled, enabled) || other.enabled == enabled)&&(identical(other.nextRun, nextRun) || other.nextRun == nextRun)&&(identical(other.lastRun, lastRun) || other.lastRun == lastRun)&&const DeepCollectionEquality().equals(other._options, _options));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,pool,description,schedule,enabled,nextRun,lastRun,const DeepCollectionEquality().hash(_options));
+
+@override
+String toString() {
+  return 'PoolScrubTask(id: $id, pool: $pool, description: $description, schedule: $schedule, enabled: $enabled, nextRun: $nextRun, lastRun: $lastRun, options: $options)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$PoolScrubTaskCopyWith<$Res> implements $PoolScrubTaskCopyWith<$Res> {
+  factory _$PoolScrubTaskCopyWith(_PoolScrubTask value, $Res Function(_PoolScrubTask) _then) = __$PoolScrubTaskCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String pool, String description, String schedule, bool enabled, DateTime? nextRun, DateTime? lastRun, Map<String, dynamic>? options
+});
+
+
+
+
+}
+/// @nodoc
+class __$PoolScrubTaskCopyWithImpl<$Res>
+    implements _$PoolScrubTaskCopyWith<$Res> {
+  __$PoolScrubTaskCopyWithImpl(this._self, this._then);
+
+  final _PoolScrubTask _self;
+  final $Res Function(_PoolScrubTask) _then;
+
+/// Create a copy of PoolScrubTask
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? pool = null,Object? description = null,Object? schedule = null,Object? enabled = null,Object? nextRun = freezed,Object? lastRun = freezed,Object? options = freezed,}) {
+  return _then(_PoolScrubTask(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,pool: null == pool ? _self.pool : pool // ignore: cast_nullable_to_non_nullable
+as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String,schedule: null == schedule ? _self.schedule : schedule // ignore: cast_nullable_to_non_nullable
+as String,enabled: null == enabled ? _self.enabled : enabled // ignore: cast_nullable_to_non_nullable
+as bool,nextRun: freezed == nextRun ? _self.nextRun : nextRun // ignore: cast_nullable_to_non_nullable
+as DateTime?,lastRun: freezed == lastRun ? _self.lastRun : lastRun // ignore: cast_nullable_to_non_nullable
+as DateTime?,options: freezed == options ? _self._options : options // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>?,
+  ));
+}
+
+
+}
+
+// dart format on

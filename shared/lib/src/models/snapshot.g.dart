@@ -6,34 +6,32 @@ part of 'snapshot.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$SnapshotImpl _$$SnapshotImplFromJson(Map<String, dynamic> json) =>
-    _$SnapshotImpl(
-      id: json['id'] as String,
-      name: json['name'] as String,
-      dataset: json['dataset'] as String,
-      pool: json['pool'] as String,
-      created: DateTime.parse(json['created'] as String),
-      used: (json['used'] as num).toInt(),
-      referenced: (json['referenced'] as num).toInt(),
-      description: json['description'] as String?,
-      properties: json['properties'] as Map<String, dynamic>?,
-    );
+_Snapshot _$SnapshotFromJson(Map<String, dynamic> json) => _Snapshot(
+  id: json['id'] as String,
+  name: json['name'] as String,
+  dataset: json['dataset'] as String,
+  pool: json['pool'] as String,
+  created: DateTime.parse(json['created'] as String),
+  used: (json['used'] as num).toInt(),
+  referenced: (json['referenced'] as num).toInt(),
+  description: json['description'] as String?,
+  properties: json['properties'] as Map<String, dynamic>?,
+);
 
-Map<String, dynamic> _$$SnapshotImplToJson(_$SnapshotImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'name': instance.name,
-      'dataset': instance.dataset,
-      'pool': instance.pool,
-      'created': instance.created.toIso8601String(),
-      'used': instance.used,
-      'referenced': instance.referenced,
-      'description': instance.description,
-      'properties': instance.properties,
-    };
+Map<String, dynamic> _$SnapshotToJson(_Snapshot instance) => <String, dynamic>{
+  'id': instance.id,
+  'name': instance.name,
+  'dataset': instance.dataset,
+  'pool': instance.pool,
+  'created': instance.created.toIso8601String(),
+  'used': instance.used,
+  'referenced': instance.referenced,
+  'description': instance.description,
+  'properties': instance.properties,
+};
 
-_$SnapshotTaskImpl _$$SnapshotTaskImplFromJson(Map<String, dynamic> json) =>
-    _$SnapshotTaskImpl(
+_SnapshotTask _$SnapshotTaskFromJson(Map<String, dynamic> json) =>
+    _SnapshotTask(
       id: json['id'] as String,
       dataset: json['dataset'] as String,
       namingSchema: json['namingSchema'] as String,
@@ -53,7 +51,7 @@ _$SnapshotTaskImpl _$$SnapshotTaskImplFromJson(Map<String, dynamic> json) =>
       options: json['options'] as Map<String, dynamic>?,
     );
 
-Map<String, dynamic> _$$SnapshotTaskImplToJson(_$SnapshotTaskImpl instance) =>
+Map<String, dynamic> _$SnapshotTaskToJson(_SnapshotTask instance) =>
     <String, dynamic>{
       'id': instance.id,
       'dataset': instance.dataset,
@@ -70,8 +68,8 @@ Map<String, dynamic> _$$SnapshotTaskImplToJson(_$SnapshotTaskImpl instance) =>
       'options': instance.options,
     };
 
-_$SnapshotCountImpl _$$SnapshotCountImplFromJson(Map<String, dynamic> json) =>
-    _$SnapshotCountImpl(
+_SnapshotCount _$SnapshotCountFromJson(Map<String, dynamic> json) =>
+    _SnapshotCount(
       dataset: json['dataset'] as String,
       totalSnapshots: (json['totalSnapshots'] as num).toInt(),
       manualSnapshots: (json['manualSnapshots'] as num).toInt(),
@@ -79,7 +77,7 @@ _$SnapshotCountImpl _$$SnapshotCountImplFromJson(Map<String, dynamic> json) =>
       totalSize: (json['totalSize'] as num).toInt(),
     );
 
-Map<String, dynamic> _$$SnapshotCountImplToJson(_$SnapshotCountImpl instance) =>
+Map<String, dynamic> _$SnapshotCountToJson(_SnapshotCount instance) =>
     <String, dynamic>{
       'dataset': instance.dataset,
       'totalSnapshots': instance.totalSnapshots,

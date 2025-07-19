@@ -6,7 +6,7 @@ part of 'share.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$ShareImpl _$$ShareImplFromJson(Map<String, dynamic> json) => _$ShareImpl(
+_Share _$ShareFromJson(Map<String, dynamic> json) => _Share(
   id: json['id'] as String,
   name: json['name'] as String,
   path: json['path'] as String,
@@ -16,16 +16,15 @@ _$ShareImpl _$$ShareImplFromJson(Map<String, dynamic> json) => _$ShareImpl(
   config: json['config'] as Map<String, dynamic>?,
 );
 
-Map<String, dynamic> _$$ShareImplToJson(_$ShareImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'name': instance.name,
-      'path': instance.path,
-      'type': _$ShareTypeEnumMap[instance.type]!,
-      'enabled': instance.enabled,
-      'comment': instance.comment,
-      'config': instance.config,
-    };
+Map<String, dynamic> _$ShareToJson(_Share instance) => <String, dynamic>{
+  'id': instance.id,
+  'name': instance.name,
+  'path': instance.path,
+  'type': _$ShareTypeEnumMap[instance.type]!,
+  'enabled': instance.enabled,
+  'comment': instance.comment,
+  'config': instance.config,
+};
 
 const _$ShareTypeEnumMap = {
   ShareType.smb: 'smb',

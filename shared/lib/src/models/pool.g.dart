@@ -6,7 +6,7 @@ part of 'pool.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$PoolImpl _$$PoolImplFromJson(Map<String, dynamic> json) => _$PoolImpl(
+_Pool _$PoolFromJson(Map<String, dynamic> json) => _Pool(
   id: json['id'] as String,
   name: json['name'] as String,
   status: json['status'] as String,
@@ -23,32 +23,29 @@ _$PoolImpl _$$PoolImplFromJson(Map<String, dynamic> json) => _$PoolImpl(
       const [],
 );
 
-Map<String, dynamic> _$$PoolImplToJson(_$PoolImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'name': instance.name,
-      'status': instance.status,
-      'size': instance.size,
-      'allocated': instance.allocated,
-      'free': instance.free,
-      'fragmentation': instance.fragmentation,
-      'isHealthy': instance.isHealthy,
-      'path': instance.path,
-      'vdevs': instance.vdevs,
-    };
+Map<String, dynamic> _$PoolToJson(_Pool instance) => <String, dynamic>{
+  'id': instance.id,
+  'name': instance.name,
+  'status': instance.status,
+  'size': instance.size,
+  'allocated': instance.allocated,
+  'free': instance.free,
+  'fragmentation': instance.fragmentation,
+  'isHealthy': instance.isHealthy,
+  'path': instance.path,
+  'vdevs': instance.vdevs,
+};
 
-_$PoolVdevImpl _$$PoolVdevImplFromJson(Map<String, dynamic> json) =>
-    _$PoolVdevImpl(
-      type: json['type'] as String,
-      status: json['status'] as String,
-      disks:
-          (json['disks'] as List<dynamic>?)?.map((e) => e as String).toList() ??
-          const [],
-    );
+_PoolVdev _$PoolVdevFromJson(Map<String, dynamic> json) => _PoolVdev(
+  type: json['type'] as String,
+  status: json['status'] as String,
+  disks:
+      (json['disks'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const [],
+);
 
-Map<String, dynamic> _$$PoolVdevImplToJson(_$PoolVdevImpl instance) =>
-    <String, dynamic>{
-      'type': instance.type,
-      'status': instance.status,
-      'disks': instance.disks,
-    };
+Map<String, dynamic> _$PoolVdevToJson(_PoolVdev instance) => <String, dynamic>{
+  'type': instance.type,
+  'status': instance.status,
+  'disks': instance.disks,
+};

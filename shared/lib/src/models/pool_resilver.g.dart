@@ -6,8 +6,8 @@ part of 'pool_resilver.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$PoolResilverImpl _$$PoolResilverImplFromJson(Map<String, dynamic> json) =>
-    _$PoolResilverImpl(
+_PoolResilver _$PoolResilverFromJson(Map<String, dynamic> json) =>
+    _PoolResilver(
       pool: json['pool'] as String,
       status: $enumDecode(_$ResilverStatusEnumMap, json['status']),
       startTime: json['startTime'] == null
@@ -24,7 +24,7 @@ _$PoolResilverImpl _$$PoolResilverImplFromJson(Map<String, dynamic> json) =>
       description: json['description'] as String?,
     );
 
-Map<String, dynamic> _$$PoolResilverImplToJson(_$PoolResilverImpl instance) =>
+Map<String, dynamic> _$PoolResilverToJson(_PoolResilver instance) =>
     <String, dynamic>{
       'pool': instance.pool,
       'status': _$ResilverStatusEnumMap[instance.status]!,

@@ -4,7 +4,7 @@ part 'pool_scrub.freezed.dart';
 part 'pool_scrub.g.dart';
 
 @freezed
-class PoolScrub with _$PoolScrub {
+sealed class PoolScrub with _$PoolScrub {
   const factory PoolScrub({
     required String id,
     required String pool,
@@ -25,7 +25,7 @@ class PoolScrub with _$PoolScrub {
 }
 
 @freezed
-class PoolScrubTask with _$PoolScrubTask {
+sealed class PoolScrubTask with _$PoolScrubTask {
   const factory PoolScrubTask({
     required String id,
     required String pool,

@@ -4,7 +4,7 @@ part 'dataset.freezed.dart';
 part 'dataset.g.dart';
 
 @freezed
-class Dataset with _$Dataset {
+sealed class Dataset with _$Dataset {
   const factory Dataset({
     required String id,
     required String name,

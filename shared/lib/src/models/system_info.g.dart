@@ -6,22 +6,21 @@ part of 'system_info.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$SystemInfoImpl _$$SystemInfoImplFromJson(Map<String, dynamic> json) =>
-    _$SystemInfoImpl(
-      hostname: json['hostname'] as String,
-      version: json['version'] as String,
-      uptime: json['uptime'] as String,
-      cpuUsage: (json['cpuUsage'] as num).toDouble(),
-      memory: MemoryInfo.fromJson(json['memory'] as Map<String, dynamic>),
-      cpuTemperature: (json['cpuTemperature'] as num).toDouble(),
-      alerts:
-          (json['alerts'] as List<dynamic>?)
-              ?.map((e) => Alert.fromJson(e as Map<String, dynamic>))
-              .toList() ??
-          const [],
-    );
+_SystemInfo _$SystemInfoFromJson(Map<String, dynamic> json) => _SystemInfo(
+  hostname: json['hostname'] as String,
+  version: json['version'] as String,
+  uptime: json['uptime'] as String,
+  cpuUsage: (json['cpuUsage'] as num).toDouble(),
+  memory: MemoryInfo.fromJson(json['memory'] as Map<String, dynamic>),
+  cpuTemperature: (json['cpuTemperature'] as num).toDouble(),
+  alerts:
+      (json['alerts'] as List<dynamic>?)
+          ?.map((e) => Alert.fromJson(e as Map<String, dynamic>))
+          .toList() ??
+      const [],
+);
 
-Map<String, dynamic> _$$SystemInfoImplToJson(_$SystemInfoImpl instance) =>
+Map<String, dynamic> _$SystemInfoToJson(_SystemInfo instance) =>
     <String, dynamic>{
       'hostname': instance.hostname,
       'version': instance.version,
@@ -32,15 +31,14 @@ Map<String, dynamic> _$$SystemInfoImplToJson(_$SystemInfoImpl instance) =>
       'alerts': instance.alerts,
     };
 
-_$MemoryInfoImpl _$$MemoryInfoImplFromJson(Map<String, dynamic> json) =>
-    _$MemoryInfoImpl(
-      total: (json['total'] as num).toInt(),
-      used: (json['used'] as num).toInt(),
-      free: (json['free'] as num).toInt(),
-      cached: (json['cached'] as num).toInt(),
-    );
+_MemoryInfo _$MemoryInfoFromJson(Map<String, dynamic> json) => _MemoryInfo(
+  total: (json['total'] as num).toInt(),
+  used: (json['used'] as num).toInt(),
+  free: (json['free'] as num).toInt(),
+  cached: (json['cached'] as num).toInt(),
+);
 
-Map<String, dynamic> _$$MemoryInfoImplToJson(_$MemoryInfoImpl instance) =>
+Map<String, dynamic> _$MemoryInfoToJson(_MemoryInfo instance) =>
     <String, dynamic>{
       'total': instance.total,
       'used': instance.used,
@@ -48,7 +46,7 @@ Map<String, dynamic> _$$MemoryInfoImplToJson(_$MemoryInfoImpl instance) =>
       'cached': instance.cached,
     };
 
-_$AlertImpl _$$AlertImplFromJson(Map<String, dynamic> json) => _$AlertImpl(
+_Alert _$AlertFromJson(Map<String, dynamic> json) => _Alert(
   id: json['id'] as String,
   level: $enumDecode(_$AlertLevelEnumMap, json['level']),
   message: json['message'] as String,
@@ -56,14 +54,13 @@ _$AlertImpl _$$AlertImplFromJson(Map<String, dynamic> json) => _$AlertImpl(
   dismissed: json['dismissed'] as bool? ?? false,
 );
 
-Map<String, dynamic> _$$AlertImplToJson(_$AlertImpl instance) =>
-    <String, dynamic>{
-      'id': instance.id,
-      'level': _$AlertLevelEnumMap[instance.level]!,
-      'message': instance.message,
-      'timestamp': instance.timestamp.toIso8601String(),
-      'dismissed': instance.dismissed,
-    };
+Map<String, dynamic> _$AlertToJson(_Alert instance) => <String, dynamic>{
+  'id': instance.id,
+  'level': _$AlertLevelEnumMap[instance.level]!,
+  'message': instance.message,
+  'timestamp': instance.timestamp.toIso8601String(),
+  'dismissed': instance.dismissed,
+};
 
 const _$AlertLevelEnumMap = {
   AlertLevel.info: 'info',

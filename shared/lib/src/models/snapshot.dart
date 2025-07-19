@@ -4,7 +4,7 @@ part 'snapshot.freezed.dart';
 part 'snapshot.g.dart';
 
 @freezed
-class Snapshot with _$Snapshot {
+sealed class Snapshot with _$Snapshot {
   const factory Snapshot({
     required String id,
     required String name,
@@ -22,7 +22,7 @@ class Snapshot with _$Snapshot {
 }
 
 @freezed
-class SnapshotTask with _$SnapshotTask {
+sealed class SnapshotTask with _$SnapshotTask {
   const factory SnapshotTask({
     required String id,
     required String dataset,
@@ -44,7 +44,7 @@ class SnapshotTask with _$SnapshotTask {
 }
 
 @freezed
-class SnapshotCount with _$SnapshotCount {
+sealed class SnapshotCount with _$SnapshotCount {
   const factory SnapshotCount({
     required String dataset,
     required int totalSnapshots,
