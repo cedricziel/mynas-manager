@@ -43,4 +43,7 @@ node_modules/
 pubspec.lock
 .dart_tool/
 
+# Pre-commit artifacts
+.dart_pre_commit/
+
 # Package-specific build directories are handled by individual .gitignore files

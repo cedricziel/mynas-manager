@@ -3,28 +3,29 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mynas_shared/mynas_shared.dart';
 import 'package:mynas_frontend/services/rpc_client.dart';
 
-final systemInfoNotifierProvider = AsyncNotifierProvider<SystemInfoNotifier, SystemInfo?>(
-  SystemInfoNotifier.new,
-);
+final systemInfoNotifierProvider =
+    AsyncNotifierProvider<SystemInfoNotifier, SystemInfo?>(
+      SystemInfoNotifier.new,
+    );
 
 class SystemInfoNotifier extends AsyncNotifier<SystemInfo?> {
   Timer? _timer;
-  
+
   @override
   Future<SystemInfo?> build() async {
     // Initially connect to the backend
     final client = ref.watch(rpcClientProvider);
-    
+
     if (!client.isConnected) {
       await client.connect();
     }
-    
+
     // Start polling for system info
     ref.onDispose(() {
       _timer?.cancel();
     });
     _startPolling();
-    
+
     return await _fetchSystemInfo();
   }
 
@@ -68,10 +69,12 @@ class SystemInfoNotifier extends AsyncNotifier<SystemInfo?> {
 
 final systemAlertsProvider = FutureProvider<List<Alert>>((ref) async {
   final client = ref.watch(rpcClientProvider);
-  
+
   try {
     final data = await client.getAlerts();
-    return data.map((json) => Alert.fromJson(json as Map<String, dynamic>)).toList();
+    return data
+        .map((json) => Alert.fromJson(json as Map<String, dynamic>))
+        .toList();
   } catch (e) {
     return [];
   }

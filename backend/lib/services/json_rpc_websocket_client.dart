@@ -8,17 +8,16 @@ import '../interfaces/connection_manager.dart';
 class JsonRpcWebSocketClient implements IJsonRpcClient {
   final _logger = Logger('JsonRpcWebSocketClient');
   final IConnectionManager _connectionManager;
-  final StreamController<JsonRpcNotification> _notificationController = 
+  final StreamController<JsonRpcNotification> _notificationController =
       StreamController<JsonRpcNotification>.broadcast();
-  
+
   final Map<String, Completer<dynamic>> _pendingRequests = {};
   StreamSubscription? _messageSubscription;
   int _requestId = 1;
   bool _isReady = false;
 
-  JsonRpcWebSocketClient({
-    required IConnectionManager connectionManager,
-  }) : _connectionManager = connectionManager {
+  JsonRpcWebSocketClient({required IConnectionManager connectionManager})
+    : _connectionManager = connectionManager {
     _initialize();
   }
 
@@ -26,7 +25,8 @@ class JsonRpcWebSocketClient implements IJsonRpcClient {
     // Listen to connection state changes
     _connectionManager.stateStream.listen((state) {
       _isReady = state == ConnectionState.connected;
-      if (state == ConnectionState.disconnected || state == ConnectionState.error) {
+      if (state == ConnectionState.disconnected ||
+          state == ConnectionState.error) {
         _handleDisconnection();
       }
     });
@@ -44,7 +44,8 @@ class JsonRpcWebSocketClient implements IJsonRpcClient {
   bool get isReady => _isReady && _connectionManager.isConnected;
 
   @override
-  Stream<JsonRpcNotification> get notifications => _notificationController.stream;
+  Stream<JsonRpcNotification> get notifications =>
+      _notificationController.stream;
 
   @override
   Future<T> call<T>(String method, [Map<String, dynamic>? params]) async {
@@ -55,27 +56,30 @@ class JsonRpcWebSocketClient implements IJsonRpcClient {
     final id = (_requestId++).toString();
     final request = _buildRequest(method, params, id);
     final completer = Completer<T>();
-    
+
     _pendingRequests[id] = completer;
-    
+
     try {
       final requestJson = jsonEncode(request);
       _logger.fine('Sending JSON-RPC request: $method (id: $id)');
-      
+
       await _connectionManager.send(requestJson);
-      
+
       // Set timeout for the request
       Timer(const Duration(seconds: 30), () {
         if (_pendingRequests.containsKey(id)) {
           _pendingRequests.remove(id);
           if (!completer.isCompleted) {
             completer.completeError(
-              TimeoutException('JSON-RPC request timeout', const Duration(seconds: 30))
+              TimeoutException(
+                'JSON-RPC request timeout',
+                const Duration(seconds: 30),
+              ),
             );
           }
         }
       });
-      
+
       return await completer.future;
     } catch (e) {
       _pendingRequests.remove(id);
@@ -84,13 +88,17 @@ class JsonRpcWebSocketClient implements IJsonRpcClient {
     }
   }
 
-  Map<String, dynamic> _buildRequest(String method, Map<String, dynamic>? params, String id) {
+  Map<String, dynamic> _buildRequest(
+    String method,
+    Map<String, dynamic>? params,
+    String id,
+  ) {
     final request = <String, dynamic>{
       'jsonrpc': '2.0',
       'method': method,
       'id': id,
     };
-    
+
     if (params != null && params.isNotEmpty) {
       // TrueNAS expects parameters in different formats depending on the method
       if (_shouldUseArrayParams(method)) {
@@ -104,7 +112,7 @@ class JsonRpcWebSocketClient implements IJsonRpcClient {
       // Some methods require an empty array even when no parameters
       request['params'] = [];
     }
-    
+
     return request;
   }
 
@@ -133,7 +141,10 @@ class JsonRpcWebSocketClient implements IJsonRpcClient {
     return arrayParamMethods.contains(method);
   }
 
-  List<dynamic> _convertToArrayParams(String method, Map<String, dynamic> params) {
+  List<dynamic> _convertToArrayParams(
+    String method,
+    Map<String, dynamic> params,
+  ) {
     switch (method) {
       case 'auth.login':
         return [params['username'], params['password']];
@@ -149,8 +160,10 @@ class JsonRpcWebSocketClient implements IJsonRpcClient {
   void _handleMessage(String message) {
     try {
       final data = jsonDecode(message) as Map<String, dynamic>;
-      _logger.fine('Received JSON-RPC message: ${data['method'] ?? data['id'] ?? 'unknown'}');
-      
+      _logger.fine(
+        'Received JSON-RPC message: ${data['method'] ?? data['id'] ?? 'unknown'}',
+      );
+
       if (_isResponse(data)) {
         _handleResponse(data);
       } else if (_isNotification(data)) {
@@ -164,8 +177,8 @@ class JsonRpcWebSocketClient implements IJsonRpcClient {
   }
 
   bool _isResponse(Map<String, dynamic> data) {
-    return data.containsKey('id') && 
-           (data.containsKey('result') || data.containsKey('error'));
+    return data.containsKey('id') &&
+        (data.containsKey('result') || data.containsKey('error'));
   }
 
   bool _isNotification(Map<String, dynamic> data) {
@@ -186,7 +199,9 @@ class JsonRpcWebSocketClient implements IJsonRpcClient {
     }
 
     if (data.containsKey('error')) {
-      final error = JsonRpcError.fromJson(data['error'] as Map<String, dynamic>);
+      final error = JsonRpcError.fromJson(
+        data['error'] as Map<String, dynamic>,
+      );
       _logger.warning('JSON-RPC error response: $error');
       completer.completeError(error);
     } else if (data.containsKey('result')) {
@@ -214,19 +229,18 @@ class JsonRpcWebSocketClient implements IJsonRpcClient {
   }
 
   void _handleDisconnection() {
-    _logger.info('Handling disconnection - completing pending requests with error');
-    
-    final error = JsonRpcError(
-      code: -32000,
-      message: 'Connection lost',
+    _logger.info(
+      'Handling disconnection - completing pending requests with error',
     );
-    
+
+    final error = JsonRpcError(code: -32000, message: 'Connection lost');
+
     for (final completer in _pendingRequests.values) {
       if (!completer.isCompleted) {
         completer.completeError(error);
       }
     }
-    
+
     _pendingRequests.clear();
     _isReady = false;
   }
@@ -234,21 +248,18 @@ class JsonRpcWebSocketClient implements IJsonRpcClient {
   @override
   Future<void> close() async {
     _logger.info('Closing JSON-RPC client');
-    
+
     await _messageSubscription?.cancel();
-    
+
     // Complete any pending requests with error
-    final error = JsonRpcError(
-      code: -32000,
-      message: 'Client closed',
-    );
-    
+    final error = JsonRpcError(code: -32000, message: 'Client closed');
+
     for (final completer in _pendingRequests.values) {
       if (!completer.isCompleted) {
         completer.completeError(error);
       }
     }
-    
+
     _pendingRequests.clear();
     await _notificationController.close();
   }

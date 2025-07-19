@@ -71,7 +71,7 @@ class _ActionButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           border: Border.all(
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.5),
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.5),
           ),
           borderRadius: BorderRadius.circular(8),
         ),

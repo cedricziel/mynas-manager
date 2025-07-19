@@ -76,17 +76,19 @@ class RetryHandler {
 
     for (int attempt = 1; attempt <= config.maxAttempts; attempt++) {
       try {
-        _logger.fine('Executing $opName (attempt $attempt/${config.maxAttempts})');
+        _logger.fine(
+          'Executing $opName (attempt $attempt/${config.maxAttempts})',
+        );
         final result = await operation();
-        
+
         if (attempt > 1) {
           _logger.info('$opName succeeded on attempt $attempt');
         }
-        
+
         return result;
       } catch (e) {
         lastException = e is Exception ? e : Exception(e.toString());
-        
+
         if (attempt == config.maxAttempts) {
           _logger.severe('$opName failed after $attempt attempts: $e');
           break;
@@ -99,9 +101,9 @@ class RetryHandler {
 
         final delay = _calculateDelay(attempt - 1, config);
         _logger.warning(
-          '$opName failed on attempt $attempt, retrying in ${delay.inMilliseconds}ms: $e'
+          '$opName failed on attempt $attempt, retrying in ${delay.inMilliseconds}ms: $e',
         );
-        
+
         await Future.delayed(delay);
       }
     }
@@ -122,7 +124,9 @@ class RetryHandler {
 
     // Check specific exception types in config
     if (config.retryOnExceptions.isNotEmpty) {
-      return config.retryOnExceptions.any((type) => exception.runtimeType == type);
+      return config.retryOnExceptions.any(
+        (type) => exception.runtimeType == type,
+      );
     }
 
     // Check TrueNAS specific exceptions
@@ -140,8 +144,8 @@ class RetryHandler {
 
     if (exception is TrueNasServerException && config.retryOnServer) {
       // Don't retry client errors (4xx)
-      if (exception.statusCode != null && 
-          exception.statusCode! >= 400 && 
+      if (exception.statusCode != null &&
+          exception.statusCode! >= 400 &&
           exception.statusCode! < 500) {
         return false;
       }
@@ -179,27 +183,28 @@ class RetryHandler {
     }
 
     // Calculate exponential backoff
-    final exponentialDelay = config.initialDelay.inMilliseconds * 
+    final exponentialDelay =
+        config.initialDelay.inMilliseconds *
         pow(config.backoffMultiplier, attemptNumber);
-    
+
     // Apply max delay constraint
-    final constrainedDelay = min(exponentialDelay, config.maxDelay.inMilliseconds.toDouble());
-    
+    final constrainedDelay = min(
+      exponentialDelay,
+      config.maxDelay.inMilliseconds.toDouble(),
+    );
+
     // Add jitter (±25% of the delay)
     final jitterRange = constrainedDelay * 0.25;
     final jitter = (_random.nextDouble() - 0.5) * 2 * jitterRange;
     final finalDelay = constrainedDelay + jitter;
-    
+
     return Duration(milliseconds: max(0, finalDelay.round()));
   }
 
   /// Creates a retry configuration for rate-limited operations
-  static RetryConfig forRateLimit({
-    Duration? retryAfter,
-    int maxAttempts = 3,
-  }) {
+  static RetryConfig forRateLimit({Duration? retryAfter, int maxAttempts = 3}) {
     final delay = retryAfter ?? const Duration(seconds: 60);
-    
+
     return RetryConfig(
       maxAttempts: maxAttempts,
       initialDelay: delay,

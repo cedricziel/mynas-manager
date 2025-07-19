@@ -61,7 +61,7 @@ class PoolHealthCards extends ConsumerWidget {
             value: poolState.totalPools.toString(),
             subtitle: '${poolState.healthyPools} healthy',
             icon: Icons.storage,
-            color: hasUnhealthyPools 
+            color: hasUnhealthyPools
                 ? Theme.of(context).colorScheme.error
                 : Theme.of(context).colorScheme.primary,
             onTap: () {
@@ -70,7 +70,7 @@ class PoolHealthCards extends ConsumerWidget {
           ),
         ),
         const SizedBox(width: 16),
-        
+
         // Capacity Card
         Expanded(
           child: _CapacityCard(
@@ -80,13 +80,9 @@ class PoolHealthCards extends ConsumerWidget {
           ),
         ),
         const SizedBox(width: 16),
-        
+
         // Health Status Card
-        Expanded(
-          child: _HealthStatusCard(
-            poolState: poolState,
-          ),
-        ),
+        Expanded(child: _HealthStatusCard(poolState: poolState)),
       ],
     );
   }
@@ -172,7 +168,7 @@ class _CapacityCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final freeCapacity = totalCapacity - allocatedCapacity;
-    
+
     // Determine color based on usage
     Color usageColor;
     if (usagePercentage >= 90) {
@@ -204,7 +200,7 @@ class _CapacityCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            
+
             // Circular progress indicator
             Center(
               child: SizedBox(
@@ -215,7 +211,8 @@ class _CapacityCard extends StatelessWidget {
                     CircularProgressIndicator(
                       value: usagePercentage / 100,
                       strokeWidth: 8,
-                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                      backgroundColor:
+                          theme.colorScheme.surfaceContainerHighest,
                       valueColor: AlwaysStoppedAnimation<Color>(usageColor),
                     ),
                     Center(
@@ -231,9 +228,9 @@ class _CapacityCard extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             const SizedBox(height: 16),
-            
+
             // Capacity details
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -274,9 +271,9 @@ class _CapacityCard extends StatelessWidget {
                 ),
               ],
             ),
-            
+
             const SizedBox(height: 8),
-            
+
             Text(
               'Total: ${StorageUtils.formatBytes(totalCapacity)}',
               style: theme.textTheme.bodySmall?.copyWith(
@@ -293,16 +290,14 @@ class _CapacityCard extends StatelessWidget {
 class _HealthStatusCard extends StatelessWidget {
   final PoolState poolState;
 
-  const _HealthStatusCard({
-    required this.poolState,
-  });
+  const _HealthStatusCard({required this.poolState});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final unhealthyPools = poolState.unhealthyPools;
     final isHealthy = unhealthyPools.isEmpty;
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20),
@@ -313,9 +308,7 @@ class _HealthStatusCard extends StatelessWidget {
               children: [
                 Icon(
                   isHealthy ? Icons.check_circle : Icons.warning,
-                  color: isHealthy 
-                      ? Colors.green 
-                      : theme.colorScheme.error,
+                  color: isHealthy ? Colors.green : theme.colorScheme.error,
                   size: 28,
                 ),
                 const SizedBox(width: 12),
@@ -330,7 +323,7 @@ class _HealthStatusCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 16),
-            
+
             if (isHealthy) ...[
               Text(
                 'All Good',
@@ -356,7 +349,7 @@ class _HealthStatusCard extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                unhealthyPools.length == 1 
+                unhealthyPools.length == 1
                     ? 'Pool needs attention'
                     : 'Pools need attention',
                 style: theme.textTheme.bodyMedium?.copyWith(
@@ -364,29 +357,33 @@ class _HealthStatusCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 12),
-              
+
               // List unhealthy pools
-              ...unhealthyPools.take(3).map((pool) => Padding(
-                padding: const EdgeInsets.only(bottom: 4),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 16,
-                      color: theme.colorScheme.error,
-                    ),
-                    const SizedBox(width: 6),
-                    Expanded(
-                      child: Text(
-                        pool.name,
-                        style: theme.textTheme.bodySmall,
-                        overflow: TextOverflow.ellipsis,
+              ...unhealthyPools
+                  .take(3)
+                  .map(
+                    (pool) => Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            size: 16,
+                            color: theme.colorScheme.error,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              pool.name,
+                              style: theme.textTheme.bodySmall,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ],
-                ),
-              )),
-              
+                  ),
+
               if (unhealthyPools.length > 3)
                 Text(
                   '... and ${unhealthyPools.length - 3} more',
@@ -395,9 +392,9 @@ class _HealthStatusCard extends StatelessWidget {
                   ),
                 ),
             ],
-            
+
             const SizedBox(height: 16),
-            
+
             // Last updated
             if (poolState.lastUpdated != null)
               Text(

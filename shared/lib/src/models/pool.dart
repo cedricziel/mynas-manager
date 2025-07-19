@@ -29,5 +29,6 @@ class PoolVdev with _$PoolVdev {
     @Default([]) List<String> disks,
   }) = _PoolVdev;
 
-  factory PoolVdev.fromJson(Map<String, dynamic> json) => _$PoolVdevFromJson(json);
+  factory PoolVdev.fromJson(Map<String, dynamic> json) =>
+      _$PoolVdevFromJson(json);
 }

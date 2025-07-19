@@ -25,7 +25,9 @@ void main(List<String> args) async {
     Logger.root.info('Loaded .env file successfully');
     Logger.root.info('TrueNAS URL: ${env['TRUENAS_URL'] ?? 'not set'}');
   } catch (e) {
-    Logger.root.warning('No .env file found, using system environment variables only: $e');
+    Logger.root.warning(
+      'No .env file found, using system environment variables only: $e',
+    );
   }
 
   // Pass environment to server if available
@@ -35,7 +37,7 @@ void main(List<String> args) async {
     trueNasUsername: env['TRUENAS_USERNAME'],
     trueNasPassword: env['TRUENAS_PASSWORD'],
   );
-  
+
   try {
     await server.start(host: host, port: port);
     print('Server listening on $host:$port');

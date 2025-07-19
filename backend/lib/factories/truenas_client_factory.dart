@@ -18,19 +18,17 @@ class TrueNasClientFactory {
   }) {
     // Create connection manager
     final connectionManager = WebSocketConnectionManager();
-    
+
     // Configure authentication headers if API key is provided
     if (apiKey != null) {
-      connectionManager.setAuthHeaders({
-        'Authorization': 'Bearer $apiKey',
-      });
+      connectionManager.setAuthHeaders({'Authorization': 'Bearer $apiKey'});
     }
-    
+
     // Create JSON-RPC client using the new Peer-based client
     final jsonRpcClient = TrueNasPeerClient(
       connectionManager: connectionManager,
     );
-    
+
     // Create authentication manager
     final authManager = TrueNasAuthManager(
       jsonRpcClient: jsonRpcClient,
@@ -38,20 +36,16 @@ class TrueNasClientFactory {
       password: password,
       apiKey: apiKey,
     );
-    
+
     // Create version manager
-    final versionManager = TrueNasVersionManager(
-      jsonRpcClient: jsonRpcClient,
-    );
-    
+    final versionManager = TrueNasVersionManager(jsonRpcClient: jsonRpcClient);
+
     // Create event manager
-    final eventManager = TrueNasEventManager(
-      jsonRpcClient: jsonRpcClient,
-    );
-    
+    final eventManager = TrueNasEventManager(jsonRpcClient: jsonRpcClient);
+
     // Create rate limiter with TrueNAS settings
     final rateLimiter = TokenBucketRateLimiter.truenas();
-    
+
     // Create the main client
     return TrueNasWebSocketClient(
       connectionManager: connectionManager,

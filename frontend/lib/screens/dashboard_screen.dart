@@ -11,10 +11,7 @@ class DashboardScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Dashboard'),
-        centerTitle: false,
-      ),
+      appBar: AppBar(title: const Text('Dashboard'), centerTitle: false),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: LayoutBuilder(
@@ -42,30 +39,18 @@ class _WideLayout extends StatelessWidget {
         const Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              flex: 2,
-              child: SystemInfoCard(),
-            ),
+            Expanded(flex: 2, child: SystemInfoCard()),
             SizedBox(width: 16),
-            Expanded(
-              flex: 3,
-              child: StorageOverviewCard(),
-            ),
+            Expanded(flex: 3, child: StorageOverviewCard()),
           ],
         ),
         const SizedBox(height: 16),
         const Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              flex: 3,
-              child: AlertsCard(),
-            ),
+            Expanded(flex: 3, child: AlertsCard()),
             SizedBox(width: 16),
-            Expanded(
-              flex: 2,
-              child: QuickActionsCard(),
-            ),
+            Expanded(flex: 2, child: QuickActionsCard()),
           ],
         ),
       ],

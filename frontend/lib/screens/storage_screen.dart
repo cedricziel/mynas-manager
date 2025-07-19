@@ -42,9 +42,7 @@ class _StorageScreenState extends ConsumerState<StorageScreen> {
           ),
         ],
       ),
-      body: _selectedPool != null
-          ? _buildDetailView()
-          : _buildOverviewLayout(),
+      body: _selectedPool != null ? _buildDetailView() : _buildOverviewLayout(),
     );
   }
 
@@ -56,9 +54,9 @@ class _StorageScreenState extends ConsumerState<StorageScreen> {
         children: [
           // Health cards section
           const PoolHealthCards(),
-          
+
           const SizedBox(height: 32),
-          
+
           // Pool list section
           Expanded(
             child: Column(
@@ -71,7 +69,7 @@ class _StorageScreenState extends ConsumerState<StorageScreen> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                
+
                 Expanded(
                   child: PoolListView(
                     onPoolSelected: (pool) {

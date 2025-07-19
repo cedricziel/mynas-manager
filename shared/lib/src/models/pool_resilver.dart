@@ -18,7 +18,8 @@ class PoolResilver with _$PoolResilver {
     String? description,
   }) = _PoolResilver;
 
-  factory PoolResilver.fromJson(Map<String, dynamic> json) => _$PoolResilverFromJson(json);
+  factory PoolResilver.fromJson(Map<String, dynamic> json) =>
+      _$PoolResilverFromJson(json);
 }
 
 enum ResilverStatus {

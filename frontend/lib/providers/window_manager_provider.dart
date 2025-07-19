@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mynas_frontend/models/window_state.dart';
 
-final windowManagerProvider = StateNotifierProvider<WindowManagerNotifier, WindowManagerState>((ref) {
-  return WindowManagerNotifier();
-});
+final windowManagerProvider =
+    StateNotifierProvider<WindowManagerNotifier, WindowManagerState>((ref) {
+      return WindowManagerNotifier();
+    });
 
 class WindowManagerState {
   final List<WindowState> windows;
@@ -49,9 +50,9 @@ class WindowManagerNotifier extends StateNotifier<WindowManagerState> {
     );
 
     // Unfocus all other windows
-    final updatedWindows = state.windows.map((w) => 
-      w.copyWith(isFocused: false)
-    ).toList();
+    final updatedWindows = state.windows
+        .map((w) => w.copyWith(isFocused: false))
+        .toList();
 
     state = state.copyWith(
       windows: [...updatedWindows, newWindow],
@@ -82,10 +83,12 @@ class WindowManagerNotifier extends StateNotifier<WindowManagerState> {
     final windowSize = size ?? const Size(800, 600);
     // Use a default screen size for now - in a real app, this would come from MediaQuery
     const screenSize = Size(1920, 1080);
-    final centerPosition = position ?? Offset(
-      (screenSize.width - windowSize.width) / 2,
-      (screenSize.height - windowSize.height) / 2,
-    );
+    final centerPosition =
+        position ??
+        Offset(
+          (screenSize.width - windowSize.width) / 2,
+          (screenSize.height - windowSize.height) / 2,
+        );
 
     final newWindow = WindowState(
       id: id,
@@ -101,9 +104,9 @@ class WindowManagerNotifier extends StateNotifier<WindowManagerState> {
     );
 
     // Unfocus all other windows
-    final updatedWindows = state.windows.map((w) => 
-      w.copyWith(isFocused: false)
-    ).toList();
+    final updatedWindows = state.windows
+        .map((w) => w.copyWith(isFocused: false))
+        .toList();
 
     state = state.copyWith(
       windows: [...updatedWindows, newWindow],
@@ -115,7 +118,9 @@ class WindowManagerNotifier extends StateNotifier<WindowManagerState> {
   void closeWindow(String id) {
     state = state.copyWith(
       windows: state.windows.where((w) => w.id != id).toList(),
-      focusedWindowId: state.focusedWindowId == id ? null : state.focusedWindowId,
+      focusedWindowId: state.focusedWindowId == id
+          ? null
+          : state.focusedWindowId,
     );
   }
 
@@ -129,7 +134,9 @@ class WindowManagerNotifier extends StateNotifier<WindowManagerState> {
 
     state = state.copyWith(
       windows: updatedWindows,
-      focusedWindowId: state.focusedWindowId == id ? null : state.focusedWindowId,
+      focusedWindowId: state.focusedWindowId == id
+          ? null
+          : state.focusedWindowId,
     );
   }
 
@@ -207,13 +214,17 @@ class WindowManagerNotifier extends StateNotifier<WindowManagerState> {
         if (w.minSize != null) {
           newSize = Size(
             newSize.width < w.minSize!.width ? w.minSize!.width : newSize.width,
-            newSize.height < w.minSize!.height ? w.minSize!.height : newSize.height,
+            newSize.height < w.minSize!.height
+                ? w.minSize!.height
+                : newSize.height,
           );
         }
         if (w.maxSize != null) {
           newSize = Size(
             newSize.width > w.maxSize!.width ? w.maxSize!.width : newSize.width,
-            newSize.height > w.maxSize!.height ? w.maxSize!.height : newSize.height,
+            newSize.height > w.maxSize!.height
+                ? w.maxSize!.height
+                : newSize.height,
           );
         }
         return w.copyWith(size: newSize);

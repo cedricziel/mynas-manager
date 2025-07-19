@@ -1,8 +1,8 @@
 import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mynas_frontend/providers/auth_provider.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -11,7 +11,7 @@ class LoginScreen extends ConsumerStatefulWidget {
   ConsumerState<LoginScreen> createState() => _LoginScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> 
+class _LoginScreenState extends ConsumerState<LoginScreen>
     with SingleTickerProviderStateMixin {
   final _passwordController = TextEditingController();
   final _passwordFocusNode = FocusNode();
@@ -30,25 +30,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
       duration: const Duration(milliseconds: 800),
       vsync: this,
     );
-    
-    _fadeAnimation = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
-    
-    _slideAnimation = Tween<Offset>(
-      begin: const Offset(0, 0.1),
-      end: Offset.zero,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    ));
-    
+
+    _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
+
+    _slideAnimation =
+        Tween<Offset>(begin: const Offset(0, 0.1), end: Offset.zero).animate(
+          CurvedAnimation(
+            parent: _animationController,
+            curve: Curves.easeOutCubic,
+          ),
+        );
+
     _animationController.forward();
-    
+
     // Auto-focus password field
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _passwordFocusNode.requestFocus();
@@ -72,9 +68,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     try {
       // TODO: Implement actual authentication
       await Future.delayed(const Duration(seconds: 1));
-      
+
       // For now, accept any password
       if (_passwordController.text.isNotEmpty) {
+        if (!mounted) return;
         context.go('/desktop');
       } else {
         setState(() {
@@ -92,9 +89,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
     final theme = Theme.of(context);
-    
+
     return Scaffold(
       body: Stack(
         fit: StackFit.expand,
@@ -105,20 +101,15 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
-                colors: [
-                  Colors.blue.shade900,
-                  Colors.purple.shade900,
-                ],
+                colors: [Colors.blue.shade900, Colors.purple.shade900],
               ),
             ),
           ),
           BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 20, sigmaY: 20),
-            child: Container(
-              color: Colors.black.withOpacity(0.5),
-            ),
+            child: Container(color: Colors.black.withValues(alpha: 0.5)),
           ),
-          
+
           // Login content
           Center(
             child: FadeTransition(
@@ -129,11 +120,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                   width: 320,
                   padding: const EdgeInsets.all(32),
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surface.withOpacity(0.9),
+                    color: theme.colorScheme.surface.withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(16),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.3),
+                        color: Colors.black.withValues(alpha: 0.3),
                         blurRadius: 40,
                         offset: const Offset(0, 20),
                       ),
@@ -148,9 +139,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         height: 100,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: theme.colorScheme.primary.withOpacity(0.1),
+                          color: theme.colorScheme.primary.withValues(
+                            alpha: 0.1,
+                          ),
                           border: Border.all(
-                            color: theme.colorScheme.primary.withOpacity(0.3),
+                            color: theme.colorScheme.primary.withValues(
+                              alpha: 0.3,
+                            ),
                             width: 3,
                           ),
                         ),
@@ -161,7 +156,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         ),
                       ),
                       const SizedBox(height: 24),
-                      
+
                       // Username
                       Text(
                         'Administrator',
@@ -170,7 +165,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         ),
                       ),
                       const SizedBox(height: 8),
-                      
+
                       // Server name
                       Text(
                         'MyNAS Manager',
@@ -179,7 +174,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         ),
                       ),
                       const SizedBox(height: 32),
-                      
+
                       // Password field
                       TextField(
                         controller: _passwordController,
@@ -190,7 +185,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         decoration: InputDecoration(
                           hintText: 'Enter password',
                           filled: true,
-                          fillColor: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+                          fillColor: theme.colorScheme.surfaceContainerHighest
+                              .withValues(alpha: 0.5),
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(12),
                             borderSide: BorderSide.none,
@@ -211,7 +207,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           ),
                           suffixIcon: IconButton(
                             icon: Icon(
-                              _showPassword ? Icons.visibility_off : Icons.visibility,
+                              _showPassword
+                                  ? Icons.visibility_off
+                                  : Icons.visibility,
                               color: theme.colorScheme.onSurfaceVariant,
                             ),
                             onPressed: () {
@@ -220,7 +218,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           ),
                         ),
                       ),
-                      
+
                       if (_errorMessage != null) ...[
                         const SizedBox(height: 12),
                         Text(
@@ -231,9 +229,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                           ),
                         ),
                       ],
-                      
+
                       const SizedBox(height: 24),
-                      
+
                       // Login button
                       SizedBox(
                         width: double.infinity,
@@ -257,18 +255,22 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                               : const Text('Login'),
                         ),
                       ),
-                      
+
                       const SizedBox(height: 16),
-                      
+
                       // Additional options
                       TextButton(
-                        onPressed: _isLoading ? null : () {
-                          // TODO: Implement connection settings
-                        },
+                        onPressed: _isLoading
+                            ? null
+                            : () {
+                                // TODO: Implement connection settings
+                              },
                         child: Text(
                           'Connection Settings',
                           style: TextStyle(
-                            color: theme.colorScheme.primary.withOpacity(0.8),
+                            color: theme.colorScheme.primary.withValues(
+                              alpha: 0.8,
+                            ),
                           ),
                         ),
                       ),
@@ -278,7 +280,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               ),
             ),
           ),
-          
+
           // Bottom info
           Positioned(
             bottom: 32,
@@ -288,7 +290,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
               child: Text(
                 'Version 1.0.0',
                 style: TextStyle(
-                  color: Colors.white.withOpacity(0.7),
+                  color: Colors.white.withValues(alpha: 0.7),
                   fontSize: 12,
                 ),
               ),

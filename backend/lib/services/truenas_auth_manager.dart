@@ -6,14 +6,14 @@ import '../interfaces/json_rpc_client.dart';
 /// TrueNAS authentication manager
 class TrueNasAuthManager implements IAuthManager {
   final _logger = Logger('TrueNasAuthManager');
-  final StreamController<AuthState> _stateController = 
+  final StreamController<AuthState> _stateController =
       StreamController<AuthState>.broadcast();
-  
+
   final IJsonRpcClient _jsonRpcClient;
   final String? _username;
   final String? _password;
   final String? _apiKey;
-  
+
   AuthState _state = AuthState.unauthenticated;
   String? _sessionId;
   Timer? _sessionCheckTimer;
@@ -51,7 +51,10 @@ class TrueNasAuthManager implements IAuthManager {
   String? get sessionId => _sessionId;
 
   @override
-  Future<AuthResult> authenticateWithCredentials(String username, String password) async {
+  Future<AuthResult> authenticateWithCredentials(
+    String username,
+    String password,
+  ) async {
     _logger.info('Authenticating with credentials for user: $username');
     _setState(AuthState.authenticating);
 
@@ -97,7 +100,7 @@ class TrueNasAuthManager implements IAuthManager {
       // The authentication is handled by the Authorization header in the connection.
       // We don't need to validate immediately - we'll mark as authenticated
       // and let actual API calls validate the key.
-      
+
       _logger.info('API key authentication configured (header-based)');
       _setState(AuthState.authenticated);
       return AuthResult.success(method: AuthMethod.apiKey);

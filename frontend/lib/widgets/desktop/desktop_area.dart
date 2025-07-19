@@ -20,35 +20,67 @@ class DesktopArea extends ConsumerWidget {
           _DesktopIcon(
             icon: Icons.dashboard,
             label: 'Dashboard',
-            onTap: () => _openApp(ref, 'dashboard', 'Dashboard', Icons.dashboard, const DashboardScreen()),
+            onTap: () => _openApp(
+              ref,
+              'dashboard',
+              'Dashboard',
+              Icons.dashboard,
+              const DashboardScreen(),
+            ),
           ),
           _DesktopIcon(
             icon: Icons.storage,
             label: 'Storage',
-            onTap: () => _openApp(ref, 'storage', 'Storage Manager', Icons.storage, const StorageScreen()),
+            onTap: () => _openApp(
+              ref,
+              'storage',
+              'Storage Manager',
+              Icons.storage,
+              const StorageScreen(),
+            ),
           ),
           _DesktopIcon(
             icon: Icons.folder_shared,
             label: 'Shares',
-            onTap: () => _openApp(ref, 'shares', 'Share Manager', Icons.folder_shared, const SharesScreen()),
+            onTap: () => _openApp(
+              ref,
+              'shares',
+              'Share Manager',
+              Icons.folder_shared,
+              const SharesScreen(),
+            ),
           ),
           _DesktopIcon(
             icon: Icons.settings,
             label: 'Settings',
-            onTap: () => _openApp(ref, 'settings', 'Settings', Icons.settings, const SettingsScreen()),
+            onTap: () => _openApp(
+              ref,
+              'settings',
+              'Settings',
+              Icons.settings,
+              const SettingsScreen(),
+            ),
           ),
         ],
       ),
     );
   }
 
-  void _openApp(WidgetRef ref, String id, String title, IconData icon, Widget content) {
-    ref.read(windowManagerProvider.notifier).openWindowWithParams(
-      id: id,
-      title: title,
-      icon: icon,
-      content: content,
-    );
+  void _openApp(
+    WidgetRef ref,
+    String id,
+    String title,
+    IconData icon,
+    Widget content,
+  ) {
+    ref
+        .read(windowManagerProvider.notifier)
+        .openWindowWithParams(
+          id: id,
+          title: title,
+          icon: icon,
+          content: content,
+        );
   }
 }
 
@@ -73,7 +105,7 @@ class _DesktopIconState extends State<_DesktopIcon> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return MouseRegion(
       onEnter: (_) => setState(() => _isHovered = true),
       onExit: (_) => setState(() => _isHovered = false),
@@ -84,9 +116,9 @@ class _DesktopIconState extends State<_DesktopIcon> {
           width: 80,
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: _isHovered 
-              ? theme.colorScheme.primary.withOpacity(0.1)
-              : Colors.transparent,
+            color: _isHovered
+                ? theme.colorScheme.primary.withValues(alpha: 0.1)
+                : Colors.transparent,
             borderRadius: BorderRadius.circular(8),
           ),
           child: Column(
@@ -96,7 +128,7 @@ class _DesktopIconState extends State<_DesktopIcon> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: theme.colorScheme.primary.withOpacity(0.15),
+                  color: theme.colorScheme.primary.withValues(alpha: 0.15),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(

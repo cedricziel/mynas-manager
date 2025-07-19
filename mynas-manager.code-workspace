@@ -55,7 +55,8 @@
     "explorer.fileNesting.enabled": true,
     "explorer.fileNesting.patterns": {
       "pubspec.yaml": ".flutter-plugins, .packages, pubspec.lock, .dart_tool, .flutter-plugins-dependencies"
-    }
+    },
+    "cSpell.words": ["pubspec"]
   },
   "extensions": {
     "recommendations": [

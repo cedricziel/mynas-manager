@@ -7,10 +7,7 @@ class SettingsScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Settings'),
-        centerTitle: false,
-      ),
+      appBar: AppBar(title: const Text('Settings'), centerTitle: false),
       body: ListView(
         children: [
           ListTile(

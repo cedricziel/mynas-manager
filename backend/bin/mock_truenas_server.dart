@@ -1,10 +1,8 @@
 import 'dart:async';
-import 'dart:convert';
 import 'dart:io';
 import 'dart:math';
 import 'package:web_socket_channel/io.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
-import 'package:stream_channel/stream_channel.dart';
 import 'package:logging/logging.dart';
 
 /// Mock TrueNAS server for testing
@@ -16,14 +14,16 @@ void main(List<String> args) async {
   });
 
   final logger = Logger('MockTrueNAS');
-  
+
   // Parse port from args or use default
   final port = args.isNotEmpty ? int.tryParse(args[0]) ?? 8081 : 8081;
-  
+
   // Start WebSocket server
   final server = await HttpServer.bind('localhost', port);
-  logger.info('Mock TrueNAS server listening on ws://localhost:$port/api/current');
-  
+  logger.info(
+    'Mock TrueNAS server listening on ws://localhost:$port/api/current',
+  );
+
   server.transform(WebSocketTransformer()).listen((WebSocket webSocket) {
     logger.info('Client connected');
     handleConnection(webSocket, logger);
@@ -33,24 +33,27 @@ void main(List<String> args) async {
 void handleConnection(WebSocket webSocket, Logger logger) {
   final channel = IOWebSocketChannel(webSocket);
   final peer = json_rpc.Peer(channel.cast<String>());
-  
+
   // Register mock methods
   registerMockMethods(peer, logger);
-  
+
   // Start listening
-  peer.listen().then((_) {
-    logger.info('Client disconnected');
-  }).catchError((error) {
-    logger.severe('WebSocket error: $error');
-  });
-  
+  peer
+      .listen()
+      .then((_) {
+        logger.info('Client disconnected');
+      })
+      .catchError((error) {
+        logger.severe('WebSocket error: $error');
+      });
+
   // Send initial real-time updates like TrueNAS does
   Timer.periodic(Duration(seconds: 1), (timer) {
     if (webSocket.readyState != WebSocket.open) {
       timer.cancel();
       return;
     }
-    
+
     try {
       // Send reporting.realtime updates like in the fixture
       peer.sendNotification('collection_update', {
@@ -136,8 +139,16 @@ void registerMockMethods(json_rpc.Peer peer, Logger logger) {
         'scan': {
           'function': 'SCRUB',
           'state': 'FINISHED',
-          'start_time': {'\$date': DateTime.now().subtract(Duration(hours: 2)).millisecondsSinceEpoch},
-          'end_time': {'\$date': DateTime.now().subtract(Duration(hours: 1)).millisecondsSinceEpoch},
+          'start_time': {
+            '\$date': DateTime.now()
+                .subtract(Duration(hours: 2))
+                .millisecondsSinceEpoch,
+          },
+          'end_time': {
+            '\$date': DateTime.now()
+                .subtract(Duration(hours: 1))
+                .millisecondsSinceEpoch,
+          },
           'percentage': 100.0,
           'bytes_to_process': 1000000000,
           'bytes_processed': 1000000000,
@@ -210,7 +221,12 @@ void registerMockMethods(json_rpc.Peer peer, Logger logger) {
         'allocated_str': '1000000000000',
         'free_str': '1000000000000',
         'freeing_str': '0',
-        'autotrim': {'value': 'on', 'rawvalue': 'on', 'parsed': 'on', 'source': 'LOCAL'},
+        'autotrim': {
+          'value': 'on',
+          'rawvalue': 'on',
+          'parsed': 'on',
+          'source': 'LOCAL',
+        },
       },
     ];
   });
@@ -227,10 +243,22 @@ void registerMockMethods(json_rpc.Peer peer, Logger logger) {
         'encryption_root': null,
         'key_loaded': false,
         'mountpoint': '/mnt/tank',
-        'used': {'parsed': 500000000000, 'rawvalue': '500000000000', 'value': '500G'},
-        'available': {'parsed': 500000000000, 'rawvalue': '500000000000', 'value': '500G'},
+        'used': {
+          'parsed': 500000000000,
+          'rawvalue': '500000000000',
+          'value': '500G',
+        },
+        'available': {
+          'parsed': 500000000000,
+          'rawvalue': '500000000000',
+          'value': '500G',
+        },
         'compression': {'parsed': 'lz4', 'rawvalue': 'lz4', 'value': 'LZ4'},
-        'compressratio': {'parsed': '1.20', 'rawvalue': '1.20', 'value': '1.20x'},
+        'compressratio': {
+          'parsed': '1.20',
+          'rawvalue': '1.20',
+          'value': '1.20x',
+        },
         'children': [],
       },
     ];
@@ -294,12 +322,7 @@ void registerMockMethods(json_rpc.Peer peer, Logger logger) {
 
   peer.registerMethod('auth.me', (params) {
     logger.fine('Called auth.me');
-    return {
-      'id': 1,
-      'username': 'root',
-      'group': 'wheel',
-      'attributes': {},
-    };
+    return {'id': 1, 'username': 'root', 'group': 'wheel', 'attributes': {}};
   });
 
   peer.registerMethod('core.ping', (params) {
@@ -315,10 +338,7 @@ void registerMockMethods(json_rpc.Peer peer, Logger logger) {
 
   peer.registerMethod('tn_connect.config', (params) {
     logger.fine('Called tn_connect.config');
-    return {
-      'enabled': false,
-      'api_key': null,
-    };
+    return {'enabled': false, 'api_key': null};
   });
 
   // Share methods

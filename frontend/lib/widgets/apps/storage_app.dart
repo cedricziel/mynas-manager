@@ -47,9 +47,7 @@ class _StorageAppState extends ConsumerState<StorageApp> {
           ),
         ],
       ),
-      body: _selectedPool != null
-          ? _buildDetailView()
-          : _buildOverviewLayout(),
+      body: _selectedPool != null ? _buildDetailView() : _buildOverviewLayout(),
     );
   }
 
@@ -61,9 +59,9 @@ class _StorageAppState extends ConsumerState<StorageApp> {
         children: [
           // Health cards section
           const PoolHealthCards(),
-          
+
           const SizedBox(height: 32),
-          
+
           // Pool list section
           Expanded(
             child: Column(
@@ -76,7 +74,7 @@ class _StorageAppState extends ConsumerState<StorageApp> {
                   ),
                 ),
                 const SizedBox(height: 16),
-                
+
                 Expanded(
                   child: PoolListView(
                     onPoolSelected: (pool) {
@@ -115,14 +113,19 @@ class _StorageAppState extends ConsumerState<StorageApp> {
   }
 
   // Static method to open the storage app as a window
+  // ignore: unused_element
   static void openAsWindow(WidgetRef ref) {
     final windowManager = ref.read(windowManagerProvider.notifier);
-    
+
     // Check if storage window is already open
-    final existingWindows = ref.read(windowManagerProvider).windows
+    final existingWindows = ref
+        .read(windowManagerProvider)
+        .windows
         .where((w) => w.id == 'storage-app');
-    final existingWindow = existingWindows.isNotEmpty ? existingWindows.first : null;
-    
+    final existingWindow = existingWindows.isNotEmpty
+        ? existingWindows.first
+        : null;
+
     if (existingWindow != null) {
       // Focus existing window
       windowManager.focusWindow('storage-app');
@@ -131,7 +134,7 @@ class _StorageAppState extends ConsumerState<StorageApp> {
       }
       return;
     }
-    
+
     // Create new storage window
     final window = WindowState(
       id: 'storage-app',
@@ -145,7 +148,7 @@ class _StorageAppState extends ConsumerState<StorageApp> {
       canClose: true,
       isFocused: true,
     );
-    
+
     windowManager.openWindow(window);
   }
 }

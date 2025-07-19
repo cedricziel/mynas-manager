@@ -20,7 +20,8 @@ class PoolScrub with _$PoolScrub {
     String? schedule, // cron expression
   }) = _PoolScrub;
 
-  factory PoolScrub.fromJson(Map<String, dynamic> json) => _$PoolScrubFromJson(json);
+  factory PoolScrub.fromJson(Map<String, dynamic> json) =>
+      _$PoolScrubFromJson(json);
 }
 
 @freezed
@@ -36,7 +37,8 @@ class PoolScrubTask with _$PoolScrubTask {
     Map<String, dynamic>? options,
   }) = _PoolScrubTask;
 
-  factory PoolScrubTask.fromJson(Map<String, dynamic> json) => _$PoolScrubTaskFromJson(json);
+  factory PoolScrubTask.fromJson(Map<String, dynamic> json) =>
+      _$PoolScrubTaskFromJson(json);
 }
 
 enum ScrubStatus {

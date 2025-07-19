@@ -14,50 +14,45 @@ class RateLimitConfig {
 
   /// TrueNAS recommended rate limits (20 requests per 60 seconds)
   factory RateLimitConfig.truenas() => const RateLimitConfig(
-        maxRequests: 20,
-        window: Duration(seconds: 60),
-        cooldownPeriod: Duration(minutes: 10),
-      );
+    maxRequests: 20,
+    window: Duration(seconds: 60),
+    cooldownPeriod: Duration(minutes: 10),
+  );
 }
 
 /// Rate limiting state
-enum RateLimitState {
-  normal,
-  approaching,
-  limited,
-  cooldown,
-}
+enum RateLimitState { normal, approaching, limited, cooldown }
 
 /// Rate limiter interface for controlling API request frequency
 abstract class IRateLimiter {
   /// Current rate limiting state
   RateLimitState get state;
-  
+
   /// Stream of rate limit state changes
   Stream<RateLimitState> get stateStream;
-  
+
   /// Current number of requests in the window
   int get currentRequests;
-  
+
   /// Maximum requests allowed in the window
   int get maxRequests;
-  
+
   /// Time until the rate limit window resets
   Duration get timeUntilReset;
-  
+
   /// Wait for permission to make a request
   /// Throws [RateLimitExceededException] if in cooldown
   Future<void> waitForPermission();
-  
+
   /// Check if a request can be made immediately
   bool canMakeRequest();
-  
+
   /// Record that a request was made
   void recordRequest();
-  
+
   /// Record that a rate limit violation occurred
   void recordViolation();
-  
+
   /// Reset the rate limiter
   void reset();
 }
@@ -73,5 +68,6 @@ class RateLimitExceededException implements Exception {
   });
 
   @override
-  String toString() => 'RateLimitExceededException: $message (retry after $retryAfter)';
+  String toString() =>
+      'RateLimitExceededException: $message (retry after $retryAfter)';
 }

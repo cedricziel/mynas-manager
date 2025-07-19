@@ -15,7 +15,8 @@ class SystemInfo with _$SystemInfo {
     @Default([]) List<Alert> alerts,
   }) = _SystemInfo;
 
-  factory SystemInfo.fromJson(Map<String, dynamic> json) => _$SystemInfoFromJson(json);
+  factory SystemInfo.fromJson(Map<String, dynamic> json) =>
+      _$SystemInfoFromJson(json);
 }
 
 @freezed
@@ -27,7 +28,8 @@ class MemoryInfo with _$MemoryInfo {
     required int cached,
   }) = _MemoryInfo;
 
-  factory MemoryInfo.fromJson(Map<String, dynamic> json) => _$MemoryInfoFromJson(json);
+  factory MemoryInfo.fromJson(Map<String, dynamic> json) =>
+      _$MemoryInfoFromJson(json);
 }
 
 @freezed

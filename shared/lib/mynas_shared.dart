@@ -1,5 +1,3 @@
-library mynas_shared;
-
 // Models
 export 'src/models/pool.dart';
 export 'src/models/dataset.dart';

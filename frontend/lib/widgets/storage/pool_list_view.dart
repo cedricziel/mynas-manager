@@ -4,24 +4,13 @@ import 'package:mynas_shared/mynas_shared.dart';
 import '../../providers/pool_provider.dart';
 import '../../utils/storage_utils.dart';
 
-enum PoolSortField {
-  name,
-  status,
-  capacity,
-  used,
-  health,
-  lastScrub,
-}
+enum PoolSortField { name, status, capacity, used, health, lastScrub }
 
 class PoolListView extends ConsumerStatefulWidget {
   final void Function(Pool pool)? onPoolSelected;
   final void Function(Pool pool)? onPoolAction;
 
-  const PoolListView({
-    super.key,
-    this.onPoolSelected,
-    this.onPoolAction,
-  });
+  const PoolListView({super.key, this.onPoolSelected, this.onPoolAction});
 
   @override
   ConsumerState<PoolListView> createState() => _PoolListViewState();
@@ -45,7 +34,7 @@ class _PoolListViewState extends ConsumerState<PoolListView> {
     if (_searchQuery.isNotEmpty) {
       filteredPools = pools.where((pool) {
         return pool.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
-               pool.status.toLowerCase().contains(_searchQuery.toLowerCase());
+            pool.status.toLowerCase().contains(_searchQuery.toLowerCase());
       }).toList();
     }
 
@@ -113,16 +102,9 @@ class _PoolListViewState extends ConsumerState<PoolListView> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(
-              Icons.error_outline,
-              size: 64,
-              color: theme.colorScheme.error,
-            ),
+            Icon(Icons.error_outline, size: 64, color: theme.colorScheme.error),
             const SizedBox(height: 16),
-            Text(
-              'Failed to load pools',
-              style: theme.textTheme.headlineSmall,
-            ),
+            Text('Failed to load pools', style: theme.textTheme.headlineSmall),
             const SizedBox(height: 8),
             Text(
               poolState.error!,
@@ -218,9 +200,9 @@ class _PoolListViewState extends ConsumerState<PoolListView> {
             ),
           ),
         ),
-        
+
         const SizedBox(height: 16),
-        
+
         // Pool table
         Expanded(
           child: Card(
@@ -237,7 +219,7 @@ class _PoolListViewState extends ConsumerState<PoolListView> {
                   ),
                   child: _buildTableHeader(theme),
                 ),
-                
+
                 // Table content
                 Expanded(
                   child: ListView.builder(
@@ -272,7 +254,11 @@ class _PoolListViewState extends ConsumerState<PoolListView> {
     );
   }
 
-  Widget _buildSortableHeader(String title, PoolSortField field, {int flex = 1}) {
+  Widget _buildSortableHeader(
+    String title,
+    PoolSortField field, {
+    int flex = 1,
+  }) {
     return Expanded(
       flex: flex,
       child: InkWell(
@@ -282,9 +268,9 @@ class _PoolListViewState extends ConsumerState<PoolListView> {
           children: [
             Text(
               title,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w600,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
             ),
             if (_sortField == field) ...[
               const SizedBox(width: 4),
@@ -300,8 +286,11 @@ class _PoolListViewState extends ConsumerState<PoolListView> {
   }
 
   Widget _buildPoolRow(Pool pool, ThemeData theme, bool isEven) {
-    final usagePercentage = StorageUtils.calculatePercentage(pool.allocated, pool.size);
-    
+    final usagePercentage = StorageUtils.calculatePercentage(
+      pool.allocated,
+      pool.size,
+    );
+
     return Container(
       decoration: BoxDecoration(
         color: isEven ? theme.colorScheme.surfaceContainerLowest : null,
@@ -336,13 +325,13 @@ class _PoolListViewState extends ConsumerState<PoolListView> {
                   ],
                 ),
               ),
-              
+
               // Status
               Expanded(
                 flex: 2,
                 child: _buildStatusChip(pool.status, pool.isHealthy, theme),
               ),
-              
+
               // Capacity
               Expanded(
                 flex: 2,
@@ -351,7 +340,7 @@ class _PoolListViewState extends ConsumerState<PoolListView> {
                   style: theme.textTheme.bodyMedium,
                 ),
               ),
-              
+
               // Used space with progress bar
               Expanded(
                 flex: 2,
@@ -365,7 +354,8 @@ class _PoolListViewState extends ConsumerState<PoolListView> {
                     const SizedBox(height: 4),
                     LinearProgressIndicator(
                       value: usagePercentage / 100,
-                      backgroundColor: theme.colorScheme.surfaceContainerHighest,
+                      backgroundColor:
+                          theme.colorScheme.surfaceContainerHighest,
                       valueColor: AlwaysStoppedAnimation<Color>(
                         _getUsageColor(usagePercentage, theme),
                       ),
@@ -373,7 +363,7 @@ class _PoolListViewState extends ConsumerState<PoolListView> {
                   ],
                 ),
               ),
-              
+
               // Health
               Expanded(
                 flex: 2,
@@ -382,19 +372,23 @@ class _PoolListViewState extends ConsumerState<PoolListView> {
                     Icon(
                       pool.isHealthy ? Icons.check_circle : Icons.warning,
                       size: 16,
-                      color: pool.isHealthy ? Colors.green : theme.colorScheme.error,
+                      color: pool.isHealthy
+                          ? Colors.green
+                          : theme.colorScheme.error,
                     ),
                     const SizedBox(width: 8),
                     Text(
                       pool.isHealthy ? 'Healthy' : 'Needs Attention',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: pool.isHealthy ? Colors.green : theme.colorScheme.error,
+                        color: pool.isHealthy
+                            ? Colors.green
+                            : theme.colorScheme.error,
                       ),
                     ),
                   ],
                 ),
               ),
-              
+
               // Actions
               Expanded(
                 flex: 1,
@@ -446,14 +440,14 @@ class _PoolListViewState extends ConsumerState<PoolListView> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: isHealthy 
-            ? Colors.green.withOpacity(0.1) 
-            : theme.colorScheme.error.withOpacity(0.1),
+        color: isHealthy
+            ? Colors.green.withValues(alpha: 0.1)
+            : theme.colorScheme.error.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: isHealthy 
-              ? Colors.green.withOpacity(0.3) 
-              : theme.colorScheme.error.withOpacity(0.3),
+          color: isHealthy
+              ? Colors.green.withValues(alpha: 0.3)
+              : theme.colorScheme.error.withValues(alpha: 0.3),
         ),
       ),
       child: Text(

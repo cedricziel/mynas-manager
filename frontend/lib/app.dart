@@ -36,10 +36,7 @@ class MyNasApp extends StatelessWidget {
   static final _router = GoRouter(
     initialLocation: '/login',
     routes: [
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginScreen(),
-      ),
+      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/desktop',
         builder: (context, state) => const DesktopScreen(),

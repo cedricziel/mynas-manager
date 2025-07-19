@@ -20,9 +20,7 @@ class SharesScreen extends ConsumerWidget {
           ),
         ],
       ),
-      body: const Center(
-        child: Text('Network shares will be displayed here'),
-      ),
+      body: const Center(child: Text('Network shares will be displayed here')),
     );
   }
 }

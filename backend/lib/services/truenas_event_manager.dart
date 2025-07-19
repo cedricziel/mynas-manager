@@ -6,17 +6,16 @@ import '../interfaces/json_rpc_client.dart';
 /// TrueNAS event manager for real-time notifications
 class TrueNasEventManager implements IEventManager {
   final _logger = Logger('TrueNasEventManager');
-  final StreamController<TrueNasEvent> _eventController = 
+  final StreamController<TrueNasEvent> _eventController =
       StreamController<TrueNasEvent>.broadcast();
-  
+
   final IJsonRpcClient _jsonRpcClient;
   StreamSubscription? _notificationSubscription;
   bool _isSubscribed = false;
   EventSubscription? _currentSubscription;
 
-  TrueNasEventManager({
-    required IJsonRpcClient jsonRpcClient,
-  }) : _jsonRpcClient = jsonRpcClient {
+  TrueNasEventManager({required IJsonRpcClient jsonRpcClient})
+    : _jsonRpcClient = jsonRpcClient {
     _initialize();
   }
 
@@ -39,7 +38,7 @@ class TrueNasEventManager implements IEventManager {
   @override
   Future<void> subscribe(EventSubscription subscription) async {
     _logger.info('Subscribing to events: ${subscription.eventTypes}');
-    
+
     try {
       if (_isSubscribed) {
         await unsubscribe();
@@ -103,7 +102,7 @@ class TrueNasEventManager implements IEventManager {
   void _handleNotification(JsonRpcNotification notification) {
     try {
       _logger.fine('Received notification: ${notification.method}');
-      
+
       // Convert JSON-RPC notification to TrueNAS event
       final event = _parseNotificationToEvent(notification);
       _eventController.add(event);
@@ -121,19 +120,19 @@ class TrueNasEventManager implements IEventManager {
     // Extract common event data
     String eventType = notification.method;
     String? eventId;
-    
+
     if (notification.params != null) {
       final params = notification.params!;
-      
+
       // Handle different notification formats
       if (params.containsKey('msg')) {
         eventType = params['msg'] as String;
       }
-      
+
       if (params.containsKey('id')) {
         eventId = params['id']?.toString();
       }
-      
+
       // Add all params to event data
       data.addAll(params);
     }
@@ -174,12 +173,7 @@ class TrueNasEventManager implements IEventManager {
 
   /// Subscribe to share-related events only
   Future<void> subscribeToShareEvents() async {
-    await subscribeToTypes([
-      'share',
-      'smb',
-      'nfs',
-      'iscsi',
-    ]);
+    await subscribeToTypes(['share', 'smb', 'nfs', 'iscsi']);
   }
 
   void dispose() {

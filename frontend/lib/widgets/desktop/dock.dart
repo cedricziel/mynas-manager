@@ -10,12 +10,16 @@ class Dock extends ConsumerWidget {
 
   void _openStorageApp(WidgetRef ref) {
     final windowManager = ref.read(windowManagerProvider.notifier);
-    
+
     // Check if storage window is already open
-    final existingWindows = ref.read(windowManagerProvider).windows
+    final existingWindows = ref
+        .read(windowManagerProvider)
+        .windows
         .where((w) => w.id == 'storage-app');
-    final existingWindow = existingWindows.isNotEmpty ? existingWindows.first : null;
-    
+    final existingWindow = existingWindows.isNotEmpty
+        ? existingWindows.first
+        : null;
+
     if (existingWindow != null) {
       // Focus existing window
       windowManager.focusWindow('storage-app');
@@ -24,7 +28,7 @@ class Dock extends ConsumerWidget {
       }
       return;
     }
-    
+
     // Create new storage window
     final window = WindowState(
       id: 'storage-app',
@@ -38,7 +42,7 @@ class Dock extends ConsumerWidget {
       canClose: true,
       isFocused: true,
     );
-    
+
     windowManager.openWindow(window);
   }
 
@@ -46,13 +50,13 @@ class Dock extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final windowManagerState = ref.watch(windowManagerProvider);
-    
+
     // Get unique apps from open windows
     final openApps = <String, WindowState>{};
     for (final window in windowManagerState.windows) {
       openApps[window.id] = window;
     }
-    
+
     return Container(
       margin: const EdgeInsets.all(16),
       child: Center(
@@ -63,10 +67,10 @@ class Dock extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
               decoration: BoxDecoration(
-                color: theme.colorScheme.surface.withOpacity(0.8),
+                color: theme.colorScheme.surface.withValues(alpha: 0.8),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: theme.colorScheme.outline.withOpacity(0.2),
+                  color: theme.colorScheme.outline.withValues(alpha: 0.2),
                   width: 1,
                 ),
               ),
@@ -80,7 +84,7 @@ class Dock extends ConsumerWidget {
                       label: 'Storage',
                       onTap: () => _openStorageApp(ref),
                     ),
-                    
+
                     // Static app launcher
                     _DockItem(
                       icon: Icons.apps,
@@ -89,30 +93,36 @@ class Dock extends ConsumerWidget {
                         // TODO: Show app launcher
                       },
                     ),
-                    
+
                     if (openApps.isNotEmpty) ...[
                       const SizedBox(width: 8),
                       Container(
                         width: 1,
                         height: 40,
-                        color: theme.colorScheme.outline.withOpacity(0.2),
+                        color: theme.colorScheme.outline.withValues(alpha: 0.2),
                       ),
                       const SizedBox(width: 8),
                     ],
-                    
+
                     // Open windows
-                    ...openApps.values.map((window) => _DockItem(
-                      icon: window.icon ?? Icons.window,
-                      label: window.title,
-                      isActive: !window.isMinimized,
-                      onTap: () {
-                        if (window.isMinimized) {
-                          ref.read(windowManagerProvider.notifier).restoreWindow(window.id);
-                        } else {
-                          ref.read(windowManagerProvider.notifier).focusWindow(window.id);
-                        }
-                      },
-                    )),
+                    ...openApps.values.map(
+                      (window) => _DockItem(
+                        icon: window.icon ?? Icons.window,
+                        label: window.title,
+                        isActive: !window.isMinimized,
+                        onTap: () {
+                          if (window.isMinimized) {
+                            ref
+                                .read(windowManagerProvider.notifier)
+                                .restoreWindow(window.id);
+                          } else {
+                            ref
+                                .read(windowManagerProvider.notifier)
+                                .focusWindow(window.id);
+                          }
+                        },
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -141,7 +151,7 @@ class _DockItem extends StatefulWidget {
   State<_DockItem> createState() => _DockItemState();
 }
 
-class _DockItemState extends State<_DockItem> 
+class _DockItemState extends State<_DockItem>
     with SingleTickerProviderStateMixin {
   bool _isHovered = false;
   late AnimationController _animationController;
@@ -154,13 +164,9 @@ class _DockItemState extends State<_DockItem>
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(
-      begin: 1.0,
-      end: 1.2,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeOutCubic,
-    ));
+    _scaleAnimation = Tween<double>(begin: 1.0, end: 1.2).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeOutCubic),
+    );
   }
 
   @override
@@ -172,7 +178,7 @@ class _DockItemState extends State<_DockItem>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return MouseRegion(
       onEnter: (_) {
         setState(() => _isHovered = true);
@@ -197,9 +203,9 @@ class _DockItemState extends State<_DockItem>
                   height: 48,
                   margin: const EdgeInsets.symmetric(horizontal: 4),
                   decoration: BoxDecoration(
-                    color: _isHovered 
-                      ? theme.colorScheme.primary.withOpacity(0.2)
-                      : Colors.transparent,
+                    color: _isHovered
+                        ? theme.colorScheme.primary.withValues(alpha: 0.2)
+                        : Colors.transparent,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Stack(

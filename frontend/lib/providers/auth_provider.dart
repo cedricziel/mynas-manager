@@ -39,13 +39,13 @@ class AuthNotifier extends StateNotifier<AuthState> {
     try {
       // TODO: Implement actual authentication
       await Future.delayed(const Duration(seconds: 1));
-      
+
       state = state.copyWith(
         isAuthenticated: true,
         username: username,
         serverUrl: serverUrl,
       );
-      
+
       return true;
     } catch (e) {
       state = const AuthState();

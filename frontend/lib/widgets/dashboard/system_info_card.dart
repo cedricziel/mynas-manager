@@ -8,7 +8,7 @@ class SystemInfoCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final systemInfoAsync = ref.watch(systemInfoNotifierProvider);
-    
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -43,10 +43,12 @@ class SystemInfoCard extends ConsumerWidget {
                     child: Text('Unable to connect to server'),
                   );
                 }
-                
-                final memoryUsedGB = (systemInfo.memory.used / 1073741824).toStringAsFixed(1);
-                final memoryTotalGB = (systemInfo.memory.total / 1073741824).toStringAsFixed(1);
-                
+
+                final memoryUsedGB = (systemInfo.memory.used / 1073741824)
+                    .toStringAsFixed(1);
+                final memoryTotalGB = (systemInfo.memory.total / 1073741824)
+                    .toStringAsFixed(1);
+
                 return Column(
                   children: [
                     _InfoRow(label: 'Hostname', value: systemInfo.hostname),
@@ -55,20 +57,27 @@ class SystemInfoCard extends ConsumerWidget {
                     const SizedBox(height: 8),
                     _InfoRow(label: 'Uptime', value: systemInfo.uptime),
                     const SizedBox(height: 8),
-                    _InfoRow(label: 'CPU Usage', value: '${systemInfo.cpuUsage.toStringAsFixed(1)}%'),
+                    _InfoRow(
+                      label: 'CPU Usage',
+                      value: '${systemInfo.cpuUsage.toStringAsFixed(1)}%',
+                    ),
                     const SizedBox(height: 8),
-                    _InfoRow(label: 'Memory', value: '$memoryUsedGB GB / $memoryTotalGB GB'),
+                    _InfoRow(
+                      label: 'Memory',
+                      value: '$memoryUsedGB GB / $memoryTotalGB GB',
+                    ),
                     const SizedBox(height: 8),
-                    _InfoRow(label: 'Temperature', value: '${systemInfo.cpuTemperature.toStringAsFixed(1)}°C'),
+                    _InfoRow(
+                      label: 'Temperature',
+                      value:
+                          '${systemInfo.cpuTemperature.toStringAsFixed(1)}°C',
+                    ),
                   ],
                 );
               },
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
-              error: (error, stack) => Center(
-                child: Text('Error: ${error.toString()}'),
-              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (error, stack) =>
+                  Center(child: Text('Error: ${error.toString()}')),
             ),
           ],
         ),
@@ -81,10 +90,7 @@ class _InfoRow extends StatelessWidget {
   final String label;
   final String value;
 
-  const _InfoRow({
-    required this.label,
-    required this.value,
-  });
+  const _InfoRow({required this.label, required this.value});
 
   @override
   Widget build(BuildContext context) {
@@ -94,14 +100,14 @@ class _InfoRow extends StatelessWidget {
         Text(
           label,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Theme.of(context).colorScheme.onSurfaceVariant,
-              ),
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
         ),
         Text(
           value,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
         ),
       ],
     );

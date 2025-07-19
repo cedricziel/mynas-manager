@@ -20,23 +20,22 @@ class DesktopScreen extends ConsumerWidget {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                   colors: [
-                    Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                    Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                    Theme.of(
+                      context,
+                    ).colorScheme.primary.withValues(alpha: 0.1),
+                    Theme.of(
+                      context,
+                    ).colorScheme.secondary.withValues(alpha: 0.1),
                   ],
                 ),
               ),
             ),
-            
+
             // Desktop area with icons
             const DesktopArea(),
-            
+
             // Dock at the bottom
-            const Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              child: Dock(),
-            ),
+            const Positioned(left: 0, right: 0, bottom: 0, child: Dock()),
           ],
         ),
       ),

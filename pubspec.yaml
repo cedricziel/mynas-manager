@@ -10,3 +10,18 @@ workspace:
 
 environment:
   sdk: ^3.8.1
+
+dev_dependencies:
+  dart_pre_commit: ^5.4.5
+
+# Pre-commit hook configuration
+dart_pre_commit:
+  # Format all Dart/Flutter files
+  format:
+    line-length: 80
+
+  # Run static analysis
+  analyze: true
+
+  # Scan for security vulnerabilities
+  osv_scanner: true

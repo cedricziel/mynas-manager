@@ -17,9 +17,9 @@ class TrueNasErrorHandler {
   }) async {
     try {
       _logger.fine('Starting operation: $operationName');
-      
+
       Future<T> future = operation();
-      
+
       // Apply timeout if specified
       if (timeout != null) {
         future = future.timeout(
@@ -30,7 +30,7 @@ class TrueNasErrorHandler {
           ),
         );
       }
-      
+
       final result = await future;
       _logger.fine('Operation completed successfully: $operationName');
       return result;
@@ -41,13 +41,9 @@ class TrueNasErrorHandler {
         context: context,
         stackTrace: stackTrace,
       );
-      
-      _logger.severe(
-        'Operation failed: $operationName',
-        exception,
-        stackTrace,
-      );
-      
+
+      _logger.severe('Operation failed: $operationName', exception, stackTrace);
+
       throw exception;
     }
   }
@@ -109,7 +105,9 @@ class TrueNasErrorHandler {
     if (error is ArgumentError) {
       return TrueNasValidationException(
         'Invalid arguments for $operationName: ${error.message}',
-        validationErrors: {'general': [error.message.toString()]},
+        validationErrors: {
+          'general': [error.message.toString()],
+        },
         code: 'VALIDATION_ERROR',
         originalError: error,
         stackTrace: stackTrace,
@@ -154,7 +152,9 @@ class TrueNasErrorHandler {
       case -32600:
         return TrueNasValidationException(
           'Invalid JSON-RPC request for $method',
-          validationErrors: {'request': ['Invalid request format']},
+          validationErrors: {
+            'request': ['Invalid request format'],
+          },
           code: 'INVALID_REQUEST',
         );
       case -32601:
@@ -167,7 +167,9 @@ class TrueNasErrorHandler {
       case -32602:
         return TrueNasValidationException(
           'Invalid parameters for $method',
-          validationErrors: {'parameters': ['Invalid parameter format']},
+          validationErrors: {
+            'parameters': ['Invalid parameter format'],
+          },
           code: 'INVALID_PARAMS',
         );
       case -32603:
@@ -215,18 +217,18 @@ class TrueNasErrorHandler {
     String? operationName,
   }) {
     final missing = <String>[];
-    
+
     for (final field in requiredFields) {
       if (!params.containsKey(field) || params[field] == null) {
         missing.add(field);
       }
     }
-    
+
     if (missing.isNotEmpty) {
       throw TrueNasValidationException(
         'Missing required parameters${operationName != null ? ' for $operationName' : ''}: ${missing.join(', ')}',
         validationErrors: {
-          for (final field in missing) field: ['This field is required']
+          for (final field in missing) field: ['This field is required'],
         },
         code: 'MISSING_REQUIRED_PARAMS',
       );
@@ -240,17 +242,17 @@ class TrueNasErrorHandler {
     String? operationName,
   }) {
     final errors = <String, List<String>>{};
-    
+
     for (final entry in expectedTypes.entries) {
       final field = entry.key;
       final expectedType = entry.value;
       final value = params[field];
-      
+
       if (value != null && value.runtimeType != expectedType) {
         errors[field] = ['Expected $expectedType, got ${value.runtimeType}'];
       }
     }
-    
+
     if (errors.isNotEmpty) {
       throw TrueNasValidationException(
         'Invalid parameter types${operationName != null ? ' for $operationName' : ''}',

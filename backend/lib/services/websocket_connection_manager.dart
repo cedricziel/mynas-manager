@@ -8,23 +8,23 @@ import '../interfaces/connection_manager.dart';
 /// WebSocket connection manager with automatic reconnection
 class WebSocketConnectionManager implements IConnectionManager {
   final _logger = Logger('WebSocketConnectionManager');
-  final StreamController<ConnectionState> _stateController = StreamController<ConnectionState>.broadcast();
-  final StreamController<String> _messageController = StreamController<String>.broadcast();
-  
+  final StreamController<ConnectionState> _stateController =
+      StreamController<ConnectionState>.broadcast();
+  final StreamController<String> _messageController =
+      StreamController<String>.broadcast();
+
   WebSocketChannel? _channel;
   StreamSubscription? _channelSubscription;
   Timer? _reconnectTimer;
-  Timer? _heartbeatTimer;
-  
+
   ConnectionState _state = ConnectionState.disconnected;
   String? _uri;
   Map<String, String>? _headers;
   int _reconnectAttempts = 0;
-  
+
   // Configuration
   static const int _maxReconnectAttempts = 5;
   static const Duration _reconnectDelay = Duration(seconds: 5);
-  static const Duration _heartbeatInterval = Duration(seconds: 30);
   static const Duration _connectionTimeout = Duration(seconds: 10);
 
   @override
@@ -41,7 +41,8 @@ class WebSocketConnectionManager implements IConnectionManager {
 
   @override
   Future<void> connect(String uri) async {
-    if (_state == ConnectionState.connecting || _state == ConnectionState.connected) {
+    if (_state == ConnectionState.connecting ||
+        _state == ConnectionState.connected) {
       _logger.warning('Already connecting or connected');
       return;
     }
@@ -81,7 +82,7 @@ class WebSocketConnectionManager implements IConnectionManager {
 
       // Wait for connection to be established
       await _channel!.ready;
-      
+
       _setState(ConnectionState.connected);
       _logger.info('WebSocket connected successfully');
 
@@ -94,8 +95,6 @@ class WebSocketConnectionManager implements IConnectionManager {
 
       // Don't start heartbeat when using with json_rpc_2 Peer
       // The Peer handles its own connection management
-      // _startHeartbeat();
-      
     } catch (e) {
       _logger.severe('WebSocket connection failed: $e');
       await _cleanup();
@@ -138,11 +137,15 @@ class WebSocketConnectionManager implements IConnectionManager {
     }
 
     _reconnectAttempts++;
-    final delay = Duration(seconds: _reconnectDelay.inSeconds * _reconnectAttempts);
-    
-    _logger.info('Scheduling reconnect attempt $_reconnectAttempts in ${delay.inSeconds}s');
+    final delay = Duration(
+      seconds: _reconnectDelay.inSeconds * _reconnectAttempts,
+    );
+
+    _logger.info(
+      'Scheduling reconnect attempt $_reconnectAttempts in ${delay.inSeconds}s',
+    );
     _setState(ConnectionState.reconnecting);
-    
+
     _reconnectTimer = Timer(delay, () async {
       if (_uri != null && _state != ConnectionState.connected) {
         try {
@@ -151,22 +154,6 @@ class WebSocketConnectionManager implements IConnectionManager {
         } catch (e) {
           _logger.severe('Reconnection attempt $_reconnectAttempts failed: $e');
           _scheduleReconnect();
-        }
-      }
-    });
-  }
-
-  void _startHeartbeat() {
-    _heartbeatTimer?.cancel();
-    _heartbeatTimer = Timer.periodic(_heartbeatInterval, (timer) {
-      if (_state == ConnectionState.connected) {
-        try {
-          // Send a proper JSON-RPC ping with numeric ID
-          final pingId = DateTime.now().millisecondsSinceEpoch;
-          _channel?.sink.add('{"jsonrpc":"2.0","method":"core.ping","id":$pingId}');
-        } catch (e) {
-          _logger.warning('Heartbeat failed: $e');
-          _onError(e);
         }
       }
     });
@@ -196,12 +183,11 @@ class WebSocketConnectionManager implements IConnectionManager {
   }
 
   Future<void> _cleanup() async {
-    _heartbeatTimer?.cancel();
     _reconnectTimer?.cancel();
-    
+
     await _channelSubscription?.cancel();
     _channelSubscription = null;
-    
+
     await _channel?.sink.close();
     _channel = null;
   }
@@ -221,10 +207,7 @@ class WebSocketConnectionManager implements IConnectionManager {
     });
 
     // Return a StreamChannel that combines our message stream and the sink
-    return StreamChannel<String>(
-      messageStream,
-      sinkController.sink,
-    );
+    return StreamChannel<String>(messageStream, sinkController.sink);
   }
 
   @override

@@ -19,5 +19,6 @@ class Dataset with _$Dataset {
     Map<String, dynamic>? properties,
   }) = _Dataset;
 
-  factory Dataset.fromJson(Map<String, dynamic> json) => _$DatasetFromJson(json);
+  factory Dataset.fromJson(Map<String, dynamic> json) =>
+      _$DatasetFromJson(json);
 }

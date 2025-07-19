@@ -17,7 +17,7 @@ class ResizableWindow extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final window = windowState;
-    
+
     if (!window.canResize || window.isMaximized) {
       return Positioned(
         left: window.position.dx,
@@ -73,14 +73,18 @@ class ResizableWindow extends ConsumerWidget {
         ref.read(windowManagerProvider.notifier).focusWindow(window.id);
       },
       onResizeUpdate: (result, details) {
-        ref.read(windowManagerProvider.notifier).updateWindowPosition(
-          window.id,
-          Offset(result.rect.left, result.rect.top),
-        );
-        ref.read(windowManagerProvider.notifier).updateWindowSize(
-          window.id,
-          Size(result.rect.width, result.rect.height),
-        );
+        ref
+            .read(windowManagerProvider.notifier)
+            .updateWindowPosition(
+              window.id,
+              Offset(result.rect.left, result.rect.top),
+            );
+        ref
+            .read(windowManagerProvider.notifier)
+            .updateWindowSize(
+              window.id,
+              Size(result.rect.width, result.rect.height),
+            );
       },
       contentBuilder: (context, rect, flip) {
         return child;

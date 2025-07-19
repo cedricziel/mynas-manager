@@ -8,11 +8,7 @@ class PoolDetailPanel extends ConsumerStatefulWidget {
   final Pool pool;
   final VoidCallback? onClose;
 
-  const PoolDetailPanel({
-    super.key,
-    required this.pool,
-    this.onClose,
-  });
+  const PoolDetailPanel({super.key, required this.pool, this.onClose});
 
   @override
   ConsumerState<PoolDetailPanel> createState() => _PoolDetailPanelState();
@@ -58,7 +54,7 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
         children: [
           // Header
           _buildHeader(theme),
-          
+
           // Tab bar
           Container(
             decoration: BoxDecoration(
@@ -78,7 +74,7 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
               ],
             ),
           ),
-          
+
           // Tab content
           Expanded(
             child: TabBarView(
@@ -97,8 +93,11 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
   }
 
   Widget _buildHeader(ThemeData theme) {
-    final usagePercentage = StorageUtils.calculatePercentage(widget.pool.allocated, widget.pool.size);
-    
+    final usagePercentage = StorageUtils.calculatePercentage(
+      widget.pool.allocated,
+      widget.pool.size,
+    );
+
     return Container(
       padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
@@ -134,7 +133,8 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
                       Text(
                         widget.pool.path!,
                         style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
+                          color: theme.colorScheme.onPrimaryContainer
+                              .withValues(alpha: 0.8),
                         ),
                       ),
                   ],
@@ -149,9 +149,9 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
               ),
             ],
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Pool stats row
           Row(
             children: [
@@ -182,7 +182,12 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
     );
   }
 
-  Widget _buildStatCard(String label, String value, Color valueColor, ThemeData theme) {
+  Widget _buildStatCard(
+    String label,
+    String value,
+    Color valueColor,
+    ThemeData theme,
+  ) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(12),
@@ -196,7 +201,9 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
             Text(
               label,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
+                color: theme.colorScheme.onPrimaryContainer.withValues(
+                  alpha: 0.8,
+                ),
               ),
             ),
             const SizedBox(height: 4),
@@ -213,7 +220,11 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
     );
   }
 
-  Widget _buildOverviewTab(ThemeData theme, PoolResilver? resilver, List<PoolScrub> scrubHistory) {
+  Widget _buildOverviewTab(
+    ThemeData theme,
+    PoolResilver? resilver,
+    List<PoolScrub> scrubHistory,
+  ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -222,10 +233,12 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
           // Performance metrics
           Text(
             'Performance',
-            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 16),
-          
+
           Row(
             children: [
               Expanded(
@@ -259,21 +272,23 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
               ),
             ],
           ),
-          
+
           const SizedBox(height: 32),
-          
+
           // Recent activity
           Text(
             'Recent Activity',
-            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 16),
-          
+
           if (resilver != null) ...[
             _buildActivityCard(
               'Resilver in Progress',
               'VDev replacement ongoing',
-              resilver.percentComplete != null 
+              resilver.percentComplete != null
                   ? '${resilver.percentComplete!.toStringAsFixed(1)}% complete'
                   : 'In progress...',
               Icons.autorenew,
@@ -282,25 +297,29 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
             ),
             const SizedBox(height: 12),
           ],
-          
+
           if (scrubHistory.isNotEmpty) ...[
-            ...scrubHistory.take(3).map((scrub) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: _buildActivityCard(
-                'Scrub ${scrub.status.name}',
-                scrub.startTime != null 
-                    ? 'Started ${StorageUtils.formatRelativeTime(scrub.startTime!)}'
-                    : 'Scheduled',
-                scrub.endTime != null && scrub.startTime != null
-                    ? 'Completed in ${StorageUtils.formatDuration(scrub.endTime!.difference(scrub.startTime!))}'
-                    : 'In progress...',
-                Icons.cleaning_services,
-                _getScrubColor(scrub.status.name),
-                theme,
-              ),
-            )),
+            ...scrubHistory
+                .take(3)
+                .map(
+                  (scrub) => Padding(
+                    padding: const EdgeInsets.only(bottom: 12),
+                    child: _buildActivityCard(
+                      'Scrub ${scrub.status.name}',
+                      scrub.startTime != null
+                          ? 'Started ${StorageUtils.formatRelativeTime(scrub.startTime!)}'
+                          : 'Scheduled',
+                      scrub.endTime != null && scrub.startTime != null
+                          ? 'Completed in ${StorageUtils.formatDuration(scrub.endTime!.difference(scrub.startTime!))}'
+                          : 'In progress...',
+                      Icons.cleaning_services,
+                      _getScrubColor(scrub.status.name),
+                      theme,
+                    ),
+                  ),
+                ),
           ],
-          
+
           if (resilver == null && scrubHistory.isEmpty)
             Card(
               child: Padding(
@@ -343,10 +362,12 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
         children: [
           Text(
             'VDev Topology',
-            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 16),
-          
+
           // Mock VDev structure - would be replaced with real data
           _buildVDevCard(
             'Main VDev',
@@ -356,7 +377,7 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
             theme,
           ),
           const SizedBox(height: 16),
-          
+
           _buildVDevCard(
             'Log Device',
             'Mirror',
@@ -365,14 +386,8 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
             theme,
           ),
           const SizedBox(height: 16),
-          
-          _buildVDevCard(
-            'Cache Device',
-            'Single',
-            ['nvme2n1'],
-            true,
-            theme,
-          ),
+
+          _buildVDevCard('Cache Device', 'Single', ['nvme2n1'], true, theme),
         ],
       ),
     );
@@ -388,7 +403,9 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
             children: [
               Text(
                 'Datasets',
-                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const Spacer(),
               ElevatedButton.icon(
@@ -401,7 +418,7 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
             ],
           ),
         ),
-        
+
         // Datasets list
         Expanded(
           child: datasets.isEmpty
@@ -442,7 +459,11 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
     );
   }
 
-  Widget _buildMaintenanceTab(ThemeData theme, List<PoolScrubTask> scrubTasks, PoolResilver? resilver) {
+  Widget _buildMaintenanceTab(
+    ThemeData theme,
+    List<PoolScrubTask> scrubTasks,
+    PoolResilver? resilver,
+  ) {
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -453,7 +474,9 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
             children: [
               Text(
                 'Scrub Tasks',
-                style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+                style: theme.textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const Spacer(),
               ElevatedButton.icon(
@@ -466,7 +489,7 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
             ],
           ),
           const SizedBox(height: 16),
-          
+
           if (scrubTasks.isEmpty)
             Card(
               child: Padding(
@@ -497,20 +520,24 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
               ),
             )
           else
-            ...scrubTasks.map((task) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: _buildScrubTaskCard(task, theme),
-            )),
-          
+            ...scrubTasks.map(
+              (task) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _buildScrubTaskCard(task, theme),
+              ),
+            ),
+
           const SizedBox(height: 32),
-          
+
           // Resilver section
           Text(
             'Resilver Status',
-            style: theme.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold),
+            style: theme.textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 16),
-          
+
           if (resilver != null)
             _buildResilverCard(resilver, theme)
           else
@@ -547,7 +574,13 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
     );
   }
 
-  Widget _buildMetricCard(String title, String value, IconData icon, Color color, ThemeData theme) {
+  Widget _buildMetricCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+    ThemeData theme,
+  ) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -580,7 +613,14 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
     );
   }
 
-  Widget _buildActivityCard(String title, String subtitle, String detail, IconData icon, Color color, ThemeData theme) {
+  Widget _buildActivityCard(
+    String title,
+    String subtitle,
+    String detail,
+    IconData icon,
+    Color color,
+    ThemeData theme,
+  ) {
     return Card(
       child: ListTile(
         leading: CircleAvatar(
@@ -599,7 +639,13 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
     );
   }
 
-  Widget _buildVDevCard(String name, String type, List<String> disks, bool isHealthy, ThemeData theme) {
+  Widget _buildVDevCard(
+    String name,
+    String type,
+    List<String> disks,
+    bool isHealthy,
+    ThemeData theme,
+  ) {
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
@@ -615,7 +661,9 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
                 const SizedBox(width: 12),
                 Text(
                   name,
-                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
                 const Spacer(),
                 Chip(
@@ -635,10 +683,15 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
             Wrap(
               spacing: 8,
               runSpacing: 8,
-              children: disks.map((disk) => Chip(
-                label: Text(disk),
-                backgroundColor: theme.colorScheme.surfaceContainerHighest,
-              )).toList(),
+              children: disks
+                  .map(
+                    (disk) => Chip(
+                      label: Text(disk),
+                      backgroundColor:
+                          theme.colorScheme.surfaceContainerHighest,
+                    ),
+                  )
+                  .toList(),
             ),
           ],
         ),
@@ -651,7 +704,7 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
       child: ListTile(
         leading: const Icon(Icons.folder),
         title: Text(dataset.name),
-        subtitle: Text(dataset.mountpoint ?? 'Not mounted'),
+        subtitle: Text(dataset.mountpoint),
         trailing: PopupMenuButton<String>(
           onSelected: (action) => _handleDatasetAction(dataset, action),
           itemBuilder: (context) => [
@@ -698,7 +751,7 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
           task.enabled ? Icons.schedule : Icons.schedule_outlined,
           color: task.enabled ? Colors.green : theme.colorScheme.outline,
         ),
-        title: Text(task.description ?? 'Scrub Task'),
+        title: Text(task.description),
         subtitle: Text(StorageUtils.formatCronExpression(task.schedule)),
         trailing: Row(
           mainAxisSize: MainAxisSize.min,
@@ -763,13 +816,17 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
                 const SizedBox(width: 12),
                 Text(
                   'Resilver in Progress',
-                  style: theme.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
             LinearProgressIndicator(
-              value: resilver.percentComplete != null ? resilver.percentComplete! / 100 : null,
+              value: resilver.percentComplete != null
+                  ? resilver.percentComplete! / 100
+                  : null,
               backgroundColor: theme.colorScheme.surfaceContainerHighest,
               valueColor: const AlwaysStoppedAnimation<Color>(Colors.blue),
             ),
@@ -778,7 +835,7 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Text(
-                  resilver.percentComplete != null 
+                  resilver.percentComplete != null
                       ? '${resilver.percentComplete!.toStringAsFixed(1)}% complete'
                       : 'Processing...',
                   style: theme.textTheme.bodyMedium,

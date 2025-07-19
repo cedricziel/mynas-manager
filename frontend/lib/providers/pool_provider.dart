@@ -76,20 +76,21 @@ class PoolState {
 
   // Aggregate statistics
   int get totalPools => pools.length;
-  
+
   int get healthyPools => pools.where((pool) => pool.isHealthy).length;
-  
+
   int get totalCapacity => pools.fold(0, (sum, pool) => sum + pool.size);
-  
+
   int get totalAllocated => pools.fold(0, (sum, pool) => sum + pool.allocated);
-  
+
   double get overallUsagePercentage {
     if (totalCapacity == 0) return 0.0;
     return (totalAllocated / totalCapacity) * 100;
   }
 
-  List<Pool> get unhealthyPools => pools.where((pool) => !pool.isHealthy).toList();
-  
+  List<Pool> get unhealthyPools =>
+      pools.where((pool) => !pool.isHealthy).toList();
+
   bool get hasUnhealthyPools => unhealthyPools.isNotEmpty;
 }
 
@@ -111,21 +112,23 @@ class PoolNotifier extends StateNotifier<PoolState> {
 
     try {
       _logger.info('Refreshing pool data');
-      
+
       // Load pools first
       final poolsData = await _rpcClient.listPools();
-      final pools = poolsData.map<Pool>((data) => Pool.fromJson(data as Map<String, dynamic>)).toList();
-      
+      final pools = poolsData
+          .map<Pool>((data) => Pool.fromJson(data as Map<String, dynamic>))
+          .toList();
+
       // Load related data for each pool in parallel
       final futures = pools.map((pool) => _loadPoolDetails(pool.id));
       await Future.wait(futures);
-      
+
       state = state.copyWith(
         pools: pools,
         isLoading: false,
         lastUpdated: DateTime.now(),
       );
-      
+
       _logger.info('Pool data refreshed successfully: ${pools.length} pools');
     } catch (e, stackTrace) {
       _logger.severe('Failed to refresh pool data: $e', e, stackTrace);
@@ -140,17 +143,34 @@ class PoolNotifier extends StateNotifier<PoolState> {
   Future<void> _loadPoolDetails(String poolId) async {
     try {
       // Load datasets for this pool
-      final datasetsData = await _rpcClient.sendRequest<List<dynamic>>('dataset.list', {'poolId': poolId});
-      final datasets = datasetsData.map<Dataset>((data) => Dataset.fromJson(data as Map<String, dynamic>)).toList();
-      
+      final datasetsData = await _rpcClient.sendRequest<List<dynamic>>(
+        'dataset.list',
+        {'poolId': poolId},
+      );
+      final datasets = datasetsData
+          .map<Dataset>(
+            (data) => Dataset.fromJson(data as Map<String, dynamic>),
+          )
+          .toList();
+
       // Load scrub tasks for this pool
-      final scrubTasksData = await _rpcClient.sendRequest<List<dynamic>>('pool.scrub.list', {'poolId': poolId});
-      final scrubTasks = scrubTasksData.map<PoolScrubTask>((data) => PoolScrubTask.fromJson(data as Map<String, dynamic>)).toList();
-      
+      final scrubTasksData = await _rpcClient.sendRequest<List<dynamic>>(
+        'pool.scrub.list',
+        {'poolId': poolId},
+      );
+      final scrubTasks = scrubTasksData
+          .map<PoolScrubTask>(
+            (data) => PoolScrubTask.fromJson(data as Map<String, dynamic>),
+          )
+          .toList();
+
       // Load resilver status for this pool
       PoolResilver? resilver;
       try {
-        final resilverData = await _rpcClient.sendRequest<Map<String, dynamic>?>('pool.resilver.status', {'poolId': poolId});
+        final resilverData = await _rpcClient
+            .sendRequest<Map<String, dynamic>?>('pool.resilver.status', {
+              'poolId': poolId,
+            });
         if (resilverData != null) {
           resilver = PoolResilver.fromJson(resilverData);
         }
@@ -158,22 +178,37 @@ class PoolNotifier extends StateNotifier<PoolState> {
         // Resilver might not exist, which is fine
         _logger.fine('No resilver active for pool $poolId: $e');
       }
-      
+
       // Load recent scrub history
-      final scrubHistoryData = await _rpcClient.sendRequest<List<dynamic>>('pool.scrub.history', {'poolId': poolId, 'limit': 10});
-      final scrubHistory = scrubHistoryData.map<PoolScrub>((data) => PoolScrub.fromJson(data as Map<String, dynamic>)).toList();
+      final scrubHistoryData = await _rpcClient.sendRequest<List<dynamic>>(
+        'pool.scrub.history',
+        {'poolId': poolId, 'limit': 10},
+      );
+      final scrubHistory = scrubHistoryData
+          .map<PoolScrub>(
+            (data) => PoolScrub.fromJson(data as Map<String, dynamic>),
+          )
+          .toList();
 
       // Update state with loaded data
-      final newDatasetsByPool = Map<String, List<Dataset>>.from(state.datasetsByPool);
+      final newDatasetsByPool = Map<String, List<Dataset>>.from(
+        state.datasetsByPool,
+      );
       newDatasetsByPool[poolId] = datasets;
-      
-      final newScrubTasksByPool = Map<String, List<PoolScrubTask>>.from(state.scrubTasksByPool);
+
+      final newScrubTasksByPool = Map<String, List<PoolScrubTask>>.from(
+        state.scrubTasksByPool,
+      );
       newScrubTasksByPool[poolId] = scrubTasks;
-      
-      final newResilverByPool = Map<String, PoolResilver?>.from(state.resilverByPool);
+
+      final newResilverByPool = Map<String, PoolResilver?>.from(
+        state.resilverByPool,
+      );
       newResilverByPool[poolId] = resilver;
-      
-      final newScrubHistoryByPool = Map<String, List<PoolScrub>>.from(state.scrubHistoryByPool);
+
+      final newScrubHistoryByPool = Map<String, List<PoolScrub>>.from(
+        state.scrubHistoryByPool,
+      );
       newScrubHistoryByPool[poolId] = scrubHistory;
 
       state = state.copyWith(
@@ -192,7 +227,7 @@ class PoolNotifier extends StateNotifier<PoolState> {
     try {
       _logger.info('Starting manual scrub for pool $poolId');
       await _rpcClient.sendRequest('pool.scrub.run', {'poolId': poolId});
-      
+
       // Refresh pool details to show updated scrub status
       await _loadPoolDetails(poolId);
     } catch (e) {
@@ -216,7 +251,7 @@ class PoolNotifier extends StateNotifier<PoolState> {
         'description': description ?? 'Automated scrub task',
         'enabled': enabled,
       });
-      
+
       // Refresh pool details to show new task
       await _loadPoolDetails(poolId);
     } catch (e) {
@@ -226,11 +261,17 @@ class PoolNotifier extends StateNotifier<PoolState> {
   }
 
   // Update an existing scrub task
-  Future<void> updateScrubTask(String taskId, Map<String, dynamic> updates) async {
+  Future<void> updateScrubTask(
+    String taskId,
+    Map<String, dynamic> updates,
+  ) async {
     try {
       _logger.info('Updating scrub task $taskId');
-      await _rpcClient.sendRequest('pool.scrub.update', {'id': taskId, ...updates});
-      
+      await _rpcClient.sendRequest('pool.scrub.update', {
+        'id': taskId,
+        ...updates,
+      });
+
       // Refresh all pool data to update the task
       await refresh();
     } catch (e) {
@@ -244,7 +285,7 @@ class PoolNotifier extends StateNotifier<PoolState> {
     try {
       _logger.info('Deleting scrub task $taskId');
       await _rpcClient.sendRequest('pool.scrub.delete', {'id': taskId});
-      
+
       // Refresh all pool data to remove the task
       await refresh();
     } catch (e) {
@@ -266,7 +307,7 @@ class PoolNotifier extends StateNotifier<PoolState> {
         name: name,
         properties: properties,
       );
-      
+
       // Refresh pool details to show new dataset
       await _loadPoolDetails(pool);
     } catch (e) {
@@ -319,19 +360,31 @@ final poolByIdProvider = Provider.family<Pool?, String>((ref, poolId) {
   return ref.watch(poolProvider).getPool(poolId);
 });
 
-final datasetsByPoolProvider = Provider.family<List<Dataset>, String>((ref, poolId) {
+final datasetsByPoolProvider = Provider.family<List<Dataset>, String>((
+  ref,
+  poolId,
+) {
   return ref.watch(poolProvider).getDatasetsForPool(poolId);
 });
 
-final scrubTasksByPoolProvider = Provider.family<List<PoolScrubTask>, String>((ref, poolId) {
+final scrubTasksByPoolProvider = Provider.family<List<PoolScrubTask>, String>((
+  ref,
+  poolId,
+) {
   return ref.watch(poolProvider).getScrubTasksForPool(poolId);
 });
 
-final resilverByPoolProvider = Provider.family<PoolResilver?, String>((ref, poolId) {
+final resilverByPoolProvider = Provider.family<PoolResilver?, String>((
+  ref,
+  poolId,
+) {
   return ref.watch(poolProvider).getResilverForPool(poolId);
 });
 
-final scrubHistoryByPoolProvider = Provider.family<List<PoolScrub>, String>((ref, poolId) {
+final scrubHistoryByPoolProvider = Provider.family<List<PoolScrub>, String>((
+  ref,
+  poolId,
+) {
   return ref.watch(poolProvider).getScrubHistoryForPool(poolId);
 });
 

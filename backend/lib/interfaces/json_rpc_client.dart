@@ -5,10 +5,7 @@ class JsonRpcNotification {
   final String method;
   final Map<String, dynamic>? params;
 
-  const JsonRpcNotification({
-    required this.method,
-    this.params,
-  });
+  const JsonRpcNotification({required this.method, this.params});
 
   factory JsonRpcNotification.fromJson(Map<String, dynamic> json) {
     return JsonRpcNotification(
@@ -24,11 +21,7 @@ class JsonRpcError implements Exception {
   final String message;
   final dynamic data;
 
-  const JsonRpcError({
-    required this.code,
-    required this.message,
-    this.data,
-  });
+  const JsonRpcError({required this.code, required this.message, this.data});
 
   factory JsonRpcError.fromJson(Map<String, dynamic> json) {
     return JsonRpcError(
@@ -46,13 +39,13 @@ class JsonRpcError implements Exception {
 abstract class IJsonRpcClient {
   /// Make a JSON-RPC method call
   Future<T> call<T>(String method, [Map<String, dynamic>? params]);
-  
+
   /// Stream of notifications from the server
   Stream<JsonRpcNotification> get notifications;
-  
+
   /// Whether the client is connected and ready to make calls
   bool get isReady;
-  
+
   /// Close the client and clean up resources
   Future<void> close();
 }

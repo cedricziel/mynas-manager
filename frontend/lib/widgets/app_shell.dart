@@ -4,17 +4,14 @@ import 'package:go_router/go_router.dart';
 class AppShell extends StatelessWidget {
   final Widget child;
 
-  const AppShell({
-    super.key,
-    required this.child,
-  });
+  const AppShell({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isWideScreen = constraints.maxWidth > 800;
-        
+
         if (isWideScreen) {
           return _DesktopLayout(child: child);
         } else {
@@ -33,7 +30,7 @@ class _DesktopLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentLocation = GoRouterState.of(context).matchedLocation;
-    
+
     return Scaffold(
       body: Row(
         children: [
@@ -83,7 +80,7 @@ class _MobileLayout extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final currentLocation = GoRouterState.of(context).matchedLocation;
-    
+
     return Scaffold(
       body: child,
       bottomNavigationBar: NavigationBar(

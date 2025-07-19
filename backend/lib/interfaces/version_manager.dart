@@ -23,10 +23,12 @@ class TrueNasVersion {
   /// Parse version string like "TrueNAS-25.04.0" or "TrueNAS-SCALE-24.10.2.1"
   factory TrueNasVersion.parse(String versionString) {
     final fullVersion = versionString;
-    final isScale = versionString.contains('-SCALE-') || 
-                   (!versionString.contains('-CORE-') && versionString.startsWith('TrueNAS-'));
+    final isScale =
+        versionString.contains('-SCALE-') ||
+        (!versionString.contains('-CORE-') &&
+            versionString.startsWith('TrueNAS-'));
     final isCore = versionString.contains('-CORE-');
-    
+
     // Extract version numbers
     String versionPart;
     if (versionString.contains('-SCALE-')) {
@@ -39,12 +41,12 @@ class TrueNasVersion {
     } else {
       versionPart = versionString;
     }
-    
+
     final parts = versionPart.split('.');
     final major = int.tryParse(parts.isNotEmpty ? parts[0] : '0') ?? 0;
     final minor = int.tryParse(parts.length > 1 ? parts[1] : '0') ?? 0;
     final patch = int.tryParse(parts.length > 2 ? parts[2] : '0') ?? 0;
-    
+
     return TrueNasVersion(
       version: versionPart,
       fullVersion: fullVersion,
@@ -62,7 +64,8 @@ class TrueNasVersion {
       case 'json_rpc_websocket':
         return majorVersion >= 25; // JSON-RPC over WebSocket in 25.04+
       case 'legacy_rest_api':
-        return majorVersion < 26; // REST API deprecated in 25.04, removed in future
+        return majorVersion <
+            26; // REST API deprecated in 25.04, removed in future
       case 'api_versioning':
         return majorVersion >= 25; // API versioning in 25.04+
       case 'enhanced_auth':
@@ -106,19 +109,19 @@ class TrueNasVersion {
 abstract class IVersionManager {
   /// Current detected version
   TrueNasVersion? get currentVersion;
-  
+
   /// Detect the TrueNAS version
   Future<TrueNasVersion> detectVersion();
-  
+
   /// Check if a feature is supported by the current version
   bool isFeatureSupported(String feature);
-  
+
   /// Check if a specific version supports a feature
   bool isFeatureSupportedByVersion(String feature, TrueNasVersion version);
-  
+
   /// Get the recommended API endpoint for the current version
   String getRecommendedApiEndpoint();
-  
+
   /// Check if current version is compatible with client
   bool isVersionCompatible();
 }

@@ -17,7 +17,8 @@ class Snapshot with _$Snapshot {
     Map<String, dynamic>? properties,
   }) = _Snapshot;
 
-  factory Snapshot.fromJson(Map<String, dynamic> json) => _$SnapshotFromJson(json);
+  factory Snapshot.fromJson(Map<String, dynamic> json) =>
+      _$SnapshotFromJson(json);
 }
 
 @freezed
@@ -38,7 +39,8 @@ class SnapshotTask with _$SnapshotTask {
     Map<String, dynamic>? options,
   }) = _SnapshotTask;
 
-  factory SnapshotTask.fromJson(Map<String, dynamic> json) => _$SnapshotTaskFromJson(json);
+  factory SnapshotTask.fromJson(Map<String, dynamic> json) =>
+      _$SnapshotTaskFromJson(json);
 }
 
 @freezed
@@ -51,5 +53,6 @@ class SnapshotCount with _$SnapshotCount {
     required int totalSize,
   }) = _SnapshotCount;
 
-  factory SnapshotCount.fromJson(Map<String, dynamic> json) => _$SnapshotCountFromJson(json);
+  factory SnapshotCount.fromJson(Map<String, dynamic> json) =>
+      _$SnapshotCountFromJson(json);
 }

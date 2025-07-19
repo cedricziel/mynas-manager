@@ -39,36 +39,33 @@ class EventSubscription {
   });
 
   /// Subscribe to all system events
-  factory EventSubscription.all() => const EventSubscription(
-        eventTypes: ['*'],
-      );
+  factory EventSubscription.all() => const EventSubscription(eventTypes: ['*']);
 
   /// Subscribe to specific event types
-  factory EventSubscription.types(List<String> types) => EventSubscription(
-        eventTypes: types,
-      );
+  factory EventSubscription.types(List<String> types) =>
+      EventSubscription(eventTypes: types);
 }
 
 /// Manages real-time event subscriptions from TrueNAS
 abstract class IEventManager {
   /// Whether event subscription is active
   bool get isSubscribed;
-  
+
   /// Stream of all events
   Stream<TrueNasEvent> get eventStream;
-  
+
   /// Subscribe to events with the given configuration
   Future<void> subscribe(EventSubscription subscription);
-  
+
   /// Subscribe to specific event types
   Future<void> subscribeToTypes(List<String> eventTypes);
-  
+
   /// Unsubscribe from all events
   Future<void> unsubscribe();
-  
+
   /// Get a filtered stream for specific event types
   Stream<TrueNasEvent> getEventsOfType(String eventType);
-  
+
   /// Get a filtered stream for multiple event types
   Stream<TrueNasEvent> getEventsOfTypes(List<String> eventTypes);
 }

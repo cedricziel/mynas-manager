@@ -9,29 +9,33 @@ class TrueNasClient {
   final String baseUrl;
   final String? apiKey;
 
-  TrueNasClient({
-    this.baseUrl = 'http://localhost/api/v2.0',
-    this.apiKey,
-  }) {
-    _dio = Dio(BaseOptions(
-      baseUrl: baseUrl,
-      headers: {
-        if (apiKey != null) 'Authorization': 'Bearer $apiKey',
-        'Content-Type': 'application/json',
-      },
-      validateStatus: (status) => status != null && status < 500,
-    ));
+  TrueNasClient({this.baseUrl = 'http://localhost/api/v2.0', this.apiKey}) {
+    _dio = Dio(
+      BaseOptions(
+        baseUrl: baseUrl,
+        headers: {
+          if (apiKey != null) 'Authorization': 'Bearer $apiKey',
+          'Content-Type': 'application/json',
+        },
+        validateStatus: (status) => status != null && status < 500,
+      ),
+    );
   }
 
   Future<SystemInfo> getSystemInfo() async {
     try {
       final response = await _dio.get('/system/info');
       final uptimeResponse = await _dio.get('/system/uptime');
-      await _dio.get('/reporting/get_data', data: {
-        'graphs': [{'name': 'cpu'}],
-        'reporting_query': {'start': '-1h', 'end': 'now'}
-      });
-      
+      await _dio.get(
+        '/reporting/get_data',
+        data: {
+          'graphs': [
+            {'name': 'cpu'},
+          ],
+          'reporting_query': {'start': '-1h', 'end': 'now'},
+        },
+      );
+
       // Mock data for now - replace with actual TrueNAS API parsing
       return SystemInfo(
         hostname: response.data['hostname'] ?? 'truenas',
@@ -57,13 +61,15 @@ class TrueNasClient {
     try {
       final response = await _dio.get('/alert/list');
       return (response.data as List)
-          .map((alert) => Alert(
-                id: alert['id'],
-                level: _parseAlertLevel(alert['level']),
-                message: alert['formatted'] ?? alert['text'],
-                timestamp: DateTime.parse(alert['datetime']),
-                dismissed: alert['dismissed'] ?? false,
-              ))
+          .map(
+            (alert) => Alert(
+              id: alert['id'],
+              level: _parseAlertLevel(alert['level']),
+              message: alert['formatted'] ?? alert['text'],
+              timestamp: DateTime.parse(alert['datetime']),
+              dismissed: alert['dismissed'] ?? false,
+            ),
+          )
           .toList();
     } catch (e) {
       _logger.severe('Failed to get alerts: $e');
@@ -90,18 +96,20 @@ class TrueNasClient {
     try {
       final response = await _dio.get('/pool');
       return (response.data as List)
-          .map((pool) => Pool(
-                id: pool['id'].toString(),
-                name: pool['name'],
-                status: pool['status'],
-                size: pool['size'] ?? 0,
-                allocated: pool['allocated'] ?? 0,
-                free: pool['free'] ?? 0,
-                fragmentation: (pool['fragmentation'] ?? 0).toDouble(),
-                isHealthy: pool['healthy'] ?? false,
-                path: pool['path'],
-                vdevs: _parseVdevs(pool['topology']),
-              ))
+          .map(
+            (pool) => Pool(
+              id: pool['id'].toString(),
+              name: pool['name'],
+              status: pool['status'],
+              size: pool['size'] ?? 0,
+              allocated: pool['allocated'] ?? 0,
+              free: pool['free'] ?? 0,
+              fragmentation: (pool['fragmentation'] ?? 0).toDouble(),
+              isHealthy: pool['healthy'] ?? false,
+              path: pool['path'],
+              vdevs: _parseVdevs(pool['topology']),
+            ),
+          )
           .toList();
     } catch (e) {
       _logger.severe('Failed to list pools: $e');
@@ -111,19 +119,23 @@ class TrueNasClient {
 
   List<PoolVdev> _parseVdevs(Map<String, dynamic>? topology) {
     if (topology == null) return [];
-    
+
     final vdevs = <PoolVdev>[];
     for (final type in ['data', 'cache', 'log', 'spare']) {
       final vdevList = topology[type] as List?;
       if (vdevList != null) {
         for (final vdev in vdevList) {
-          vdevs.add(PoolVdev(
-            type: vdev['type'] ?? type,
-            status: vdev['status'] ?? 'ONLINE',
-            disks: (vdev['children'] as List?)
-                ?.map((child) => child['disk'] as String)
-                .toList() ?? [],
-          ));
+          vdevs.add(
+            PoolVdev(
+              type: vdev['type'] ?? type,
+              status: vdev['status'] ?? 'ONLINE',
+              disks:
+                  (vdev['children'] as List?)
+                      ?.map((child) => child['disk'] as String)
+                      .toList() ??
+                  [],
+            ),
+          );
         }
       }
     }
@@ -140,21 +152,25 @@ class TrueNasClient {
       final response = await _dio.get('/pool/dataset');
       return (response.data as List)
           .where((ds) => poolId == null || ds['pool'] == poolId)
-          .map((ds) => Dataset(
-                id: ds['id'],
-                name: ds['name'],
-                pool: ds['pool'],
-                type: ds['type'] ?? 'FILESYSTEM',
-                used: ds['used']['parsed'] ?? 0,
-                available: ds['available']['parsed'] ?? 0,
-                referenced: ds['referenced']['parsed'] ?? 0,
-                mountpoint: ds['mountpoint'] ?? '',
-                encrypted: ds['encrypted'] ?? false,
-                children: (ds['children'] as List?)
-                    ?.map((c) => c['name'] as String)
-                    .toList() ?? [],
-                properties: ds['properties'],
-              ))
+          .map(
+            (ds) => Dataset(
+              id: ds['id'],
+              name: ds['name'],
+              pool: ds['pool'],
+              type: ds['type'] ?? 'FILESYSTEM',
+              used: ds['used']['parsed'] ?? 0,
+              available: ds['available']['parsed'] ?? 0,
+              referenced: ds['referenced']['parsed'] ?? 0,
+              mountpoint: ds['mountpoint'] ?? '',
+              encrypted: ds['encrypted'] ?? false,
+              children:
+                  (ds['children'] as List?)
+                      ?.map((c) => c['name'] as String)
+                      .toList() ??
+                  [],
+              properties: ds['properties'],
+            ),
+          )
           .toList();
     } catch (e) {
       _logger.severe('Failed to list datasets: $e');
@@ -173,12 +189,11 @@ class TrueNasClient {
     Map<String, dynamic>? properties,
   }) async {
     try {
-      final response = await _dio.post('/pool/dataset', data: {
-        'name': '$pool/$name',
-        'type': 'FILESYSTEM',
-        ...?properties,
-      });
-      
+      final response = await _dio.post(
+        '/pool/dataset',
+        data: {'name': '$pool/$name', 'type': 'FILESYSTEM', ...?properties},
+      );
+
       return getDataset(response.data['id']);
     } catch (e) {
       _logger.severe('Failed to create dataset: $e');
@@ -188,14 +203,14 @@ class TrueNasClient {
 
   Future<List<Share>> listShares({ShareType? type}) async {
     final shares = <Share>[];
-    
+
     if (type == null || type == ShareType.smb) {
       shares.addAll(await _listSmbShares());
     }
     if (type == null || type == ShareType.nfs) {
       shares.addAll(await _listNfsShares());
     }
-    
+
     return shares;
   }
 
@@ -203,15 +218,17 @@ class TrueNasClient {
     try {
       final response = await _dio.get('/sharing/smb');
       return (response.data as List)
-          .map((share) => Share(
-                id: share['id'].toString(),
-                name: share['name'],
-                path: share['path'],
-                type: ShareType.smb,
-                enabled: share['enabled'] ?? false,
-                comment: share['comment'],
-                config: share,
-              ))
+          .map(
+            (share) => Share(
+              id: share['id'].toString(),
+              name: share['name'],
+              path: share['path'],
+              type: ShareType.smb,
+              enabled: share['enabled'] ?? false,
+              comment: share['comment'],
+              config: share,
+            ),
+          )
           .toList();
     } catch (e) {
       _logger.severe('Failed to list SMB shares: $e');
@@ -223,15 +240,17 @@ class TrueNasClient {
     try {
       final response = await _dio.get('/sharing/nfs');
       return (response.data as List)
-          .map((share) => Share(
-                id: share['id'].toString(),
-                name: share['comment'] ?? 'NFS Share ${share['id']}',
-                path: share['path'],
-                type: ShareType.nfs,
-                enabled: share['enabled'] ?? false,
-                comment: share['comment'],
-                config: share,
-              ))
+          .map(
+            (share) => Share(
+              id: share['id'].toString(),
+              name: share['comment'] ?? 'NFS Share ${share['id']}',
+              path: share['path'],
+              type: ShareType.nfs,
+              enabled: share['enabled'] ?? false,
+              comment: share['comment'],
+              config: share,
+            ),
+          )
           .toList();
     } catch (e) {
       _logger.severe('Failed to list NFS shares: $e');
@@ -257,14 +276,17 @@ class TrueNasClient {
 
   Future<Share> _createSmbShare(Share shareData) async {
     try {
-      final response = await _dio.post('/sharing/smb', data: {
-        'name': shareData.name,
-        'path': shareData.path,
-        'enabled': shareData.enabled,
-        'comment': shareData.comment,
-        ...?shareData.config,
-      });
-      
+      final response = await _dio.post(
+        '/sharing/smb',
+        data: {
+          'name': shareData.name,
+          'path': shareData.path,
+          'enabled': shareData.enabled,
+          'comment': shareData.comment,
+          ...?shareData.config,
+        },
+      );
+
       return getShare(response.data['id'].toString());
     } catch (e) {
       _logger.severe('Failed to create SMB share: $e');
@@ -274,13 +296,16 @@ class TrueNasClient {
 
   Future<Share> _createNfsShare(Share shareData) async {
     try {
-      final response = await _dio.post('/sharing/nfs', data: {
-        'path': shareData.path,
-        'enabled': shareData.enabled,
-        'comment': shareData.comment ?? shareData.name,
-        ...?shareData.config,
-      });
-      
+      final response = await _dio.post(
+        '/sharing/nfs',
+        data: {
+          'path': shareData.path,
+          'enabled': shareData.enabled,
+          'comment': shareData.comment ?? shareData.name,
+          ...?shareData.config,
+        },
+      );
+
       return getShare(response.data['id'].toString());
     } catch (e) {
       _logger.severe('Failed to create NFS share: $e');
@@ -291,33 +316,39 @@ class TrueNasClient {
   Future<Share> updateShare(Share shareData) async {
     switch (shareData.type) {
       case ShareType.smb:
-        await _dio.put('/sharing/smb/id/${shareData.id}', data: {
-          'name': shareData.name,
-          'path': shareData.path,
-          'enabled': shareData.enabled,
-          'comment': shareData.comment,
-          ...?shareData.config,
-        });
+        await _dio.put(
+          '/sharing/smb/id/${shareData.id}',
+          data: {
+            'name': shareData.name,
+            'path': shareData.path,
+            'enabled': shareData.enabled,
+            'comment': shareData.comment,
+            ...?shareData.config,
+          },
+        );
         break;
       case ShareType.nfs:
-        await _dio.put('/sharing/nfs/id/${shareData.id}', data: {
-          'path': shareData.path,
-          'enabled': shareData.enabled,
-          'comment': shareData.comment,
-          ...?shareData.config,
-        });
+        await _dio.put(
+          '/sharing/nfs/id/${shareData.id}',
+          data: {
+            'path': shareData.path,
+            'enabled': shareData.enabled,
+            'comment': shareData.comment,
+            ...?shareData.config,
+          },
+        );
         break;
       default:
         throw UnsupportedError('Share type ${shareData.type} not implemented');
     }
-    
+
     return getShare(shareData.id);
   }
 
   Future<bool> deleteShare(String id) async {
     try {
       final share = await getShare(id);
-      
+
       switch (share.type) {
         case ShareType.smb:
           await _dio.delete('/sharing/smb/id/$id');
@@ -328,7 +359,7 @@ class TrueNasClient {
         default:
           throw UnsupportedError('Share type ${share.type} not implemented');
       }
-      
+
       return true;
     } catch (e) {
       _logger.severe('Failed to delete share: $e');

@@ -9,19 +9,18 @@ import '../interfaces/connection_manager.dart';
 class TrueNasPeerClient implements IJsonRpcClient {
   final _logger = Logger('TrueNasPeerClient');
   final IConnectionManager _connectionManager;
-  final StreamController<JsonRpcNotification> _notificationController = 
+  final StreamController<JsonRpcNotification> _notificationController =
       StreamController<JsonRpcNotification>.broadcast();
-  
+
   json_rpc.Peer? _peer;
   StreamSubscription? _stateSubscription;
   Timer? _keepAliveTimer;
   bool _isReady = false;
-  
+
   static const Duration _keepAliveInterval = Duration(seconds: 30);
 
-  TrueNasPeerClient({
-    required IConnectionManager connectionManager,
-  }) : _connectionManager = connectionManager {
+  TrueNasPeerClient({required IConnectionManager connectionManager})
+    : _connectionManager = connectionManager {
     _initialize();
   }
 
@@ -30,7 +29,8 @@ class TrueNasPeerClient implements IJsonRpcClient {
     _stateSubscription = _connectionManager.stateStream.listen((state) {
       if (state == ConnectionState.connected) {
         _setupPeer();
-      } else if (state == ConnectionState.disconnected || state == ConnectionState.error) {
+      } else if (state == ConnectionState.disconnected ||
+          state == ConnectionState.error) {
         _handleDisconnection();
       }
     });
@@ -53,17 +53,20 @@ class TrueNasPeerClient implements IJsonRpcClient {
       _registerNotificationHandlers();
 
       // Start listening
-      _peer!.listen().then((_) {
-        _logger.info('TrueNAS Peer connection closed');
-        _handleDisconnection();
-      }).catchError((error) {
-        _logger.severe('TrueNAS Peer error: $error');
-        _handleDisconnection();
-      });
+      _peer!
+          .listen()
+          .then((_) {
+            _logger.info('TrueNAS Peer connection closed');
+            _handleDisconnection();
+          })
+          .catchError((error) {
+            _logger.severe('TrueNAS Peer error: $error');
+            _handleDisconnection();
+          });
 
       _isReady = true;
       _logger.info('TrueNAS Peer client ready');
-      
+
       // Start keepalive timer
       _startKeepAlive();
     } catch (e) {
@@ -77,7 +80,7 @@ class TrueNasPeerClient implements IJsonRpcClient {
 
     // Register handlers for TrueNAS notifications
     // These allow TrueNAS to push updates to us
-    
+
     // Pool events
     _peer!.registerMethod('pool.changed', (params) {
       _handleNotification('pool.changed', params.asMap);
@@ -116,17 +119,18 @@ class TrueNasPeerClient implements IJsonRpcClient {
 
   void _handleNotification(String method, Map<String, dynamic> params) {
     _logger.fine('Received TrueNAS notification: $method');
-    _notificationController.add(JsonRpcNotification(
-      method: method,
-      params: params,
-    ));
+    _notificationController.add(
+      JsonRpcNotification(method: method, params: params),
+    );
   }
 
   @override
-  bool get isReady => _isReady && _peer != null && _connectionManager.isConnected;
+  bool get isReady =>
+      _isReady && _peer != null && _connectionManager.isConnected;
 
   @override
-  Stream<JsonRpcNotification> get notifications => _notificationController.stream;
+  Stream<JsonRpcNotification> get notifications =>
+      _notificationController.stream;
 
   @override
   Future<T> call<T>(String method, [Map<String, dynamic>? params]) async {
@@ -136,23 +140,21 @@ class TrueNasPeerClient implements IJsonRpcClient {
 
     try {
       _logger.fine('Calling TrueNAS method: $method');
-      
+
       // Transform parameters for TrueNAS compatibility
       final transformedParams = _transformParameters(method, params);
-      
+
       // Make the call using the peer
       final result = await _peer!.sendRequest(method, transformedParams);
-      
+
       _logger.fine('TrueNAS method $method completed successfully');
       return result as T;
     } catch (e) {
       if (e is json_rpc.RpcException) {
-        _logger.warning('TrueNAS RPC error for $method: ${e.code} - ${e.message}');
-        throw JsonRpcError(
-          code: e.code,
-          message: e.message,
-          data: e.data,
+        _logger.warning(
+          'TrueNAS RPC error for $method: ${e.code} - ${e.message}',
         );
+        throw JsonRpcError(code: e.code, message: e.message, data: e.data);
       }
       _logger.severe('Failed to call TrueNAS method $method: $e');
       rethrow;
@@ -163,7 +165,7 @@ class TrueNasPeerClient implements IJsonRpcClient {
   dynamic _transformParameters(String method, Map<String, dynamic>? params) {
     // For TrueNAS, most methods require at least an empty array
     // rather than null/undefined params
-    
+
     // Special handling for methods that take complex array parameters
     if (_requiresComplexArrayParams(method)) {
       return _buildComplexArrayParams(method, params);
@@ -212,7 +214,10 @@ class TrueNasPeerClient implements IJsonRpcClient {
     return complexArrayMethods.contains(method);
   }
 
-  dynamic _buildComplexArrayParams(String method, Map<String, dynamic>? params) {
+  dynamic _buildComplexArrayParams(
+    String method,
+    Map<String, dynamic>? params,
+  ) {
     switch (method) {
       case 'pool.query':
       case 'pool.dataset.query':
@@ -222,12 +227,12 @@ class TrueNasPeerClient implements IJsonRpcClient {
         final filters = params?['filters'] ?? [];
         final options = params?['options'] ?? {};
         return [filters, options];
-      
+
       case 'core.subscribe':
         // Takes a single string parameter in an array
         final event = params?['event'] ?? params?['name'] ?? '';
         return [event];
-      
+
       default:
         return [];
     }
@@ -244,7 +249,10 @@ class TrueNasPeerClient implements IJsonRpcClient {
     return arrayParamMethods.contains(method);
   }
 
-  List<dynamic> _convertToArrayParams(String method, Map<String, dynamic> params) {
+  List<dynamic> _convertToArrayParams(
+    String method,
+    Map<String, dynamic> params,
+  ) {
     switch (method) {
       case 'auth.login':
         return [params['username'], params['password']];
@@ -280,7 +288,7 @@ class TrueNasPeerClient implements IJsonRpcClient {
 
   void _handleDisconnection() {
     _logger.info('Handling disconnection - closing peer');
-    
+
     _stopKeepAlive();
     _peer?.close();
     _peer = null;
@@ -290,7 +298,7 @@ class TrueNasPeerClient implements IJsonRpcClient {
   @override
   Future<void> close() async {
     _logger.info('Closing TrueNAS Peer client');
-    
+
     _stopKeepAlive();
     await _stateSubscription?.cancel();
     _peer?.close();

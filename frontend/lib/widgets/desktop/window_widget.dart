@@ -7,24 +7,20 @@ import 'package:mynas_frontend/widgets/desktop/resizable_window.dart';
 class WindowWidget extends ConsumerStatefulWidget {
   final WindowState windowState;
 
-  const WindowWidget({
-    super.key,
-    required this.windowState,
-  });
+  const WindowWidget({super.key, required this.windowState});
 
   @override
   ConsumerState<WindowWidget> createState() => _WindowWidgetState();
 }
 
 class _WindowWidgetState extends ConsumerState<WindowWidget> {
-  Offset _dragOffset = Offset.zero;
   bool _isDragging = false;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final window = widget.windowState;
-    
+
     if (window.isMinimized) {
       return const SizedBox.shrink();
     }
@@ -39,22 +35,28 @@ class _WindowWidgetState extends ConsumerState<WindowWidget> {
         curve: Curves.easeOutCubic,
         decoration: BoxDecoration(
           color: theme.colorScheme.surface,
-          borderRadius: isMaximized ? BorderRadius.zero : BorderRadius.circular(12),
-          boxShadow: isMaximized || !window.isFocused ? [] : [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.2),
-              blurRadius: 20,
-              offset: const Offset(0, 10),
-            ),
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 10,
-              offset: const Offset(0, 5),
-            ),
-          ],
+          borderRadius: isMaximized
+              ? BorderRadius.zero
+              : BorderRadius.circular(12),
+          boxShadow: isMaximized || !window.isFocused
+              ? []
+              : [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.2),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
         ),
         child: ClipRRect(
-          borderRadius: isMaximized ? BorderRadius.zero : BorderRadius.circular(12),
+          borderRadius: isMaximized
+              ? BorderRadius.zero
+              : BorderRadius.circular(12),
           child: Column(
             children: [
               _WindowTitleBar(
@@ -63,9 +65,7 @@ class _WindowWidgetState extends ConsumerState<WindowWidget> {
                 onDragUpdate: _onDragUpdate,
                 onDragEnd: _onDragEnd,
               ),
-              Expanded(
-                child: window.content,
-              ),
+              Expanded(child: window.content),
             ],
           ),
         ),
@@ -82,10 +82,7 @@ class _WindowWidgetState extends ConsumerState<WindowWidget> {
       );
     }
 
-    return ResizableWindow(
-      windowState: window,
-      child: windowContent,
-    );
+    return ResizableWindow(windowState: window, child: windowContent);
   }
 
   void _focusWindow() {
@@ -95,21 +92,19 @@ class _WindowWidgetState extends ConsumerState<WindowWidget> {
   void _onDragStart(DragStartDetails details) {
     if (widget.windowState.isMaximized) return;
     _isDragging = true;
-    _dragOffset = details.localPosition;
   }
 
   void _onDragUpdate(DragUpdateDetails details) {
     if (!_isDragging || widget.windowState.isMaximized) return;
-    
+
     final newPosition = Offset(
       widget.windowState.position.dx + details.delta.dx,
       widget.windowState.position.dy + details.delta.dy,
     );
-    
-    ref.read(windowManagerProvider.notifier).updateWindowPosition(
-      widget.windowState.id,
-      newPosition,
-    );
+
+    ref
+        .read(windowManagerProvider.notifier)
+        .updateWindowPosition(widget.windowState.id, newPosition);
   }
 
   void _onDragEnd(DragEndDetails details) {
@@ -133,8 +128,7 @@ class _WindowTitleBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    
+
     return GestureDetector(
       onPanStart: onDragStart,
       onPanUpdate: onDragUpdate,
@@ -146,12 +140,14 @@ class _WindowTitleBar extends ConsumerWidget {
       child: Container(
         height: 40,
         decoration: BoxDecoration(
-          color: window.isFocused 
-            ? theme.colorScheme.surfaceVariant.withOpacity(0.8)
-            : theme.colorScheme.surfaceVariant.withOpacity(0.4),
+          color: window.isFocused
+              ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.8)
+              : theme.colorScheme.surfaceContainerHighest.withValues(
+                  alpha: 0.4,
+                ),
           border: Border(
             bottom: BorderSide(
-              color: theme.colorScheme.outline.withOpacity(0.2),
+              color: theme.colorScheme.outline.withValues(alpha: 0.2),
               width: 1,
             ),
           ),
@@ -172,27 +168,37 @@ class _WindowTitleBar extends ConsumerWidget {
                 window.title,
                 style: theme.textTheme.titleSmall?.copyWith(
                   color: window.isFocused
-                    ? theme.colorScheme.onSurfaceVariant
-                    : theme.colorScheme.onSurfaceVariant.withOpacity(0.6),
+                      ? theme.colorScheme.onSurfaceVariant
+                      : theme.colorScheme.onSurfaceVariant.withValues(
+                          alpha: 0.6,
+                        ),
                 ),
                 overflow: TextOverflow.ellipsis,
               ),
             ),
             _WindowButton(
               icon: Icons.remove,
-              onPressed: () => ref.read(windowManagerProvider.notifier).minimizeWindow(window.id),
+              onPressed: () => ref
+                  .read(windowManagerProvider.notifier)
+                  .minimizeWindow(window.id),
               isEnabled: window.isFocused,
             ),
             if (window.canResize)
               _WindowButton(
-                icon: window.isMaximized ? Icons.filter_none : Icons.crop_square,
-                onPressed: () => ref.read(windowManagerProvider.notifier).maximizeWindow(window.id),
+                icon: window.isMaximized
+                    ? Icons.filter_none
+                    : Icons.crop_square,
+                onPressed: () => ref
+                    .read(windowManagerProvider.notifier)
+                    .maximizeWindow(window.id),
                 isEnabled: window.isFocused,
               ),
             if (window.canClose)
               _WindowButton(
                 icon: Icons.close,
-                onPressed: () => ref.read(windowManagerProvider.notifier).closeWindow(window.id),
+                onPressed: () => ref
+                    .read(windowManagerProvider.notifier)
+                    .closeWindow(window.id),
                 isEnabled: window.isFocused,
                 isClose: true,
               ),
@@ -220,7 +226,7 @@ class _WindowButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    
+
     return SizedBox(
       width: 32,
       height: 32,
@@ -228,14 +234,13 @@ class _WindowButton extends StatelessWidget {
         icon: Icon(icon, size: 16),
         onPressed: isEnabled ? onPressed : null,
         style: IconButton.styleFrom(
-          foregroundColor: isClose 
-            ? theme.colorScheme.error 
-            : theme.colorScheme.onSurfaceVariant,
-          disabledForegroundColor: theme.colorScheme.onSurfaceVariant.withOpacity(0.3),
+          foregroundColor: isClose
+              ? theme.colorScheme.error
+              : theme.colorScheme.onSurfaceVariant,
+          disabledForegroundColor: theme.colorScheme.onSurfaceVariant
+              .withValues(alpha: 0.3),
           padding: EdgeInsets.zero,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(4),
-          ),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
         ),
       ),
     );

@@ -27,24 +27,29 @@ class RpcClient {
     try {
       final protocol = secure ? 'wss' : 'ws';
       final url = '$protocol://$host:$port/ws';
-      
+
       _logger.info('Connecting to $url');
-      
+
       // Create WebSocket connection
       _channel = WebSocketChannel.connect(Uri.parse(url));
-      
+
       // Create JSON-RPC peer
       _peer = json_rpc.Peer(_channel!.cast<String>());
-      
+
       // Start listening
-      unawaited(_peer!.listen().then((_) {
-        _logger.info('WebSocket connection closed');
-        _isConnected = false;
-      }).catchError((error) {
-        _logger.severe('WebSocket error: $error');
-        _isConnected = false;
-      }));
-      
+      unawaited(
+        _peer!
+            .listen()
+            .then((_) {
+              _logger.info('WebSocket connection closed');
+              _isConnected = false;
+            })
+            .catchError((error) {
+              _logger.severe('WebSocket error: $error');
+              _isConnected = false;
+            }),
+      );
+
       _isConnected = true;
       _connectionCompleter.complete();
       _logger.info('Connected to backend');
@@ -62,11 +67,14 @@ class RpcClient {
     _logger.info('Disconnected from backend');
   }
 
-  Future<T> sendRequest<T>(String method, [Map<String, dynamic>? params]) async {
+  Future<T> sendRequest<T>(
+    String method, [
+    Map<String, dynamic>? params,
+  ]) async {
     if (!_isConnected || _peer == null) {
       await connect();
     }
-    
+
     try {
       final result = await _peer!.sendRequest(method, params);
       return result as T;
@@ -80,7 +88,7 @@ class RpcClient {
     if (!_isConnected || _peer == null) {
       throw StateError('Not connected');
     }
-    
+
     _peer!.sendNotification(method, params);
   }
 
@@ -124,20 +132,22 @@ class RpcClient {
   }
 
   Future<List<dynamic>> listShares({String? type}) async {
-    return await sendRequest('share.list', {
-      if (type != null) 'type': type,
-    });
+    return await sendRequest('share.list', {if (type != null) 'type': type});
   }
 
   Future<Map<String, dynamic>> getShare(String id) async {
     return await sendRequest('share.get', {'id': id});
   }
 
-  Future<Map<String, dynamic>> createShare(Map<String, dynamic> shareData) async {
+  Future<Map<String, dynamic>> createShare(
+    Map<String, dynamic> shareData,
+  ) async {
     return await sendRequest('share.create', shareData);
   }
 
-  Future<Map<String, dynamic>> updateShare(Map<String, dynamic> shareData) async {
+  Future<Map<String, dynamic>> updateShare(
+    Map<String, dynamic> shareData,
+  ) async {
     return await sendRequest('share.update', shareData);
   }
 
