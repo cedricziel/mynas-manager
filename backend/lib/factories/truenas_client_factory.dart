@@ -1,6 +1,6 @@
 import '../interfaces/truenas_api_client.dart';
 import '../services/websocket_connection_manager.dart';
-import '../services/json_rpc_websocket_client.dart';
+import '../services/truenas_peer_client.dart';
 import '../services/truenas_auth_manager.dart';
 import '../services/truenas_version_manager.dart';
 import '../services/truenas_event_manager.dart';
@@ -26,8 +26,8 @@ class TrueNasClientFactory {
       });
     }
     
-    // Create JSON-RPC client
-    final jsonRpcClient = JsonRpcWebSocketClient(
+    // Create JSON-RPC client using the new Peer-based client
+    final jsonRpcClient = TrueNasPeerClient(
       connectionManager: connectionManager,
     );
     

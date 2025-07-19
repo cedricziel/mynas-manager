@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:stream_channel/stream_channel.dart';
 
 /// Connection states for the WebSocket connection
 enum ConnectionState {
@@ -34,6 +35,9 @@ abstract class IConnectionManager {
   
   /// Stream of incoming messages
   Stream<String> get messageStream;
+  
+  /// Get a StreamChannel for use with json_rpc_2 Peer
+  StreamChannel<String> getStreamChannel();
   
   /// Dispose resources and close connections
   Future<void> dispose();

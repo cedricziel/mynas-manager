@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:logging/logging.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/io.dart';
+import 'package:stream_channel/stream_channel.dart';
 import '../interfaces/connection_manager.dart';
 
 /// WebSocket connection manager with automatic reconnection
@@ -91,8 +92,9 @@ class WebSocketConnectionManager implements IConnectionManager {
         onDone: _onDone,
       );
 
-      // Start heartbeat
-      _startHeartbeat();
+      // Don't start heartbeat when using with json_rpc_2 Peer
+      // The Peer handles its own connection management
+      // _startHeartbeat();
       
     } catch (e) {
       _logger.severe('WebSocket connection failed: $e');
@@ -159,8 +161,9 @@ class WebSocketConnectionManager implements IConnectionManager {
     _heartbeatTimer = Timer.periodic(_heartbeatInterval, (timer) {
       if (_state == ConnectionState.connected) {
         try {
-          // Send ping frame
-          _channel?.sink.add('{"jsonrpc":"2.0","method":"core.ping","id":"heartbeat"}');
+          // Send a proper JSON-RPC ping with numeric ID
+          final pingId = DateTime.now().millisecondsSinceEpoch;
+          _channel?.sink.add('{"jsonrpc":"2.0","method":"core.ping","id":$pingId}');
         } catch (e) {
           _logger.warning('Heartbeat failed: $e');
           _onError(e);
@@ -201,6 +204,27 @@ class WebSocketConnectionManager implements IConnectionManager {
     
     await _channel?.sink.close();
     _channel = null;
+  }
+
+  @override
+  StreamChannel<String> getStreamChannel() {
+    if (!isConnected) {
+      throw StateError('WebSocket not connected');
+    }
+
+    // Create a sink controller that forwards messages to the WebSocket
+    final sinkController = StreamController<String>();
+    sinkController.stream.listen((data) {
+      send(data).catchError((error) {
+        _logger.severe('Failed to send via StreamChannel: $error');
+      });
+    });
+
+    // Return a StreamChannel that combines our message stream and the sink
+    return StreamChannel<String>(
+      messageStream,
+      sinkController.sink,
+    );
   }
 
   @override
