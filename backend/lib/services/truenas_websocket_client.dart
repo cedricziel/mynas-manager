@@ -1,309 +1,155 @@
 import 'dart:async';
-import 'dart:convert';
-import 'package:web_socket_channel/web_socket_channel.dart';
-import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:logging/logging.dart';
 import 'package:mynas_shared/mynas_shared.dart';
+import '../interfaces/truenas_api_client.dart';
+import '../interfaces/connection_manager.dart';
+import '../interfaces/auth_manager.dart';
+import '../interfaces/version_manager.dart';
+import '../interfaces/event_manager.dart';
+import '../interfaces/json_rpc_client.dart';
+import '../interfaces/rate_limiter.dart';
 
-class TrueNasWebSocketClient {
+/// Main TrueNAS WebSocket API client with dependency injection
+class TrueNasWebSocketClient implements ITrueNasApiClient {
   final _logger = Logger('TrueNasWebSocketClient');
-  final String wsUrl;
-  final String? apiKey;
-  
-  WebSocketChannel? _channel;
-  json_rpc.Peer? _peer;
-  final _connectionCompleter = Completer<void>();
-  
-  TrueNasWebSocketClient({
-    required this.wsUrl,
-    this.apiKey,
-  });
+  final IConnectionManager _connectionManager;
+  final IAuthManager _authManager;
+  final IVersionManager _versionManager;
+  final IEventManager _eventManager;
+  final IJsonRpcClient _jsonRpcClient;
+  final IRateLimiter _rateLimiter;
 
-  Future<void> connect() async {
+  TrueNasWebSocketClient({
+    required IConnectionManager connectionManager,
+    required IAuthManager authManager,
+    required IVersionManager versionManager,
+    required IEventManager eventManager,
+    required IJsonRpcClient jsonRpcClient,
+    required IRateLimiter rateLimiter,
+  }) : _connectionManager = connectionManager,
+       _authManager = authManager,
+       _versionManager = versionManager,
+       _eventManager = eventManager,
+       _jsonRpcClient = jsonRpcClient,
+       _rateLimiter = rateLimiter;
+
+  @override
+  IAuthManager get auth => _authManager;
+
+  @override
+  IVersionManager get version => _versionManager;
+
+  @override
+  IEventManager get events => _eventManager;
+
+  @override
+  bool get isReady => _connectionManager.isConnected && 
+                     _authManager.isAuthenticated && 
+                     _jsonRpcClient.isReady;
+
+  @override
+  Future<void> connect(String uri) async {
+    _logger.info('Connecting to TrueNAS at: $uri');
+    
     try {
-      _logger.info('Connecting to TrueNAS WebSocket at $wsUrl');
+      // Connect WebSocket
+      await _connectionManager.connect(uri);
       
-      // Create WebSocket connection
-      _channel = WebSocketChannel.connect(Uri.parse(wsUrl));
+      // Detect version
+      await _versionManager.detectVersion();
       
-      // Create JSON-RPC peer
-      _peer = json_rpc.Peer(_channel!.cast<String>());
-      
-      // Register method handlers if needed
-      _registerHandlers();
-      
-      // Start listening
-      unawaited(_peer!.listen().then((_) {
-        _logger.info('WebSocket connection closed');
-      }).catchError((error) {
-        _logger.severe('WebSocket error: $error');
-      }));
-      
-      // Authenticate if API key is provided
-      if (apiKey != null) {
-        await authenticate();
+      // Check compatibility
+      if (!_versionManager.isVersionCompatible()) {
+        throw Exception('TrueNAS version ${_versionManager.currentVersion} is not compatible');
       }
       
-      _connectionCompleter.complete();
-      _logger.info('Connected to TrueNAS WebSocket');
+      _logger.info('Successfully connected to TrueNAS ${_versionManager.currentVersion}');
     } catch (e) {
       _logger.severe('Failed to connect to TrueNAS: $e');
       rethrow;
     }
   }
 
-  void _registerHandlers() {
-    // Register handlers for server-initiated methods
-    _peer?.registerMethod('event', (params) {
-      _logger.info('Received event: $params');
-      // Handle TrueNAS events
-    });
-  }
-
-  Future<void> authenticate() async {
-    try {
-      await _peer!.sendRequest('auth.login', {
-        'username': 'root',
-        'password': apiKey,
-      });
-      _logger.info('Authenticated with TrueNAS');
-    } catch (e) {
-      _logger.severe('Authentication failed: $e');
-      rethrow;
-    }
-  }
-
+  @override
   Future<void> disconnect() async {
-    await _peer?.close();
-    await _channel?.sink.close();
-    _logger.info('Disconnected from TrueNAS');
-  }
-
-  // System methods
-  Future<SystemInfo> getSystemInfo() async {
-    await _ensureConnected();
+    _logger.info('Disconnecting from TrueNAS');
     
     try {
-      final info = await _peer!.sendRequest('system.info');
-      final uptime = await _peer!.sendRequest('system.uptime');
-      final stats = await _peer!.sendRequest('reporting.netdata_get_data', {
-        'graphs': [
-          {'name': 'cpu', 'identifier': 'system.cpu'},
-          {'name': 'memory', 'identifier': 'system.ram'},
-          {'name': 'temperature', 'identifier': 'cputemp-0.temperature'},
-        ],
-        'params': {'start': '-60', 'end': '0'}
-      });
-      
-      // Parse the response
-      final cpuData = _parseLatestValue(stats, 'cpu');
-      final memoryData = stats['memory'] ?? {};
-      final tempData = _parseLatestValue(stats, 'temperature');
-      
-      return SystemInfo(
-        hostname: info['hostname'] ?? 'truenas',
-        version: info['version'] ?? 'Unknown',
-        uptime: _formatUptime(uptime),
-        cpuUsage: cpuData ?? 0.0,
-        memory: MemoryInfo(
-          total: memoryData['total'] ?? 0,
-          used: memoryData['used'] ?? 0,
-          free: memoryData['free'] ?? 0,
-          cached: memoryData['cached'] ?? 0,
-        ),
-        cpuTemperature: tempData ?? 0.0,
-        alerts: await getAlerts(),
-      );
+      await _authManager.logout();
+      await _eventManager.unsubscribe();
+      await _connectionManager.disconnect();
     } catch (e) {
-      _logger.severe('Failed to get system info: $e');
-      rethrow;
+      _logger.warning('Error during disconnect: $e');
     }
   }
 
-  Future<List<Alert>> getAlerts() async {
-    await _ensureConnected();
+  @override
+  Future<void> dispose() async {
+    _logger.info('Disposing TrueNAS client');
+    
+    await disconnect();
+    await _connectionManager.dispose();
+  }
+
+  // Helper method for making rate-limited API calls
+  Future<T> _call<T>(String method, [Map<String, dynamic>? params]) async {
+    await _rateLimiter.waitForPermission();
+    _rateLimiter.recordRequest();
     
     try {
-      final alerts = await _peer!.sendRequest('alert.list');
-      return (alerts as List).map((alert) => Alert(
-        id: alert['id'].toString(),
-        level: _parseAlertLevel(alert['level']),
-        message: alert['formatted'] ?? alert['text'] ?? '',
-        timestamp: DateTime.parse(alert['datetime'] ?? DateTime.now().toIso8601String()),
-        dismissed: alert['dismissed'] ?? false,
-      )).toList();
+      return await _jsonRpcClient.call<T>(method, params);
     } catch (e) {
-      _logger.severe('Failed to get alerts: $e');
-      return [];
-    }
-  }
-
-  // Pool methods
-  Future<List<Pool>> listPools() async {
-    await _ensureConnected();
-    
-    try {
-      final pools = await _peer!.sendRequest('pool.query');
-      return (pools as List).map((pool) => Pool(
-        id: pool['id'].toString(),
-        name: pool['name'],
-        status: pool['status'] ?? 'UNKNOWN',
-        size: pool['size'] ?? 0,
-        allocated: pool['allocated'] ?? 0,
-        free: pool['free'] ?? 0,
-        fragmentation: (pool['fragmentation'] ?? 0).toDouble(),
-        isHealthy: pool['healthy'] ?? false,
-        path: pool['path'],
-        vdevs: _parseVdevs(pool['topology']),
-      )).toList();
-    } catch (e) {
-      _logger.severe('Failed to list pools: $e');
-      return [];
-    }
-  }
-
-  // Dataset methods
-  Future<List<Dataset>> listDatasets({String? poolId}) async {
-    await _ensureConnected();
-    
-    try {
-      final datasets = await _peer!.sendRequest('pool.dataset.query');
-      return (datasets as List)
-          .where((ds) => poolId == null || ds['pool'] == poolId)
-          .map((ds) => Dataset(
-            id: ds['id'],
-            name: ds['name'],
-            pool: ds['pool'] ?? '',
-            type: ds['type'] ?? 'FILESYSTEM',
-            used: ds['used']?['parsed'] ?? 0,
-            available: ds['available']?['parsed'] ?? 0,
-            referenced: ds['referenced']?['parsed'] ?? 0,
-            mountpoint: ds['mountpoint'] ?? '',
-            encrypted: ds['encrypted'] ?? false,
-            children: (ds['children'] as List?)?.map((c) => c.toString()).toList() ?? [],
-            properties: ds['properties'] ?? {},
-          ))
-          .toList();
-    } catch (e) {
-      _logger.severe('Failed to list datasets: $e');
-      return [];
-    }
-  }
-
-  Future<Dataset> createDataset({
-    required String pool,
-    required String name,
-    Map<String, dynamic>? properties,
-  }) async {
-    await _ensureConnected();
-    
-    try {
-      final result = await _peer!.sendRequest('pool.dataset.create', {
-        'name': '$pool/$name',
-        'type': 'FILESYSTEM',
-        ...?properties,
-      });
-      
-      // Query the created dataset
-      final datasets = await listDatasets();
-      return datasets.firstWhere((ds) => ds.id == result['id']);
-    } catch (e) {
-      _logger.severe('Failed to create dataset: $e');
-      rethrow;
-    }
-  }
-
-  // Share methods
-  Future<List<Share>> listShares({ShareType? type}) async {
-    final shares = <Share>[];
-    
-    if (type == null || type == ShareType.smb) {
-      shares.addAll(await _listSmbShares());
-    }
-    if (type == null || type == ShareType.nfs) {
-      shares.addAll(await _listNfsShares());
-    }
-    
-    return shares;
-  }
-
-  Future<List<Share>> _listSmbShares() async {
-    await _ensureConnected();
-    
-    try {
-      final shares = await _peer!.sendRequest('sharing.smb.query');
-      return (shares as List).map((share) => Share(
-        id: share['id'].toString(),
-        name: share['name'],
-        path: share['path'],
-        type: ShareType.smb,
-        enabled: share['enabled'] ?? false,
-        comment: share['comment'],
-        config: share,
-      )).toList();
-    } catch (e) {
-      _logger.severe('Failed to list SMB shares: $e');
-      return [];
-    }
-  }
-
-  Future<List<Share>> _listNfsShares() async {
-    await _ensureConnected();
-    
-    try {
-      final shares = await _peer!.sendRequest('sharing.nfs.query');
-      return (shares as List).map((share) => Share(
-        id: share['id'].toString(),
-        name: share['comment'] ?? 'NFS Share ${share['id']}',
-        path: share['path'] ?? '',
-        type: ShareType.nfs,
-        enabled: share['enabled'] ?? false,
-        comment: share['comment'],
-        config: share,
-      )).toList();
-    } catch (e) {
-      _logger.severe('Failed to list NFS shares: $e');
-      return [];
-    }
-  }
-
-  // Helper methods
-  Future<void> _ensureConnected() async {
-    if (_peer == null || _peer!.isClosed) {
-      await connect();
-    }
-    await _connectionCompleter.future;
-  }
-
-  String _formatUptime(dynamic uptimeSeconds) {
-    if (uptimeSeconds is! num) return 'Unknown';
-    
-    final duration = Duration(seconds: uptimeSeconds.toInt());
-    final days = duration.inDays;
-    final hours = duration.inHours % 24;
-    final minutes = duration.inMinutes % 60;
-    final seconds = duration.inSeconds % 60;
-    
-    if (days > 0) {
-      return '$days days, $hours:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-    } else {
-      return '$hours:${minutes.toString().padLeft(2, '0')}:${seconds.toString().padLeft(2, '0')}';
-    }
-  }
-
-  double? _parseLatestValue(Map<String, dynamic> stats, String key) {
-    final data = stats[key];
-    if (data is Map && data['data'] is List && (data['data'] as List).isNotEmpty) {
-      final latestPoint = (data['data'] as List).last;
-      if (latestPoint is List && latestPoint.length > 1) {
-        return (latestPoint[1] as num?)?.toDouble();
+      // Check if it's a rate limit error and record violation
+      if (e.toString().contains('rate') || e.toString().contains('limit')) {
+        _rateLimiter.recordViolation();
       }
+      rethrow;
     }
-    return null;
   }
 
-  AlertLevel _parseAlertLevel(String? level) {
-    switch (level?.toLowerCase()) {
+  // System Information
+  @override
+  Future<SystemInfo> getSystemInfo() async {
+    final result = await _call<Map<String, dynamic>>('system.info');
+    
+    // Get additional system data
+    final uptime = await getUptime();
+    final alerts = await getAlerts();
+    
+    return SystemInfo(
+      hostname: result['hostname'] ?? 'unknown',
+      version: result['version'] ?? _versionManager.currentVersion?.fullVersion ?? 'unknown',
+      uptime: uptime,
+      cpuUsage: (result['cpu_usage'] as num?)?.toDouble() ?? 0.0,
+      memory: MemoryInfo(
+        total: (result['physmem'] as num?)?.toInt() ?? 0,
+        used: (result['memused'] as num?)?.toInt() ?? 0,
+        free: (result['memfree'] as num?)?.toInt() ?? 0,
+        cached: (result['memcached'] as num?)?.toInt() ?? 0,
+      ),
+      cpuTemperature: (result['temperature'] as num?)?.toDouble() ?? 0.0,
+      alerts: alerts,
+    );
+  }
+
+  @override
+  Future<List<Alert>> getAlerts() async {
+    final result = await _call<List<dynamic>>('alert.list');
+    
+    return result.map((alertData) {
+      final alert = alertData as Map<String, dynamic>;
+      return Alert(
+        id: alert['id']?.toString() ?? '',
+        level: _parseAlertLevel(alert['level']?.toString() ?? 'info'),
+        message: alert['formatted'] ?? alert['text'] ?? alert['message'] ?? '',
+        timestamp: DateTime.tryParse(alert['datetime'] ?? '') ?? DateTime.now(),
+        dismissed: alert['dismissed'] ?? false,
+      );
+    }).toList();
+  }
+
+  AlertLevel _parseAlertLevel(String level) {
+    switch (level.toLowerCase()) {
       case 'info':
         return AlertLevel.info;
       case 'warning':
@@ -317,18 +163,57 @@ class TrueNasWebSocketClient {
     }
   }
 
-  List<PoolVdev> _parseVdevs(Map<String, dynamic>? topology) {
+  @override
+  Future<String> getUptime() async {
+    try {
+      final result = await _call<dynamic>('system.uptime');
+      return result?.toString() ?? 'unknown';
+    } catch (e) {
+      _logger.warning('Failed to get uptime: $e');
+      return 'unknown';
+    }
+  }
+
+  // Pool Management
+  @override
+  Future<List<Pool>> listPools() async {
+    final result = await _call<List<dynamic>>('pool.query');
+    
+    return result.map((poolData) {
+      final pool = poolData as Map<String, dynamic>;
+      return Pool(
+        id: pool['id']?.toString() ?? '',
+        name: pool['name'] ?? '',
+        status: pool['status'] ?? 'unknown',
+        size: (pool['size'] as num?)?.toInt() ?? 0,
+        allocated: (pool['allocated'] as num?)?.toInt() ?? 0,
+        free: (pool['free'] as num?)?.toInt() ?? 0,
+        fragmentation: (pool['fragmentation'] as num?)?.toDouble() ?? 0.0,
+        isHealthy: pool['healthy'] ?? false,
+        path: pool['path'],
+        vdevs: _parseVdevs(pool['topology']),
+      );
+    }).toList();
+  }
+
+  List<PoolVdev> _parseVdevs(dynamic topology) {
     if (topology == null) return [];
     
     final vdevs = <PoolVdev>[];
-    for (final type in ['data', 'cache', 'log', 'spare', 'special', 'dedup']) {
-      final vdevList = topology[type] as List?;
-      if (vdevList != null && vdevList.isNotEmpty) {
+    final topologyMap = topology as Map<String, dynamic>;
+    
+    for (final type in ['data', 'cache', 'log', 'spare']) {
+      final vdevList = topologyMap[type] as List?;
+      if (vdevList != null) {
         for (final vdev in vdevList) {
+          final vdevMap = vdev as Map<String, dynamic>;
           vdevs.add(PoolVdev(
-            type: vdev['type'] ?? type,
-            status: vdev['status'] ?? 'ONLINE',
-            disks: _extractDisks(vdev),
+            type: vdevMap['type']?.toString() ?? type,
+            status: vdevMap['status']?.toString() ?? 'ONLINE',
+            disks: (vdevMap['children'] as List?)
+                ?.map((child) => (child as Map<String, dynamic>)['disk']?.toString() ?? '')
+                .where((disk) => disk.isNotEmpty)
+                .toList() ?? [],
           ));
         }
       }
@@ -336,21 +221,429 @@ class TrueNasWebSocketClient {
     return vdevs;
   }
 
-  List<String> _extractDisks(Map<String, dynamic> vdev) {
-    final disks = <String>[];
+  @override
+  Future<Pool> getPool(String id) async {
+    final result = await _call<Map<String, dynamic>>('pool.get_instance', {'id': id});
     
-    if (vdev['disk'] != null) {
-      disks.add(vdev['disk']);
+    return Pool(
+      id: result['id']?.toString() ?? '',
+      name: result['name'] ?? '',
+      status: result['status'] ?? 'unknown',
+      size: (result['size'] as num?)?.toInt() ?? 0,
+      allocated: (result['allocated'] as num?)?.toInt() ?? 0,
+      free: (result['free'] as num?)?.toInt() ?? 0,
+      fragmentation: (result['fragmentation'] as num?)?.toDouble() ?? 0.0,
+      isHealthy: result['healthy'] ?? false,
+      path: result['path'],
+      vdevs: _parseVdevs(result['topology']),
+    );
+  }
+
+  @override
+  Future<Pool> importPool(String poolName, {Map<String, dynamic>? options}) async {
+    final params = {'name': poolName, ...?options};
+    final result = await _call<Map<String, dynamic>>('pool.import_pool', params);
+    return getPool(result['id']?.toString() ?? '');
+  }
+
+  @override
+  Future<bool> exportPool(String poolId, {bool destroy = false}) async {
+    await _call('pool.export', {
+      'id': poolId,
+      'destroy': destroy,
+    });
+    return true;
+  }
+
+  // Dataset Management
+  @override
+  Future<List<Dataset>> listDatasets({String? poolId}) async {
+    final result = await _call<List<dynamic>>('pool.dataset.query');
+    
+    return result
+        .where((datasetData) {
+          if (poolId == null) return true;
+          final dataset = datasetData as Map<String, dynamic>;
+          return dataset['pool']?.toString() == poolId;
+        })
+        .map((datasetData) {
+          final dataset = datasetData as Map<String, dynamic>;
+          return Dataset(
+            id: dataset['id'] ?? '',
+            name: dataset['name'] ?? '',
+            pool: dataset['pool'] ?? '',
+            type: dataset['type'] ?? 'FILESYSTEM',
+            used: (dataset['used']?['parsed'] as num?)?.toInt() ?? 0,
+            available: (dataset['available']?['parsed'] as num?)?.toInt() ?? 0,
+            referenced: (dataset['referenced']?['parsed'] as num?)?.toInt() ?? 0,
+            mountpoint: dataset['mountpoint'] ?? '',
+            encrypted: dataset['encrypted'] ?? false,
+            children: (dataset['children'] as List?)
+                ?.map((c) => (c as Map<String, dynamic>)['name']?.toString() ?? '')
+                .where((name) => name.isNotEmpty)
+                .toList() ?? [],
+            properties: dataset['properties'] as Map<String, dynamic>? ?? {},
+          );
+        }).toList();
+  }
+
+  @override
+  Future<Dataset> getDataset(String id) async {
+    final result = await _call<Map<String, dynamic>>('pool.dataset.get_instance', {'id': id});
+    
+    return Dataset(
+      id: result['id'] ?? '',
+      name: result['name'] ?? '',
+      pool: result['pool'] ?? '',
+      type: result['type'] ?? 'FILESYSTEM',
+      used: (result['used']?['parsed'] as num?)?.toInt() ?? 0,
+      available: (result['available']?['parsed'] as num?)?.toInt() ?? 0,
+      referenced: (result['referenced']?['parsed'] as num?)?.toInt() ?? 0,
+      mountpoint: result['mountpoint'] ?? '',
+      encrypted: result['encrypted'] ?? false,
+      children: (result['children'] as List?)
+          ?.map((c) => (c as Map<String, dynamic>)['name']?.toString() ?? '')
+          .where((name) => name.isNotEmpty)
+          .toList() ?? [],
+      properties: result['properties'] as Map<String, dynamic>? ?? {},
+    );
+  }
+
+  @override
+  Future<Dataset> createDataset({
+    required String pool,
+    required String name,
+    String? type,
+    Map<String, dynamic>? properties,
+  }) async {
+    final params = {
+      'name': '$pool/$name',
+      'type': type ?? 'FILESYSTEM',
+      ...?properties,
+    };
+    
+    final result = await _call<Map<String, dynamic>>('pool.dataset.create', params);
+    return getDataset(result['id']?.toString() ?? '');
+  }
+
+  @override
+  Future<Dataset> updateDataset(String id, Map<String, dynamic> properties) async {
+    await _call('pool.dataset.update', {'id': id, ...properties});
+    return getDataset(id);
+  }
+
+  @override
+  Future<bool> deleteDataset(String id, {bool recursive = false}) async {
+    await _call('pool.dataset.delete', {
+      'id': id,
+      'recursive': recursive,
+    });
+    return true;
+  }
+
+  // Share Management
+  @override
+  Future<List<Share>> listShares({ShareType? type}) async {
+    final shares = <Share>[];
+    
+    if (type == null || type == ShareType.smb) {
+      final smbShares = await _call<List<dynamic>>('sharing.smb.query');
+      shares.addAll(smbShares.map((share) => _parseSmbShare(share as Map<String, dynamic>)));
     }
     
-    if (vdev['children'] is List) {
-      for (final child in vdev['children']) {
-        if (child['disk'] != null) {
-          disks.add(child['disk']);
-        }
-      }
+    if (type == null || type == ShareType.nfs) {
+      final nfsShares = await _call<List<dynamic>>('sharing.nfs.query');
+      shares.addAll(nfsShares.map((share) => _parseNfsShare(share as Map<String, dynamic>)));
     }
     
-    return disks;
+    return shares;
+  }
+
+  Share _parseSmbShare(Map<String, dynamic> data) {
+    return Share(
+      id: data['id']?.toString() ?? '',
+      name: data['name'] ?? '',
+      path: data['path'] ?? '',
+      type: ShareType.smb,
+      enabled: data['enabled'] ?? false,
+      comment: data['comment'],
+      config: data,
+    );
+  }
+
+  Share _parseNfsShare(Map<String, dynamic> data) {
+    return Share(
+      id: data['id']?.toString() ?? '',
+      name: data['comment'] ?? 'NFS Share ${data['id']}',
+      path: data['path'] ?? '',
+      type: ShareType.nfs,
+      enabled: data['enabled'] ?? false,
+      comment: data['comment'],
+      config: data,
+    );
+  }
+
+  @override
+  Future<Share> getShare(String id) async {
+    // Try SMB first, then NFS
+    try {
+      final result = await _call<Map<String, dynamic>>('sharing.smb.get_instance', {'id': id});
+      return _parseSmbShare(result);
+    } catch (e) {
+      final result = await _call<Map<String, dynamic>>('sharing.nfs.get_instance', {'id': id});
+      return _parseNfsShare(result);
+    }
+  }
+
+  @override
+  Future<Share> createShare(Share shareData) async {
+    Map<String, dynamic> result;
+    
+    switch (shareData.type) {
+      case ShareType.smb:
+        result = await _call<Map<String, dynamic>>('sharing.smb.create', {
+          'name': shareData.name,
+          'path': shareData.path,
+          'enabled': shareData.enabled,
+          'comment': shareData.comment,
+          ...?shareData.config,
+        });
+        break;
+      case ShareType.nfs:
+        result = await _call<Map<String, dynamic>>('sharing.nfs.create', {
+          'path': shareData.path,
+          'enabled': shareData.enabled,
+          'comment': shareData.comment ?? shareData.name,
+          ...?shareData.config,
+        });
+        break;
+      default:
+        throw UnsupportedError('Share type ${shareData.type} not supported');
+    }
+    
+    return getShare(result['id']?.toString() ?? '');
+  }
+
+  @override
+  Future<Share> updateShare(Share shareData) async {
+    switch (shareData.type) {
+      case ShareType.smb:
+        await _call('sharing.smb.update', {
+          'id': shareData.id,
+          'name': shareData.name,
+          'path': shareData.path,
+          'enabled': shareData.enabled,
+          'comment': shareData.comment,
+          ...?shareData.config,
+        });
+        break;
+      case ShareType.nfs:
+        await _call('sharing.nfs.update', {
+          'id': shareData.id,
+          'path': shareData.path,
+          'enabled': shareData.enabled,
+          'comment': shareData.comment,
+          ...?shareData.config,
+        });
+        break;
+      default:
+        throw UnsupportedError('Share type ${shareData.type} not supported');
+    }
+    
+    return getShare(shareData.id);
+  }
+
+  @override
+  Future<bool> deleteShare(String id) async {
+    // Try both SMB and NFS deletion
+    try {
+      await _call('sharing.smb.delete', {'id': id});
+      return true;
+    } catch (e) {
+      await _call('sharing.nfs.delete', {'id': id});
+      return true;
+    }
+  }
+
+  // Stub implementations for remaining methods (to be expanded as needed)
+  @override
+  Future<List<Map<String, dynamic>>> listUsers() async {
+    return await _call<List<dynamic>>('user.query').then((result) => 
+        result.cast<Map<String, dynamic>>());
+  }
+
+  @override
+  Future<Map<String, dynamic>> getUser(String username) async {
+    return await _call<Map<String, dynamic>>('user.get_instance', {'username': username});
+  }
+
+  @override
+  Future<Map<String, dynamic>> createUser(Map<String, dynamic> userData) async {
+    return await _call<Map<String, dynamic>>('user.create', userData);
+  }
+
+  @override
+  Future<Map<String, dynamic>> updateUser(String username, Map<String, dynamic> userData) async {
+    return await _call<Map<String, dynamic>>('user.update', {'username': username, ...userData});
+  }
+
+  @override
+  Future<bool> deleteUser(String username) async {
+    await _call('user.delete', {'username': username});
+    return true;
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> listGroups() async {
+    return await _call<List<dynamic>>('group.query').then((result) => 
+        result.cast<Map<String, dynamic>>());
+  }
+
+  @override
+  Future<Map<String, dynamic>> getGroup(String groupname) async {
+    return await _call<Map<String, dynamic>>('group.get_instance', {'groupname': groupname});
+  }
+
+  @override
+  Future<Map<String, dynamic>> createGroup(Map<String, dynamic> groupData) async {
+    return await _call<Map<String, dynamic>>('group.create', groupData);
+  }
+
+  @override
+  Future<Map<String, dynamic>> updateGroup(String groupname, Map<String, dynamic> groupData) async {
+    return await _call<Map<String, dynamic>>('group.update', {'groupname': groupname, ...groupData});
+  }
+
+  @override
+  Future<bool> deleteGroup(String groupname) async {
+    await _call('group.delete', {'groupname': groupname});
+    return true;
+  }
+
+  @override
+  Future<Map<String, dynamic>> getNetworkConfig() async {
+    return await _call<Map<String, dynamic>>('network.configuration.config');
+  }
+
+  @override
+  Future<Map<String, dynamic>> updateNetworkConfig(Map<String, dynamic> config) async {
+    return await _call<Map<String, dynamic>>('network.configuration.update', config);
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> listNetworkInterfaces() async {
+    return await _call<List<dynamic>>('interface.query').then((result) => 
+        result.cast<Map<String, dynamic>>());
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> listServices() async {
+    return await _call<List<dynamic>>('service.query').then((result) => 
+        result.cast<Map<String, dynamic>>());
+  }
+
+  @override
+  Future<Map<String, dynamic>> getService(String serviceName) async {
+    return await _call<Map<String, dynamic>>('service.get_instance', {'service': serviceName});
+  }
+
+  @override
+  Future<bool> startService(String serviceName) async {
+    await _call('service.start', {'service': serviceName});
+    return true;
+  }
+
+  @override
+  Future<bool> stopService(String serviceName) async {
+    await _call('service.stop', {'service': serviceName});
+    return true;
+  }
+
+  @override
+  Future<bool> restartService(String serviceName) async {
+    await _call('service.restart', {'service': serviceName});
+    return true;
+  }
+
+  @override
+  Future<Map<String, dynamic>> updateService(String serviceName, Map<String, dynamic> config) async {
+    return await _call<Map<String, dynamic>>('service.update', {'service': serviceName, ...config});
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> listVMs() async {
+    return await _call<List<dynamic>>('vm.query').then((result) => 
+        result.cast<Map<String, dynamic>>());
+  }
+
+  @override
+  Future<Map<String, dynamic>> getVM(String vmId) async {
+    return await _call<Map<String, dynamic>>('vm.get_instance', {'id': vmId});
+  }
+
+  @override
+  Future<bool> startVM(String vmId) async {
+    await _call('vm.start', {'id': vmId});
+    return true;
+  }
+
+  @override
+  Future<bool> stopVM(String vmId) async {
+    await _call('vm.stop', {'id': vmId});
+    return true;
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> listApps() async {
+    return await _call<List<dynamic>>('app.query').then((result) => 
+        result.cast<Map<String, dynamic>>());
+  }
+
+  @override
+  Future<Map<String, dynamic>> getApp(String appId) async {
+    return await _call<Map<String, dynamic>>('app.get_instance', {'id': appId});
+  }
+
+  @override
+  Future<Map<String, dynamic>> installApp(String appName, Map<String, dynamic> config) async {
+    return await _call<Map<String, dynamic>>('app.create', {'name': appName, ...config});
+  }
+
+  @override
+  Future<Map<String, dynamic>> updateApp(String appId, Map<String, dynamic> config) async {
+    return await _call<Map<String, dynamic>>('app.update', {'id': appId, ...config});
+  }
+
+  @override
+  Future<bool> deleteApp(String appId) async {
+    await _call('app.delete', {'id': appId});
+    return true;
+  }
+
+  @override
+  Future<bool> reboot({int delay = 0}) async {
+    await _call('system.reboot', {'delay': delay});
+    return true;
+  }
+
+  @override
+  Future<bool> shutdown({int delay = 0}) async {
+    await _call('system.shutdown', {'delay': delay});
+    return true;
+  }
+
+  @override
+  Future<List<Map<String, dynamic>>> getSystemLogs({
+    int? limit,
+    String? level,
+    DateTime? since,
+  }) async {
+    final params = <String, dynamic>{};
+    if (limit != null) params['limit'] = limit;
+    if (level != null) params['level'] = level;
+    if (since != null) params['since'] = since.toIso8601String();
+    
+    return await _call<List<dynamic>>('system.logs', params).then((result) => 
+        result.cast<Map<String, dynamic>>());
   }
 }
