@@ -93,12 +93,7 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
   Future<void> disconnect() async {
     return TrueNasErrorHandler.handleOperation(
       () async {
-        // Graceful logout (don't fail if already logged out)
-        try {
-          await _authManager.logout();
-        } catch (e) {
-          _logger.warning('Logout failed (continuing): $e');
-        }
+        // No logout needed for API key authentication
 
         // Unsubscribe from events (don't fail if not subscribed)
         try {

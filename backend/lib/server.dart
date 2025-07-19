@@ -21,25 +21,14 @@ class Server {
   // Store configuration
   late final String _trueNasUrl;
   late final String? _trueNasApiKey;
-  late final String? _trueNasUsername;
-  late final String? _trueNasPassword;
 
-  Server({
-    String? trueNasUrl,
-    String? trueNasApiKey,
-    String? trueNasUsername,
-    String? trueNasPassword,
-  }) {
+  Server({String? trueNasUrl, String? trueNasApiKey}) {
     // Get configuration from environment or parameters
     _trueNasUrl =
         trueNasUrl ??
         Platform.environment['TRUENAS_URL'] ??
         'ws://localhost/api/current';
     _trueNasApiKey = trueNasApiKey ?? Platform.environment['TRUENAS_API_KEY'];
-    _trueNasUsername =
-        trueNasUsername ?? Platform.environment['TRUENAS_USERNAME'];
-    _trueNasPassword =
-        trueNasPassword ?? Platform.environment['TRUENAS_PASSWORD'];
 
     _logger.info('Server configuration:');
     _logger.info('  TrueNAS URL (param): $trueNasUrl');
@@ -50,8 +39,6 @@ class Server {
     _trueNasClient = TrueNasClientFactory.createClient(
       uri: _trueNasUrl,
       apiKey: _trueNasApiKey,
-      username: _trueNasUsername,
-      password: _trueNasPassword,
     );
     _rpcHandler = RpcHandler(_trueNasClient);
     _setupRoutes();
@@ -112,22 +99,16 @@ class Server {
       // Connect to TrueNAS using stored configuration
       await _trueNasClient.connect(_trueNasUrl);
 
-      // Authenticate if credentials are available
+      // Authenticate if API key is available
       final apiKey = _trueNasApiKey;
-      final username = _trueNasUsername;
-      final password = _trueNasPassword;
 
       if (apiKey != null) {
         _logger.info('Authenticating with API key...');
         await _trueNasClient.auth.authenticateWithApiKey(apiKey);
-      } else if (username != null && password != null) {
-        _logger.info('Authenticating with credentials...');
-        await _trueNasClient.auth.authenticateWithCredentials(
-          username,
-          password,
-        );
       } else {
-        _logger.warning('No authentication credentials provided');
+        _logger.warning(
+          'No API key provided - authentication may be required for certain operations',
+        );
       }
 
       _logger.info('TrueNAS client initialized successfully');

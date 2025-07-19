@@ -101,10 +101,8 @@ Create `.env` file in backend directory:
 # TrueNAS WebSocket URL (new JSON-RPC API)
 TRUENAS_URL=ws://your-truenas-ip/api/current
 
-# Authentication (use either API key OR username/password)
+# Authentication (API key required)
 TRUENAS_API_KEY=your-api-key-here
-# TRUENAS_USERNAME=root
-# TRUENAS_PASSWORD=your-password
 ```
 
 **Frontend Configuration**

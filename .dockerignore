@@ -1,0 +1,33 @@
+# Git
+.git
+.gitignore
+.claude
+
+# Build directories
+**/build
+**/.dart_tool
+**/web-build
+
+# Environment files
+**/.env
+**/.env.*
+
+# Test files
+**/test
+**/coverage
+
+# Documentation
+*.md
+LICENSE
+
+# IDE
+.vscode
+.idea
+*.iml
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log

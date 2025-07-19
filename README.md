@@ -100,6 +100,38 @@ cd backend && dart test && cd ..
 cd frontend && flutter test && cd ..
 ```
 
+## Docker
+
+The application can be containerized for easy deployment.
+
+### Building the Docker Image
+
+```bash
+docker build -t mynas-manager .
+```
+
+### Running with Docker
+
+```bash
+# Using docker run
+docker run -p 80:80 \
+  -e TRUENAS_URL=ws://your-truenas-ip/api/current \
+  -e TRUENAS_API_KEY=your-api-key \
+  mynas-manager
+
+# Using docker-compose
+docker-compose up
+```
+
+### Environment Variables
+
+Configure the container using these environment variables:
+
+- `TRUENAS_URL`: TrueNAS WebSocket URL (e.g., `ws://192.168.1.100/api/current`)
+- `TRUENAS_API_KEY`: Your TrueNAS API key
+
+The container exposes port 80 and includes both the backend server and frontend web application.
+
 ## Workspace Structure
 
 This project uses Dart pub workspaces for monorepo management, which provides:

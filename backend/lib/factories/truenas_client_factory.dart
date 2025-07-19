@@ -10,12 +10,7 @@ import '../services/truenas_websocket_client.dart';
 /// Factory for creating TrueNAS API client instances with proper dependency injection
 class TrueNasClientFactory {
   /// Create a production TrueNAS client with all dependencies
-  static ITrueNasApiClient createClient({
-    required String uri,
-    String? username,
-    String? password,
-    String? apiKey,
-  }) {
+  static ITrueNasApiClient createClient({required String uri, String? apiKey}) {
     // Create connection manager
     final connectionManager = WebSocketConnectionManager();
 
@@ -32,8 +27,6 @@ class TrueNasClientFactory {
     // Create authentication manager
     final authManager = TrueNasAuthManager(
       jsonRpcClient: jsonRpcClient,
-      username: username,
-      password: password,
       apiKey: apiKey,
     );
 
@@ -60,15 +53,8 @@ class TrueNasClientFactory {
   /// Create a client factory function for lazy initialization
   static ITrueNasApiClient Function() createClientFactory({
     required String uri,
-    String? username,
-    String? password,
     String? apiKey,
   }) {
-    return () => createClient(
-      uri: uri,
-      username: username,
-      password: password,
-      apiKey: apiKey,
-    );
+    return () => createClient(uri: uri, apiKey: apiKey);
   }
 }

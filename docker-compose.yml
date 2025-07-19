@@ -1,0 +1,13 @@
+version: '3.8'
+
+services:
+  mynas-manager:
+    build: .
+    ports:
+      - "80:80"
+    environment:
+      - TRUENAS_URL=${TRUENAS_URL}
+      - TRUENAS_API_KEY=${TRUENAS_API_KEY}
+    env_file:
+      - backend/.env
+    restart: unless-stopped

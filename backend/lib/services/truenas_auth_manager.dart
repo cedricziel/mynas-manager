@@ -10,23 +10,14 @@ class TrueNasAuthManager implements IAuthManager {
       StreamController<AuthState>.broadcast();
 
   final IJsonRpcClient _jsonRpcClient;
-  final String? _username;
-  final String? _password;
   final String? _apiKey;
 
   AuthState _state = AuthState.unauthenticated;
-  String? _sessionId;
   Timer? _sessionCheckTimer;
 
-  TrueNasAuthManager({
-    required IJsonRpcClient jsonRpcClient,
-    String? username,
-    String? password,
-    String? apiKey,
-  }) : _jsonRpcClient = jsonRpcClient,
-       _username = username,
-       _password = password,
-       _apiKey = apiKey {
+  TrueNasAuthManager({required IJsonRpcClient jsonRpcClient, String? apiKey})
+    : _jsonRpcClient = jsonRpcClient,
+      _apiKey = apiKey {
     _initialize();
   }
 
@@ -48,49 +39,6 @@ class TrueNasAuthManager implements IAuthManager {
   bool get isAuthenticated => _state == AuthState.authenticated;
 
   @override
-  String? get sessionId => _sessionId;
-
-  @override
-  Future<AuthResult> authenticateWithCredentials(
-    String username,
-    String password,
-  ) async {
-    _logger.info('Authenticating with credentials for user: $username');
-    _setState(AuthState.authenticating);
-
-    try {
-      final result = await _jsonRpcClient.call('auth.login', {
-        'username': username,
-        'password': password,
-      });
-
-      if (result is bool && result) {
-        _logger.info('Authentication successful');
-        _setState(AuthState.authenticated);
-        return AuthResult.success(method: AuthMethod.credentials);
-      } else if (result is Map<String, dynamic>) {
-        // Some versions return session info
-        final sessionId = result['session_id']?.toString();
-        _sessionId = sessionId;
-        _logger.info('Authentication successful with session ID');
-        _setState(AuthState.authenticated);
-        return AuthResult.success(
-          sessionId: sessionId,
-          method: AuthMethod.credentials,
-        );
-      } else {
-        _logger.warning('Authentication failed: unexpected result type');
-        _setState(AuthState.error);
-        return AuthResult.failure('Authentication failed: unexpected response');
-      }
-    } catch (e) {
-      _logger.severe('Authentication failed: $e');
-      _setState(AuthState.error);
-      return AuthResult.failure('Authentication failed: $e');
-    }
-  }
-
-  @override
   Future<AuthResult> authenticateWithApiKey(String apiKey) async {
     _logger.info('Authenticating with API key (header-based)');
     _setState(AuthState.authenticating);
@@ -103,7 +51,7 @@ class TrueNasAuthManager implements IAuthManager {
 
       _logger.info('API key authentication configured (header-based)');
       _setState(AuthState.authenticated);
-      return AuthResult.success(method: AuthMethod.apiKey);
+      return AuthResult.success();
     } catch (e) {
       _logger.severe('API key authentication failed: $e');
       _setState(AuthState.error);
@@ -111,21 +59,7 @@ class TrueNasAuthManager implements IAuthManager {
     }
   }
 
-  @override
-  Future<void> logout() async {
-    _logger.info('Logging out');
-
-    try {
-      if (isAuthenticated) {
-        await _jsonRpcClient.call('auth.logout');
-      }
-    } catch (e) {
-      _logger.warning('Logout failed: $e');
-    } finally {
-      _sessionId = null;
-      _setState(AuthState.unauthenticated);
-    }
-  }
+  // Logout is not needed for API key authentication
 
   @override
   Future<bool> validateSession() async {
@@ -151,11 +85,8 @@ class TrueNasAuthManager implements IAuthManager {
     if (_apiKey != null) {
       final result = await authenticateWithApiKey(_apiKey);
       return result.success;
-    } else if (_username != null && _password != null) {
-      final result = await authenticateWithCredentials(_username, _password);
-      return result.success;
     } else {
-      _logger.warning('No credentials available for refresh');
+      _logger.warning('No API key available for refresh');
       return false;
     }
   }

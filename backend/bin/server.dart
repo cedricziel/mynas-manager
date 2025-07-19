@@ -34,8 +34,6 @@ void main(List<String> args) async {
   final server = Server(
     trueNasUrl: env['TRUENAS_URL'],
     trueNasApiKey: env['TRUENAS_API_KEY'],
-    trueNasUsername: env['TRUENAS_USERNAME'],
-    trueNasPassword: env['TRUENAS_PASSWORD'],
   );
 
   try {
