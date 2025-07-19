@@ -4,8 +4,10 @@ import 'package:shelf/shelf.dart';
 import 'package:shelf/shelf_io.dart' as shelf_io;
 import 'package:shelf_router/shelf_router.dart';
 import 'package:shelf_cors_headers/shelf_cors_headers.dart';
+import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:logging/logging.dart';
 import 'package:mynas_backend/rpc/rpc_handler.dart';
+import 'package:mynas_backend/rpc/websocket_handler.dart';
 import 'package:mynas_backend/services/truenas_client.dart';
 
 class Server {
@@ -25,7 +27,13 @@ class Server {
     _router = Router()
       ..get('/health', _healthHandler)
       ..post('/rpc', _rpcHandler.handle)
+      ..get('/ws', webSocketHandler(_handleWebSocket))
       ..all('/<ignored|.*>', _notFoundHandler);
+  }
+  
+  void _handleWebSocket(dynamic webSocket) {
+    final handler = WebSocketHandler(webSocket, _trueNasClient);
+    handler.start();
   }
 
   Response _healthHandler(Request request) {

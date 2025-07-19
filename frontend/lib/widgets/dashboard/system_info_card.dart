@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:mynas_frontend/providers/system_provider.dart';
 
 class SystemInfoCard extends ConsumerWidget {
   const SystemInfoCard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final systemInfoAsync = ref.watch(systemInfoNotifierProvider);
+    
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -23,20 +26,50 @@ class SystemInfoCard extends ConsumerWidget {
                   'System Information',
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
+                const Spacer(),
+                if (systemInfoAsync.isLoading)
+                  const SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
               ],
             ),
             const SizedBox(height: 16),
-            _InfoRow(label: 'Hostname', value: 'truenas.local'),
-            const SizedBox(height: 8),
-            _InfoRow(label: 'Version', value: 'TrueNAS-SCALE-24.04'),
-            const SizedBox(height: 8),
-            _InfoRow(label: 'Uptime', value: '5 days, 12:34:56'),
-            const SizedBox(height: 8),
-            _InfoRow(label: 'CPU Usage', value: '15%'),
-            const SizedBox(height: 8),
-            _InfoRow(label: 'Memory', value: '8 GB / 16 GB'),
-            const SizedBox(height: 8),
-            _InfoRow(label: 'Temperature', value: '45°C'),
+            systemInfoAsync.when(
+              data: (systemInfo) {
+                if (systemInfo == null) {
+                  return const Center(
+                    child: Text('Unable to connect to server'),
+                  );
+                }
+                
+                final memoryUsedGB = (systemInfo.memory.used / 1073741824).toStringAsFixed(1);
+                final memoryTotalGB = (systemInfo.memory.total / 1073741824).toStringAsFixed(1);
+                
+                return Column(
+                  children: [
+                    _InfoRow(label: 'Hostname', value: systemInfo.hostname),
+                    const SizedBox(height: 8),
+                    _InfoRow(label: 'Version', value: systemInfo.version),
+                    const SizedBox(height: 8),
+                    _InfoRow(label: 'Uptime', value: systemInfo.uptime),
+                    const SizedBox(height: 8),
+                    _InfoRow(label: 'CPU Usage', value: '${systemInfo.cpuUsage.toStringAsFixed(1)}%'),
+                    const SizedBox(height: 8),
+                    _InfoRow(label: 'Memory', value: '$memoryUsedGB GB / $memoryTotalGB GB'),
+                    const SizedBox(height: 8),
+                    _InfoRow(label: 'Temperature', value: '${systemInfo.cpuTemperature.toStringAsFixed(1)}°C'),
+                  ],
+                );
+              },
+              loading: () => const Center(
+                child: CircularProgressIndicator(),
+              ),
+              error: (error, stack) => Center(
+                child: Text('Error: ${error.toString()}'),
+              ),
+            ),
           ],
         ),
       ),

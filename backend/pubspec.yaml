@@ -10,7 +10,9 @@ dependencies:
   shelf_router: ^1.1.4
   shelf_static: ^1.1.2
   shelf_cors_headers: ^0.1.5
+  shelf_web_socket: ^2.0.0
   json_rpc_2: ^3.0.2
+  web_socket_channel: ^3.0.1
   http: ^1.2.2
   dio: ^5.7.0
   args: ^2.6.0

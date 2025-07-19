@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'package:shelf/shelf.dart';
-import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:logging/logging.dart';
 import 'package:mynas_backend/services/truenas_client.dart';
 import 'package:mynas_shared/mynas_shared.dart';
@@ -15,102 +14,139 @@ class RpcHandler {
   Future<Response> handle(Request request) async {
     try {
       final body = await request.readAsString();
-      final server = json_rpc.Server();
+      final jsonRequest = jsonDecode(body);
       
-      _registerMethods(server);
+      // Handle JSON-RPC request manually
+      final method = jsonRequest['method'] as String?;
+      final params = jsonRequest['params'] ?? {};
+      final id = jsonRequest['id'];
       
-      final response = await server.parseRequest(body);
+      if (method == null) {
+        return _errorResponse(id, -32600, 'Invalid Request');
+      }
       
-      return Response.ok(
-        response,
-        headers: {'content-type': 'application/json'},
-      );
+      try {
+        final result = await _handleMethod(method, params);
+        return Response.ok(
+          jsonEncode({
+            'jsonrpc': '2.0',
+            'result': result,
+            'id': id,
+          }),
+          headers: {'content-type': 'application/json'},
+        );
+      } catch (e) {
+        _logger.severe('Method error: $e');
+        return _errorResponse(id, -32603, 'Internal error', e.toString());
+      }
     } catch (e) {
       _logger.severe('RPC error: $e');
-      return Response.internalServerError(
-        body: jsonEncode({
-          'jsonrpc': '2.0',
-          'error': {
-            'code': -32603,
-            'message': 'Internal error',
-            'data': e.toString(),
-          },
-        }),
-        headers: {'content-type': 'application/json'},
-      );
+      return _errorResponse(null, -32700, 'Parse error');
+    }
+  }
+  
+  Response _errorResponse(dynamic id, int code, String message, [String? data]) {
+    return Response.ok(
+      jsonEncode({
+        'jsonrpc': '2.0',
+        'error': {
+          'code': code,
+          'message': message,
+          if (data != null) 'data': data,
+        },
+        'id': id,
+      }),
+      headers: {'content-type': 'application/json'},
+    );
+  }
+
+  Future<dynamic> _handleMethod(String method, Map<String, dynamic> params) async {
+    switch (method) {
+      // System methods
+      case 'system.info':
+        return await _getSystemInfo(params);
+      case 'system.alerts':
+        return await _getAlerts(params);
+      
+      // Pool methods
+      case 'pool.list':
+        return await _listPools(params);
+      case 'pool.get':
+        return await _getPool(params);
+      
+      // Dataset methods
+      case 'dataset.list':
+        return await _listDatasets(params);
+      case 'dataset.get':
+        return await _getDataset(params);
+      case 'dataset.create':
+        return await _createDataset(params);
+      
+      // Share methods
+      case 'share.list':
+        return await _listShares(params);
+      case 'share.get':
+        return await _getShare(params);
+      case 'share.create':
+        return await _createShare(params);
+      case 'share.update':
+        return await _updateShare(params);
+      case 'share.delete':
+        return await _deleteShare(params);
+      
+      default:
+        throw Exception('Method not found: $method');
     }
   }
 
-  void _registerMethods(json_rpc.Server server) {
-    // System methods
-    server.registerMethod('system.info', _getSystemInfo);
-    server.registerMethod('system.alerts', _getAlerts);
-    
-    // Pool methods
-    server.registerMethod('pool.list', _listPools);
-    server.registerMethod('pool.get', _getPool);
-    
-    // Dataset methods
-    server.registerMethod('dataset.list', _listDatasets);
-    server.registerMethod('dataset.get', _getDataset);
-    server.registerMethod('dataset.create', _createDataset);
-    
-    // Share methods
-    server.registerMethod('share.list', _listShares);
-    server.registerMethod('share.get', _getShare);
-    server.registerMethod('share.create', _createShare);
-    server.registerMethod('share.update', _updateShare);
-    server.registerMethod('share.delete', _deleteShare);
-  }
-
-  Future<Map<String, dynamic>> _getSystemInfo(json_rpc.Parameters params) async {
+  Future<Map<String, dynamic>> _getSystemInfo(Map<String, dynamic> params) async {
     final info = await _trueNasClient.getSystemInfo();
     return info.toJson();
   }
 
-  Future<List<Map<String, dynamic>>> _getAlerts(json_rpc.Parameters params) async {
+  Future<List<Map<String, dynamic>>> _getAlerts(Map<String, dynamic> params) async {
     final alerts = await _trueNasClient.getAlerts();
     return alerts.map((a) => a.toJson()).toList();
   }
 
-  Future<List<Map<String, dynamic>>> _listPools(json_rpc.Parameters params) async {
+  Future<List<Map<String, dynamic>>> _listPools(Map<String, dynamic> params) async {
     final pools = await _trueNasClient.listPools();
     return pools.map((p) => p.toJson()).toList();
   }
 
-  Future<Map<String, dynamic>> _getPool(json_rpc.Parameters params) async {
-    final id = params['id'].asString;
+  Future<Map<String, dynamic>> _getPool(Map<String, dynamic> params) async {
+    final id = params['id'] as String;
     final pool = await _trueNasClient.getPool(id);
     return pool.toJson();
   }
 
-  Future<List<Map<String, dynamic>>> _listDatasets(json_rpc.Parameters params) async {
-    final poolId = params['poolId'].asStringOr(null);
+  Future<List<Map<String, dynamic>>> _listDatasets(Map<String, dynamic> params) async {
+    final poolId = params['poolId'] as String?;
     final datasets = await _trueNasClient.listDatasets(poolId: poolId);
     return datasets.map((d) => d.toJson()).toList();
   }
 
-  Future<Map<String, dynamic>> _getDataset(json_rpc.Parameters params) async {
-    final id = params['id'].asString;
+  Future<Map<String, dynamic>> _getDataset(Map<String, dynamic> params) async {
+    final id = params['id'] as String;
     final dataset = await _trueNasClient.getDataset(id);
     return dataset.toJson();
   }
 
-  Future<Map<String, dynamic>> _createDataset(json_rpc.Parameters params) async {
-    final pool = params['pool'].asString;
-    final name = params['name'].asString;
-    final properties = params['properties'].asMapOr({});
+  Future<Map<String, dynamic>> _createDataset(Map<String, dynamic> params) async {
+    final pool = params['pool'] as String;
+    final name = params['name'] as String;
+    final properties = params['properties'] as Map<String, dynamic>? ?? {};
     
     final dataset = await _trueNasClient.createDataset(
       pool: pool,
       name: name,
-      properties: properties as Map<String, dynamic>,
+      properties: properties,
     );
     return dataset.toJson();
   }
 
-  Future<List<Map<String, dynamic>>> _listShares(json_rpc.Parameters params) async {
-    final type = params['type'].asStringOr(null);
+  Future<List<Map<String, dynamic>>> _listShares(Map<String, dynamic> params) async {
+    final type = params['type'] as String?;
     ShareType? shareType;
     if (type != null) {
       shareType = ShareType.values.firstWhere(
@@ -123,26 +159,26 @@ class RpcHandler {
     return shares.map((s) => s.toJson()).toList();
   }
 
-  Future<Map<String, dynamic>> _getShare(json_rpc.Parameters params) async {
-    final id = params['id'].asString;
+  Future<Map<String, dynamic>> _getShare(Map<String, dynamic> params) async {
+    final id = params['id'] as String;
     final share = await _trueNasClient.getShare(id);
     return share.toJson();
   }
 
-  Future<Map<String, dynamic>> _createShare(json_rpc.Parameters params) async {
-    final shareData = Share.fromJson(params.asMap);
+  Future<Map<String, dynamic>> _createShare(Map<String, dynamic> params) async {
+    final shareData = Share.fromJson(params);
     final share = await _trueNasClient.createShare(shareData);
     return share.toJson();
   }
 
-  Future<Map<String, dynamic>> _updateShare(json_rpc.Parameters params) async {
-    final shareData = Share.fromJson(params.asMap);
+  Future<Map<String, dynamic>> _updateShare(Map<String, dynamic> params) async {
+    final shareData = Share.fromJson(params);
     final share = await _trueNasClient.updateShare(shareData);
     return share.toJson();
   }
 
-  Future<bool> _deleteShare(json_rpc.Parameters params) async {
-    final id = params['id'].asString;
+  Future<bool> _deleteShare(Map<String, dynamic> params) async {
+    final id = params['id'] as String;
     return await _trueNasClient.deleteShare(id);
   }
 }
