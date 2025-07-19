@@ -55,6 +55,9 @@ dependencies:
   # Charts
   fl_chart: ^0.70.0
   
+  # Desktop UI
+  flutter_box_transform: ^0.4.5
+  
   # Shared models
   mynas_shared:
     path: ../shared

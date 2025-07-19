@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mynas_frontend/screens/login_screen.dart';
+import 'package:mynas_frontend/screens/desktop_screen.dart';
 import 'package:mynas_frontend/screens/dashboard_screen.dart';
 import 'package:mynas_frontend/screens/storage_screen.dart';
 import 'package:mynas_frontend/screens/shares_screen.dart';
@@ -32,8 +34,17 @@ class MyNasApp extends StatelessWidget {
   }
 
   static final _router = GoRouter(
-    initialLocation: '/dashboard',
+    initialLocation: '/login',
     routes: [
+      GoRoute(
+        path: '/login',
+        builder: (context, state) => const LoginScreen(),
+      ),
+      GoRoute(
+        path: '/desktop',
+        builder: (context, state) => const DesktopScreen(),
+      ),
+      // Keep the old routes for now - they can be opened as windows
       ShellRoute(
         builder: (context, state, child) => AppShell(child: child),
         routes: [

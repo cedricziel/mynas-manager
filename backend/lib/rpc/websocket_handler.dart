@@ -12,10 +12,8 @@ class WebSocketHandler {
   final TrueNasClient _trueNasClient;
   late final json_rpc.Peer _peer;
 
-  WebSocketHandler(dynamic webSocket, this._trueNasClient)
-      : _channel = webSocket is WebSocketChannel 
-          ? webSocket 
-          : WebSocketChannel(webSocket);
+  WebSocketHandler(WebSocketChannel webSocket, this._trueNasClient)
+      : _channel = webSocket;
 
   void start() {
     _logger.info('New WebSocket connection established');
@@ -63,7 +61,12 @@ class WebSocketHandler {
   // TrueNAS connection methods
   Future<Map<String, dynamic>> _connectToTrueNAS(json_rpc.Parameters params) async {
     final url = params['url'].asString;
-    final apiKey = params['apiKey'].asStringOr(null);
+    String? apiKey;
+    try {
+      apiKey = params['apiKey'].asString;
+    } catch (_) {
+      apiKey = null;
+    }
     
     // TODO: Create WebSocket connection to TrueNAS
     return {'connected': true, 'url': url};
@@ -98,7 +101,12 @@ class WebSocketHandler {
 
   // Dataset methods
   Future<List<Map<String, dynamic>>> _listDatasets(json_rpc.Parameters params) async {
-    final poolId = params['poolId'].asStringOr(null);
+    String? poolId;
+    try {
+      poolId = params['poolId'].asString;
+    } catch (_) {
+      poolId = null;
+    }
     final datasets = await _trueNasClient.listDatasets(poolId: poolId);
     return datasets.map((d) => d.toJson()).toList();
   }
@@ -124,7 +132,12 @@ class WebSocketHandler {
 
   // Share methods
   Future<List<Map<String, dynamic>>> _listShares(json_rpc.Parameters params) async {
-    final type = params['type'].asStringOr(null);
+    String? type;
+    try {
+      type = params['type'].asString;
+    } catch (_) {
+      type = null;
+    }
     ShareType? shareType;
     if (type != null) {
       shareType = ShareType.values.firstWhere(
