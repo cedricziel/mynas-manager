@@ -135,3 +135,86 @@ TRUENAS_API_KEY=your-api-key-here
 - Platform: Web only (not desktop)
 - TrueNAS uses bidirectional WebSocket "Peer" connections
 - Custom window management system (no suitable packages for web)
+
+---
+
+## AI Development Team Configuration
+
+*Updated by team-configurator on 2025-07-28*
+
+Your project uses: Dart (Shelf HTTP), Flutter Web, Riverpod, WebSocket (JSON-RPC2), TrueNAS SCALE API
+
+### Specialist Assignments
+
+- **Backend Development** → @dart-engineer
+  - Dart server implementation with Shelf framework
+  - WebSocket handling and JSON-RPC2 protocol
+  - TrueNAS API integration and client implementation
+  - Async programming patterns, isolates, and streams
+  - Code generation with Freezed and build_runner
+
+- **Frontend Development** → @flutter-app-developer
+  - Flutter web application development
+  - Desktop-like UI with window management system
+  - Riverpod state management implementation
+  - Custom widget development (WindowWidget, ResizableWindow, Dock)
+  - Go Router navigation and deep linking
+  - Performance optimization for web platform
+
+- **Architecture & System Design** → @api-architect
+  - WebSocket communication architecture
+  - JSON-RPC2 protocol design and implementation
+  - Service layer design and dependency injection
+  - Shared model architecture across packages
+  - Package structure (backend/frontend/shared/mynas_desktop)
+
+- **Code Quality & Performance** → @code-reviewer + @performance-optimizer
+  - Code review for Dart/Flutter best practices
+  - Performance profiling and optimization
+  - Memory management and resource cleanup
+  - Widget rebuild optimization
+  - WebSocket connection efficiency
+
+- **Documentation** → @documentation-specialist
+  - API documentation for TrueNAS integration
+  - Flutter widget documentation
+  - Architecture decision records
+  - Development guides and setup instructions
+
+### How to Use Your Team
+
+**Backend Tasks:**
+
+- "Implement new TrueNAS API endpoint for disk management"
+- "Add WebSocket reconnection logic with exponential backoff"
+- "Create Freezed models for new API responses"
+
+**Frontend Tasks:**
+
+- "Build a file browser window for the desktop interface"
+- "Implement drag-and-drop between windows"
+- "Create Riverpod providers for system monitoring"
+
+**Architecture Tasks:**
+
+- "Design state synchronization between multiple windows"
+- "Plan migration of screens to window apps"
+- "Optimize WebSocket message batching"
+
+**Quality Tasks:**
+
+- "Review the window management implementation"
+- "Profile and optimize app startup time"
+- "Analyze memory usage during long sessions"
+
+### Project-Specific Expertise
+
+Your AI team understands:
+
+- TrueNAS SCALE 25.04+ JSON-RPC 2.0 API
+- Bidirectional WebSocket "Peer" connections
+- Desktop-like UI patterns for web applications
+- Dart/Flutter monorepo structure with shared packages
+- Custom window management without third-party packages
+
+Your specialized AI development team is configured and ready to help with MyNAS Manager!
