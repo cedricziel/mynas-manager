@@ -2,9 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:shelf/shelf.dart';
 import 'package:logging/logging.dart';
-import 'package:mynas_backend/interfaces/truenas_api_client.dart';
+import 'package:truenas_client/truenas_client.dart';
 import 'package:mynas_shared/mynas_shared.dart';
-import '../exceptions/truenas_exceptions.dart';
 
 class RpcHandler {
   final _logger = Logger('RpcHandler');
@@ -233,6 +232,26 @@ class RpcHandler {
       case 'share.delete':
         return await _deleteShare(params);
 
+      // Disk methods
+      case 'disk.list':
+        return await _listDisks(params);
+      case 'disk.get':
+        return await _getDisk(params);
+      case 'disk.temperatures':
+        return await _getDiskTemperatures(params);
+      case 'disk.temperature_alerts':
+        return await _getDiskTemperatureAlerts(params);
+      case 'disk.temperature_history':
+        return await _getDiskTemperatureHistory(params);
+      case 'pool.disks':
+        return await _getPoolDisks(params);
+      case 'pool.topology':
+        return await _getPoolTopology(params);
+      case 'disk.smart_data':
+        return await _getDiskSmartData(params);
+      case 'disk.run_smart_test':
+        return await _runSmartTest(params);
+
       default:
         throw Exception('Method not found: $method');
     }
@@ -331,5 +350,77 @@ class RpcHandler {
   Future<bool> _deleteShare(Map<String, dynamic> params) async {
     final id = params['id'] as String;
     return await _trueNasClient.deleteShare(id);
+  }
+
+  Future<List<Map<String, dynamic>>> _listDisks(
+    Map<String, dynamic> params,
+  ) async {
+    final includePools = params['includePools'] as bool? ?? true;
+    final disks = await _trueNasClient.listDisks(includePools: includePools);
+    return disks.map((d) => d.toJson()).toList();
+  }
+
+  Future<Map<String, dynamic>> _getDisk(Map<String, dynamic> params) async {
+    final identifier = params['identifier'] as String;
+    final disk = await _trueNasClient.getDisk(identifier);
+    return disk.toJson();
+  }
+
+  Future<List<Map<String, dynamic>>> _getDiskTemperatures(
+    Map<String, dynamic> params,
+  ) async {
+    final diskNames = (params['diskNames'] as List).cast<String>();
+    final temperatures = await _trueNasClient.getDiskTemperatures(diskNames);
+    return temperatures.map((t) => t.toJson()).toList();
+  }
+
+  Future<Map<String, dynamic>> _getDiskTemperatureAlerts(
+    Map<String, dynamic> params,
+  ) async {
+    final diskNames = (params['diskNames'] as List).cast<String>();
+    return await _trueNasClient.getDiskTemperatureAlerts(diskNames);
+  }
+
+  Future<Map<String, dynamic>> _getDiskTemperatureHistory(
+    Map<String, dynamic> params,
+  ) async {
+    final diskNames = (params['diskNames'] as List).cast<String>();
+    final days = params['days'] as int;
+    return await _trueNasClient.getDiskTemperatureHistory(
+      diskNames: diskNames,
+      days: days,
+    );
+  }
+
+  Future<List<Map<String, dynamic>>> _getPoolDisks(
+    Map<String, dynamic> params,
+  ) async {
+    final poolId = params['poolId'] as String;
+    final disks = await _trueNasClient.getPoolDisks(poolId);
+    return disks.map((d) => d.toJson()).toList();
+  }
+
+  Future<Map<String, dynamic>> _getPoolTopology(
+    Map<String, dynamic> params,
+  ) async {
+    final poolId = params['poolId'] as String;
+    final topology = await _trueNasClient.getPoolTopology(poolId);
+    return topology.toJson();
+  }
+
+  Future<Map<String, dynamic>> _getDiskSmartData(
+    Map<String, dynamic> params,
+  ) async {
+    final diskName = params['diskName'] as String;
+    return await _trueNasClient.getDiskSmartData(diskName);
+  }
+
+  Future<bool> _runSmartTest(Map<String, dynamic> params) async {
+    final diskName = params['diskName'] as String;
+    final testType = params['testType'] as String;
+    return await _trueNasClient.runSmartTest(
+      diskName: diskName,
+      testType: testType,
+    );
   }
 }

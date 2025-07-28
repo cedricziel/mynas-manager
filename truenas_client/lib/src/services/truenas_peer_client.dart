@@ -83,40 +83,40 @@ class TrueNasPeerClient implements IJsonRpcClient {
 
     // Pool events
     _peer!.registerMethod('pool.changed', (params) {
-      _handleNotification('pool.changed', params.asMap);
+      _handleNotification('pool.changed', _safeParamsAsMap(params));
     });
 
     // Dataset events
     _peer!.registerMethod('dataset.changed', (params) {
-      _handleNotification('dataset.changed', params.asMap);
+      _handleNotification('dataset.changed', _safeParamsAsMap(params));
     });
 
     // Alert events
     _peer!.registerMethod('alert.added', (params) {
-      _handleNotification('alert.added', params.asMap);
+      _handleNotification('alert.added', _safeParamsAsMap(params));
     });
 
     _peer!.registerMethod('alert.removed', (params) {
-      _handleNotification('alert.removed', params.asMap);
+      _handleNotification('alert.removed', _safeParamsAsMap(params));
     });
 
     // System events
     _peer!.registerMethod('system.general.updated', (params) {
-      _handleNotification('system.general.updated', params.asMap);
+      _handleNotification('system.general.updated', _safeParamsAsMap(params));
     });
 
     // Share events
     _peer!.registerMethod('sharing.smb.changed', (params) {
-      _handleNotification('sharing.smb.changed', params.asMap);
+      _handleNotification('sharing.smb.changed', _safeParamsAsMap(params));
     });
 
     _peer!.registerMethod('sharing.nfs.changed', (params) {
-      _handleNotification('sharing.nfs.changed', params.asMap);
+      _handleNotification('sharing.nfs.changed', _safeParamsAsMap(params));
     });
 
     // Real-time data updates (reporting.realtime collection)
     _peer!.registerMethod('collection_update', (params) {
-      _handleNotification('collection_update', params.asMap);
+      _handleNotification('collection_update', _safeParamsAsMap(params));
     });
 
     _logger.fine('Registered TrueNAS notification handlers');
@@ -248,6 +248,8 @@ class TrueNasPeerClient implements IJsonRpcClient {
       'auth.login',
       'auth.token',
       'auth.logout',
+      'auth.login_with_api_key',
+      'auth.login_ex', // Takes array with single object
       'pool.get_disks',
       'dataset.get_quota',
     };
@@ -263,6 +265,11 @@ class TrueNasPeerClient implements IJsonRpcClient {
         return [params['username'], params['password']];
       case 'auth.token':
         return [params['token']];
+      case 'auth.login_with_api_key':
+        return [params['api_key']];
+      case 'auth.login_ex':
+        // auth.login_ex takes an array containing a single object
+        return [params];
       case 'pool.get_disks':
         return [params['name']];
       case 'dataset.get_quota':
@@ -298,6 +305,22 @@ class TrueNasPeerClient implements IJsonRpcClient {
     _peer?.close();
     _peer = null;
     _isReady = false;
+  }
+
+  /// Safely converts JSON-RPC Parameters to Map<String, dynamic>
+  Map<String, dynamic> _safeParamsAsMap(dynamic params) {
+    try {
+      if (params is json_rpc.Parameters) {
+        return params.asMap.cast<String, dynamic>();
+      } else if (params is Map) {
+        return params.cast<String, dynamic>();
+      } else {
+        return <String, dynamic>{};
+      }
+    } catch (e) {
+      _logger.warning('Failed to convert parameters to map: $e');
+      return <String, dynamic>{};
+    }
   }
 
   @override

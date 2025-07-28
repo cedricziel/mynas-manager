@@ -2,7 +2,7 @@ import 'dart:async';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:logging/logging.dart';
-import 'package:mynas_backend/interfaces/truenas_api_client.dart';
+import 'package:truenas_client/truenas_client.dart';
 import 'package:mynas_shared/mynas_shared.dart';
 
 class WebSocketHandler {

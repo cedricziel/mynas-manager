@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:test/test.dart';
 import 'package:mockito/mockito.dart';
 import 'package:mockito/annotations.dart';
-import 'package:mynas_backend/services/truenas_peer_client.dart';
-import 'package:mynas_backend/interfaces/connection_manager.dart';
-import 'package:mynas_backend/interfaces/json_rpc_client.dart';
+import 'package:truenas_client/src/services/truenas_peer_client.dart';
+import 'package:truenas_client/src/interfaces/connection_manager.dart';
+import 'package:truenas_client/src/interfaces/json_rpc_client.dart';
 import 'package:stream_channel/stream_channel.dart';
 
 @GenerateMocks([IConnectionManager])

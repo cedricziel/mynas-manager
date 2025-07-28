@@ -300,4 +300,38 @@ abstract class ITrueNasApiClient {
     String? level,
     DateTime? since,
   });
+
+  // Disk Management
+  /// List all disks in the system
+  Future<List<Disk>> listDisks({bool includePools = true});
+
+  /// Get a specific disk by identifier
+  Future<Disk> getDisk(String identifier);
+
+  /// Get temperature data for multiple disks
+  Future<List<DiskTemperature>> getDiskTemperatures(List<String> diskNames);
+
+  /// Get current temperature alerts for disks
+  Future<Map<String, dynamic>> getDiskTemperatureAlerts(List<String> diskNames);
+
+  /// Get aggregated temperature data for disks over a period
+  Future<Map<String, dynamic>> getDiskTemperatureHistory({
+    required List<String> diskNames,
+    required int days,
+  });
+
+  /// Get disks for a specific pool
+  Future<List<Disk>> getPoolDisks(String poolId);
+
+  /// Get pool topology including vdev structure
+  Future<PoolTopology> getPoolTopology(String poolId);
+
+  /// Get SMART data for a disk
+  Future<Map<String, dynamic>> getDiskSmartData(String diskName);
+
+  /// Run SMART test on a disk
+  Future<bool> runSmartTest({
+    required String diskName,
+    required String testType,
+  });
 }

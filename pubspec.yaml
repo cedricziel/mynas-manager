@@ -8,6 +8,7 @@ workspace:
   - frontend
   - shared
   - mynas_desktop
+  - truenas_client
 
 environment:
   sdk: ^3.8.1

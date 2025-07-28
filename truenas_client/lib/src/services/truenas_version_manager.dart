@@ -66,9 +66,9 @@ class TrueNasVersionManager implements IVersionManager {
       } else if (result is Map<String, dynamic>) {
         // Extract version from object response
         versionString =
-            result['version'] ??
-            result['fullversion'] ??
-            result['name'] ??
+            (result['version'] as String?) ??
+            (result['fullversion'] as String?) ??
+            (result['name'] as String?) ??
             'unknown';
       } else {
         throw Exception(

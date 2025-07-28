@@ -8,8 +8,7 @@ import 'package:shelf_web_socket/shelf_web_socket.dart';
 import 'package:logging/logging.dart';
 import 'package:mynas_backend/rpc/rpc_handler.dart';
 import 'package:mynas_backend/rpc/websocket_handler.dart';
-import 'package:mynas_backend/factories/truenas_client_factory.dart';
-import 'package:mynas_backend/interfaces/truenas_api_client.dart';
+import 'package:truenas_client/truenas_client.dart';
 
 class Server {
   final _logger = Logger('Server');

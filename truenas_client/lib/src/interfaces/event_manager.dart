@@ -16,7 +16,7 @@ class TrueNasEvent {
 
   factory TrueNasEvent.fromJson(Map<String, dynamic> json) {
     return TrueNasEvent(
-      type: json['msg'] ?? json['type'] ?? 'unknown',
+      type: (json['msg'] as String?) ?? (json['type'] as String?) ?? 'unknown',
       id: json['id']?.toString(),
       data: json,
       timestamp: DateTime.now(),

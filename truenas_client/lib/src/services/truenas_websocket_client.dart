@@ -175,9 +175,9 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
     final alerts = await getAlerts();
 
     return SystemInfo(
-      hostname: result['hostname'] ?? 'unknown',
+      hostname: (result['hostname'] as String?) ?? 'unknown',
       version:
-          result['version'] ??
+          (result['version'] as String?) ??
           _versionManager.currentVersion?.fullVersion ??
           'unknown',
       uptime: uptime,
@@ -202,9 +202,15 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
       return Alert(
         id: alert['id']?.toString() ?? '',
         level: _parseAlertLevel(alert['level']?.toString() ?? 'info'),
-        message: alert['formatted'] ?? alert['text'] ?? alert['message'] ?? '',
-        timestamp: DateTime.tryParse(alert['datetime'] ?? '') ?? DateTime.now(),
-        dismissed: alert['dismissed'] ?? false,
+        message:
+            (alert['formatted'] as String?) ??
+            (alert['text'] as String?) ??
+            (alert['message'] as String?) ??
+            '',
+        timestamp:
+            DateTime.tryParse((alert['datetime'] as String?) ?? '') ??
+            DateTime.now(),
+        dismissed: (alert['dismissed'] as bool?) ?? false,
       );
     }).toList();
   }
@@ -238,20 +244,25 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
   // Pool Management
   @override
   Future<List<Pool>> listPools() async {
-    final result = await _call<List<dynamic>>('pool.query');
+    final result = await _call<List<dynamic>>('pool.query', {
+      'filters': [],
+      'options': {
+        'extra': {'is_upgraded': true},
+      },
+    });
 
     return result.map((poolData) {
       final pool = poolData as Map<String, dynamic>;
       return Pool(
         id: pool['id']?.toString() ?? '',
-        name: pool['name'] ?? '',
-        status: pool['status'] ?? 'unknown',
+        name: (pool['name'] as String?) ?? '',
+        status: (pool['status'] as String?) ?? 'unknown',
         size: (pool['size'] as num?)?.toInt() ?? 0,
         allocated: (pool['allocated'] as num?)?.toInt() ?? 0,
         free: (pool['free'] as num?)?.toInt() ?? 0,
         fragmentation: (pool['fragmentation'] as num?)?.toDouble() ?? 0.0,
-        isHealthy: pool['healthy'] ?? false,
-        path: pool['path'],
+        isHealthy: (pool['healthy'] as bool?) ?? false,
+        path: pool['path'] as String?,
         vdevs: _parseVdevs(pool['topology']),
       );
     }).toList();
@@ -299,14 +310,14 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
 
     return Pool(
       id: result['id']?.toString() ?? '',
-      name: result['name'] ?? '',
-      status: result['status'] ?? 'unknown',
+      name: (result['name'] as String?) ?? '',
+      status: (result['status'] as String?) ?? 'unknown',
       size: (result['size'] as num?)?.toInt() ?? 0,
       allocated: (result['allocated'] as num?)?.toInt() ?? 0,
       free: (result['free'] as num?)?.toInt() ?? 0,
       fragmentation: (result['fragmentation'] as num?)?.toDouble() ?? 0.0,
-      isHealthy: result['healthy'] ?? false,
-      path: result['path'],
+      isHealthy: (result['healthy'] as bool?) ?? false,
+      path: result['path'] as String?,
       vdevs: _parseVdevs(result['topology']),
     );
   }
@@ -361,15 +372,15 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
       final task = taskData as Map<String, dynamic>;
       return PoolScrubTask(
         id: task['id']?.toString() ?? '',
-        pool: task['pool'] ?? '',
-        description: task['description'] ?? '',
-        schedule: task['schedule'] ?? '',
-        enabled: task['enabled'] ?? true,
+        pool: (task['pool'] as String?) ?? '',
+        description: (task['description'] as String?) ?? '',
+        schedule: (task['schedule'] as String?) ?? '',
+        enabled: (task['enabled'] as bool?) ?? true,
         nextRun: task['next_run'] != null
-            ? DateTime.tryParse(task['next_run'])
+            ? DateTime.tryParse(task['next_run'] as String)
             : null,
         lastRun: task['last_run'] != null
-            ? DateTime.tryParse(task['last_run'])
+            ? DateTime.tryParse(task['last_run'] as String)
             : null,
         options: task,
       );
@@ -385,15 +396,15 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
 
     return PoolScrubTask(
       id: result['id']?.toString() ?? '',
-      pool: result['pool'] ?? '',
-      description: result['description'] ?? '',
-      schedule: result['schedule'] ?? '',
-      enabled: result['enabled'] ?? true,
+      pool: (result['pool'] as String?) ?? '',
+      description: (result['description'] as String?) ?? '',
+      schedule: (result['schedule'] as String?) ?? '',
+      enabled: (result['enabled'] as bool?) ?? true,
       nextRun: result['next_run'] != null
-          ? DateTime.tryParse(result['next_run'])
+          ? DateTime.tryParse(result['next_run'] as String)
           : null,
       lastRun: result['last_run'] != null
-          ? DateTime.tryParse(result['last_run'])
+          ? DateTime.tryParse(result['last_run'] as String)
           : null,
       options: result,
     );
@@ -442,16 +453,16 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
       pool: poolId,
       status: _parseScrubStatus(result['state']?.toString() ?? 'waiting'),
       startTime: result['start_time'] != null
-          ? DateTime.tryParse(result['start_time'])
+          ? DateTime.tryParse(result['start_time'] as String)
           : null,
       endTime: result['end_time'] != null
-          ? DateTime.tryParse(result['end_time'])
+          ? DateTime.tryParse(result['end_time'] as String)
           : null,
-      duration: result['duration'],
-      bytesProcessed: result['bytes_processed'],
-      bytesPerSecond: result['bytes_per_second'],
-      errorsFound: result['errors'],
-      description: result['description'] ?? 'Manual scrub',
+      duration: result['duration'] as int?,
+      bytesProcessed: result['bytes_processed'] as int?,
+      bytesPerSecond: result['bytes_per_second'] as int?,
+      errorsFound: result['errors'] as int?,
+      description: (result['description'] as String?) ?? 'Manual scrub',
     );
   }
 
@@ -618,15 +629,15 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
     );
 
     return Dataset(
-      id: result['id'] ?? '',
-      name: result['name'] ?? '',
-      pool: result['pool'] ?? '',
-      type: result['type'] ?? 'FILESYSTEM',
+      id: (result['id'] as String?) ?? '',
+      name: (result['name'] as String?) ?? '',
+      pool: (result['pool'] as String?) ?? '',
+      type: (result['type'] as String?) ?? 'FILESYSTEM',
       used: (result['used']?['parsed'] as num?)?.toInt() ?? 0,
       available: (result['available']?['parsed'] as num?)?.toInt() ?? 0,
       referenced: (result['referenced']?['parsed'] as num?)?.toInt() ?? 0,
-      mountpoint: result['mountpoint'] ?? '',
-      encrypted: result['encrypted'] ?? false,
+      mountpoint: (result['mountpoint'] as String?) ?? '',
+      encrypted: (result['encrypted'] as bool?) ?? false,
       children:
           (result['children'] as List?)
               ?.map(
@@ -691,10 +702,10 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
 
     return SnapshotCount(
       dataset: datasetId,
-      totalSnapshots: result['total'] ?? 0,
-      manualSnapshots: result['manual'] ?? 0,
-      taskSnapshots: result['task'] ?? 0,
-      totalSize: result['total_size'] ?? 0,
+      totalSnapshots: (result['total'] as int?) ?? 0,
+      manualSnapshots: (result['manual'] as int?) ?? 0,
+      taskSnapshots: (result['task'] as int?) ?? 0,
+      totalSize: (result['total_size'] as int?) ?? 0,
     );
   }
 
@@ -768,21 +779,21 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
 
     return SnapshotTask(
       id: result['id']?.toString() ?? '',
-      dataset: result['dataset'] ?? '',
-      namingSchema: result['naming_schema'] ?? '',
-      schedule: result['schedule'] ?? '',
-      enabled: result['enabled'] ?? true,
-      recursive: result['recursive'] ?? false,
-      excludeEmpty: result['exclude_empty'] ?? false,
-      lifetimeValue: result['lifetime_value'] ?? 0,
-      lifetimeUnit: result['lifetime_unit'] ?? 'WEEK',
+      dataset: (result['dataset'] as String?) ?? '',
+      namingSchema: (result['naming_schema'] as String?) ?? '',
+      schedule: (result['schedule'] as String?) ?? '',
+      enabled: (result['enabled'] as bool?) ?? true,
+      recursive: (result['recursive'] as bool?) ?? false,
+      excludeEmpty: (result['exclude_empty'] as bool?) ?? false,
+      lifetimeValue: (result['lifetime_value'] as int?) ?? 0,
+      lifetimeUnit: (result['lifetime_unit'] as String?) ?? 'WEEK',
       nextRun: result['next_run'] != null
-          ? DateTime.tryParse(result['next_run'])
+          ? DateTime.tryParse(result['next_run'] as String)
           : null,
       lastRun: result['last_run'] != null
-          ? DateTime.tryParse(result['last_run'])
+          ? DateTime.tryParse(result['last_run'] as String)
           : null,
-      keepCount: result['keep_count'] ?? 0,
+      keepCount: (result['keep_count'] as int?) ?? 0,
       options: result,
     );
   }
@@ -835,7 +846,8 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
     });
 
     // Get the created snapshot details
-    final snapshotId = result['snapshot_id'] ?? result['id'];
+    final snapshotId =
+        (result['snapshot_id'] as String?) ?? (result['id'] as String?);
     final snapshotResult = await _call<Map<String, dynamic>>(
       'zfs.snapshot.get_instance',
       {'id': snapshotId},
@@ -869,10 +881,10 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
     });
 
     return Snapshot(
-      id: result['id'] ?? '',
+      id: (result['id'] as String?) ?? '',
       name: name,
       dataset: dataset,
-      pool: result['pool'] ?? '',
+      pool: (result['pool'] as String?) ?? '',
       created: DateTime.now(),
       used: 0,
       referenced: 0,
@@ -1258,5 +1270,221 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
       'system.logs',
       params,
     ).then((result) => result.cast<Map<String, dynamic>>());
+  }
+
+  // Disk Management
+  @override
+  Future<List<Disk>> listDisks({bool includePools = true}) async {
+    final result = await _call<List<dynamic>>('disk.query', {
+      'filters': [],
+      'options': {
+        'extra': {'pools': includePools},
+      },
+    });
+
+    return result.map((diskData) {
+      final disk = diskData as Map<String, dynamic>;
+      return Disk(
+        identifier: disk['identifier'] ?? '',
+        name: disk['name'] ?? '',
+        serial: disk['serial'],
+        lunid: disk['lunid'],
+        size: disk['size'] ?? 0,
+        description: disk['description'],
+        model: disk['model'] ?? 'Unknown',
+        type: _parseDiskType(disk['type']),
+        bus: disk['bus'] ?? 'Unknown',
+        devname: disk['devname'] ?? '',
+        rotationrate: disk['rotationrate'],
+        zfsGuid: disk['zfs_guid']?.toString(),
+        pool: disk['pool'],
+        number: disk['number'] ?? 0,
+        subsystem: disk['subsystem'] ?? '',
+        transfermode: disk['transfermode'] ?? 'Auto',
+        hddstandby: disk['hddstandby'] ?? 'ALWAYS ON',
+        advpowermgmt: disk['advpowermgmt'] ?? 'DISABLED',
+        togglesmart: disk['togglesmart'] ?? true,
+        smartoptions: disk['smartoptions'] ?? '',
+        temperature: disk['temperature'],
+        supportsSmart: disk['supports_smart'],
+        enclosure: disk['enclosure'],
+        health: _evaluateDiskHealth(disk),
+      );
+    }).toList();
+  }
+
+  @override
+  Future<Disk> getDisk(String identifier) async {
+    final disks = await listDisks();
+    return disks.firstWhere(
+      (disk) => disk.identifier == identifier,
+      orElse: () => throw TrueNasNotFoundException(
+        'Disk with identifier $identifier not found',
+        resourceType: 'Disk',
+        resourceId: identifier,
+      ),
+    );
+  }
+
+  @override
+  Future<List<DiskTemperature>> getDiskTemperatures(
+    List<String> diskNames,
+  ) async {
+    final result = await _call<Map<String, dynamic>>('disk.temperatures', {
+      'names': diskNames,
+    });
+
+    final temperatures = <DiskTemperature>[];
+    final now = DateTime.now();
+
+    result.forEach((diskName, temp) {
+      temperatures.add(
+        DiskTemperature(
+          diskName: diskName,
+          temperature: temp as int?,
+          timestamp: now,
+        ),
+      );
+    });
+
+    return temperatures;
+  }
+
+  @override
+  Future<Map<String, dynamic>> getDiskTemperatureAlerts(
+    List<String> diskNames,
+  ) async {
+    return await _call<Map<String, dynamic>>('disk.temperature_alerts', {
+      'names': diskNames,
+    });
+  }
+
+  @override
+  Future<Map<String, dynamic>> getDiskTemperatureHistory({
+    required List<String> diskNames,
+    required int days,
+  }) async {
+    return await _call<Map<String, dynamic>>('disk.temperature_agg', {
+      'names': diskNames,
+      'days': days,
+    });
+  }
+
+  @override
+  Future<List<Disk>> getPoolDisks(String poolId) async {
+    final disks = await listDisks(includePools: true);
+    return disks.where((disk) => disk.pool == poolId).toList();
+  }
+
+  @override
+  Future<PoolTopology> getPoolTopology(String poolId) async {
+    // Get pool configuration to extract topology
+    final poolConfig = await _call<Map<String, dynamic>>('pool.query', {
+      'filters': [
+        ['id', '=', poolId],
+      ],
+      'options': {'get': true},
+    });
+
+    final topology = poolConfig['topology'] as Map<String, dynamic>? ?? {};
+    final allDisks = await listDisks(includePools: true);
+
+    // Helper to convert disk references to Disk objects
+    List<Disk> getDisksFromVdev(List<dynamic> vdevDisks) {
+      return vdevDisks.map((diskRef) {
+        final diskName = diskRef is Map ? diskRef['disk'] : diskRef;
+        return allDisks.firstWhere(
+          (disk) => disk.name == diskName || disk.devname == diskName,
+          orElse: () => throw TrueNasNotFoundException(
+            'Disk $diskName not found',
+            resourceType: 'Disk',
+            resourceId: diskName.toString(),
+          ),
+        );
+      }).toList();
+    }
+
+    // Parse vdev groups
+    final vdevGroups = <VdevGroup>[];
+
+    // Data vdevs
+    final dataVdevs = topology['data'] as List<dynamic>? ?? [];
+    for (final vdev in dataVdevs) {
+      vdevGroups.add(
+        VdevGroup(
+          type: vdev['type'] ?? 'stripe',
+          status: vdev['status'] ?? 'ONLINE',
+          disks: getDisksFromVdev(vdev['children'] ?? []),
+          name: vdev['name'],
+          guid: vdev['guid']?.toString(),
+        ),
+      );
+    }
+
+    // Parse special vdevs (spares, cache, log)
+    final spares = getDisksFromVdev(topology['spare'] ?? []);
+    final cache = getDisksFromVdev(topology['cache'] ?? []);
+    final log = getDisksFromVdev(topology['log'] ?? []);
+
+    return PoolTopology(
+      poolId: poolId,
+      poolName: poolConfig['name'] ?? poolId,
+      vdevGroups: vdevGroups,
+      spares: spares,
+      cache: cache,
+      log: log,
+    );
+  }
+
+  @override
+  Future<Map<String, dynamic>> getDiskSmartData(String diskName) async {
+    return await _call<Map<String, dynamic>>('smart.test.results', {
+      'disk': diskName,
+    });
+  }
+
+  @override
+  Future<bool> runSmartTest({
+    required String diskName,
+    required String testType,
+  }) async {
+    await _call('smart.test.manual_test', {'disk': diskName, 'type': testType});
+    return true;
+  }
+
+  // Helper methods
+  DiskType _parseDiskType(String? type) {
+    switch (type?.toUpperCase()) {
+      case 'SSD':
+        return DiskType.ssd;
+      case 'HDD':
+        return DiskType.hdd;
+      default:
+        return DiskType.unknown;
+    }
+  }
+
+  DiskHealth _evaluateDiskHealth(Map<String, dynamic> diskData) {
+    // Basic health evaluation based on SMART status and temperature
+    final smartStatus = diskData['smart_status'];
+    final temperature = diskData['temperature'] as int?;
+
+    if (smartStatus == 'FAIL' || smartStatus == 'FAILED') {
+      return DiskHealth.critical;
+    }
+
+    if (temperature != null) {
+      if (temperature > 50) {
+        return DiskHealth.critical;
+      } else if (temperature > 45) {
+        return DiskHealth.warning;
+      }
+    }
+
+    if (smartStatus == 'PASS' || smartStatus == 'PASSED') {
+      return DiskHealth.healthy;
+    }
+
+    return DiskHealth.unknown;
   }
 }

@@ -2,7 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mynas_shared/mynas_shared.dart';
 import '../../providers/pool_provider.dart';
+import '../../providers/disk_provider.dart';
 import '../../utils/storage_utils.dart';
+import 'pool_topology_view.dart';
+import 'disk_list_view.dart';
 
 class PoolDetailPanel extends ConsumerStatefulWidget {
   final Pool pool;
@@ -68,7 +71,7 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
               controller: _tabController,
               tabs: const [
                 Tab(text: 'Overview', icon: Icon(Icons.dashboard_outlined)),
-                Tab(text: 'VDevs', icon: Icon(Icons.device_hub_outlined)),
+                Tab(text: 'Disks', icon: Icon(Icons.album)),
                 Tab(text: 'Datasets', icon: Icon(Icons.folder_outlined)),
                 Tab(text: 'Maintenance', icon: Icon(Icons.build_outlined)),
               ],
@@ -81,7 +84,7 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
               controller: _tabController,
               children: [
                 _buildOverviewTab(theme, resilver, scrubHistory),
-                _buildVDevsTab(theme),
+                _buildDisksTab(theme),
                 _buildDatasetsTab(theme, datasets),
                 _buildMaintenanceTab(theme, scrubTasks, resilver),
               ],
@@ -354,40 +357,100 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
     );
   }
 
-  Widget _buildVDevsTab(ThemeData theme) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+  Widget _buildDisksTab(ThemeData theme) {
+    final poolDisks = ref.watch(disksByPoolProvider(widget.pool.id));
+
+    return DefaultTabController(
+      length: 2,
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'VDev Topology',
-            style: theme.textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.bold,
+          // Disk health summary for this pool
+          Container(
+            padding: const EdgeInsets.all(24),
+            child: Row(
+              children: [
+                _buildDiskHealthCard(
+                  'Total Disks',
+                  poolDisks.length.toString(),
+                  Icons.album,
+                  theme.colorScheme.primary,
+                  theme,
+                ),
+                const SizedBox(width: 16),
+                _buildDiskHealthCard(
+                  'Healthy',
+                  poolDisks
+                      .where((d) => d.health == DiskHealth.healthy)
+                      .length
+                      .toString(),
+                  Icons.check_circle,
+                  Colors.green,
+                  theme,
+                ),
+                const SizedBox(width: 16),
+                _buildDiskHealthCard(
+                  'Warning',
+                  poolDisks
+                      .where((d) => d.health == DiskHealth.warning)
+                      .length
+                      .toString(),
+                  Icons.warning,
+                  Colors.orange,
+                  theme,
+                ),
+                const SizedBox(width: 16),
+                _buildDiskHealthCard(
+                  'Critical',
+                  poolDisks
+                      .where((d) => d.health == DiskHealth.critical)
+                      .length
+                      .toString(),
+                  Icons.error,
+                  Colors.red,
+                  theme,
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 16),
 
-          // Mock VDev structure - would be replaced with real data
-          _buildVDevCard(
-            'Main VDev',
-            'RAID-Z2',
-            ['sda', 'sdb', 'sdc', 'sdd', 'sde', 'sdf'],
-            true,
-            theme,
+          // Sub tabs for topology and disk list
+          Container(
+            color: theme.colorScheme.surfaceContainerHighest,
+            child: const TabBar(
+              tabs: [
+                Tab(text: 'Topology', icon: Icon(Icons.device_hub)),
+                Tab(text: 'Disk List', icon: Icon(Icons.list)),
+              ],
+            ),
           ),
-          const SizedBox(height: 16),
 
-          _buildVDevCard(
-            'Log Device',
-            'Mirror',
-            ['nvme0n1', 'nvme1n1'],
-            true,
-            theme,
+          // Tab content
+          Expanded(
+            child: TabBarView(
+              children: [
+                // Topology view
+                PoolTopologyView(
+                  poolId: widget.pool.id,
+                  onDiskSelected: (disk) {
+                    // TODO: Open disk detail panel
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Selected disk: ${disk.name}')),
+                    );
+                  },
+                ),
+
+                // Disk list view
+                DiskListView(
+                  onDiskSelected: (disk) {
+                    // TODO: Open disk detail panel
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Selected disk: ${disk.name}')),
+                    );
+                  },
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 16),
-
-          _buildVDevCard('Cache Device', 'Single', ['nvme2n1'], true, theme),
         ],
       ),
     );
@@ -613,6 +676,47 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
     );
   }
 
+  Widget _buildDiskHealthCard(
+    String title,
+    String value,
+    IconData icon,
+    Color color,
+    ThemeData theme,
+  ) {
+    return Expanded(
+      child: Card(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(icon, size: 20, color: color),
+                  const SizedBox(width: 8),
+                  Text(
+                    title,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                value,
+                style: theme.textTheme.headlineMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildActivityCard(
     String title,
     String subtitle,
@@ -634,66 +738,6 @@ class _PoolDetailPanelState extends ConsumerState<PoolDetailPanel>
           style: theme.textTheme.bodySmall?.copyWith(
             color: theme.colorScheme.onSurfaceVariant,
           ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildVDevCard(
-    String name,
-    String type,
-    List<String> disks,
-    bool isHealthy,
-    ThemeData theme,
-  ) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  isHealthy ? Icons.check_circle : Icons.warning,
-                  color: isHealthy ? Colors.green : theme.colorScheme.error,
-                ),
-                const SizedBox(width: 12),
-                Text(
-                  name,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-                const Spacer(),
-                Chip(
-                  label: Text(type),
-                  backgroundColor: theme.colorScheme.secondaryContainer,
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            Text(
-              'Disks (${disks.length})',
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: disks
-                  .map(
-                    (disk) => Chip(
-                      label: Text(disk),
-                      backgroundColor:
-                          theme.colorScheme.surfaceContainerHighest,
-                    ),
-                  )
-                  .toList(),
-            ),
-          ],
         ),
       ),
     );

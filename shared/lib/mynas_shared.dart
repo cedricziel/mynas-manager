@@ -6,6 +6,7 @@ export 'src/models/system_info.dart';
 export 'src/models/pool_scrub.dart';
 export 'src/models/snapshot.dart';
 export 'src/models/pool_resilver.dart';
+export 'src/models/disk.dart';
 
 // Base
 export 'src/mynas_shared_base.dart';

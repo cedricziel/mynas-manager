@@ -40,18 +40,24 @@ class TrueNasAuthManager implements IAuthManager {
 
   @override
   Future<AuthResult> authenticateWithApiKey(String apiKey) async {
-    _logger.info('Authenticating with API key (header-based)');
+    _logger.info('Authenticating with API key');
     _setState(AuthState.authenticating);
 
     try {
-      // For backend-to-TrueNAS authentication, we use the API key in WebSocket headers.
-      // The authentication is handled by the Authorization header in the connection.
-      // We don't need to validate immediately - we'll mark as authenticated
-      // and let actual API calls validate the key.
+      // Call the TrueNAS auth.login_with_api_key method
+      // This returns a boolean indicating success
+      final success = await _jsonRpcClient.call<bool>(
+        'auth.login_with_api_key',
+        {'api_key': apiKey},
+      );
 
-      _logger.info('API key authentication configured (header-based)');
-      _setState(AuthState.authenticated);
-      return AuthResult.success();
+      if (success) {
+        _logger.info('API key authentication successful');
+        _setState(AuthState.authenticated);
+        return AuthResult.success();
+      } else {
+        throw Exception('Invalid API key');
+      }
     } catch (e) {
       _logger.severe('API key authentication failed: $e');
       _setState(AuthState.error);
