@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mynas_frontend/providers/window_manager_provider.dart';
-import 'package:mynas_frontend/widgets/desktop/window_widget.dart';
+import 'package:mynas_desktop/src/providers/window_manager_provider.dart';
+import 'package:mynas_desktop/src/widgets/window_widget.dart';
 
 class WindowManager extends ConsumerWidget {
   final Widget child;

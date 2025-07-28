@@ -7,6 +7,7 @@ workspace:
   - backend
   - frontend
   - shared
+  - mynas_desktop
 
 environment:
   sdk: ^3.8.1

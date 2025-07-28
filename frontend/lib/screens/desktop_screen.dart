@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mynas_frontend/widgets/desktop/window_manager.dart';
-import 'package:mynas_frontend/widgets/desktop/desktop_area.dart';
-import 'package:mynas_frontend/widgets/desktop/dock.dart';
+import 'package:mynas_desktop/mynas_desktop.dart';
+import 'package:mynas_frontend/widgets/desktop/mynas_desktop_area.dart';
+import 'package:mynas_frontend/widgets/desktop/mynas_dock.dart';
 
 class DesktopScreen extends ConsumerWidget {
   const DesktopScreen({super.key});
@@ -32,10 +32,10 @@ class DesktopScreen extends ConsumerWidget {
             ),
 
             // Desktop area with icons
-            const DesktopArea(),
+            const MyNASDesktopArea(),
 
             // Dock at the bottom
-            const Positioned(left: 0, right: 0, bottom: 0, child: Dock()),
+            const Positioned(left: 0, right: 0, bottom: 0, child: MyNASDock()),
           ],
         ),
       ),

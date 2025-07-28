@@ -15,6 +15,10 @@
     {
       "name": "📦 Shared",
       "path": "shared"
+    },
+    {
+      "name": "🖥️ Desktop",
+      "path": "mynas_desktop"
     }
   ],
   "settings": {
@@ -109,7 +113,7 @@
       {
         "label": "Get Dependencies (All)",
         "type": "shell",
-        "command": "dart pub get && cd backend && dart pub get && cd ../frontend && flutter pub get && cd ../shared && dart pub get",
+        "command": "dart pub get && cd backend && dart pub get && cd ../frontend && flutter pub get && cd ../shared && dart pub get && cd ../mynas_desktop && flutter pub get",
         "group": {
           "kind": "build",
           "isDefault": true
@@ -119,7 +123,7 @@
       {
         "label": "Run Tests (All)",
         "type": "shell",
-        "command": "cd shared && dart test && cd ../backend && dart test && cd ../frontend && flutter test",
+        "command": "cd shared && dart test && cd ../backend && dart test && cd ../frontend && flutter test && cd ../mynas_desktop && flutter test",
         "group": {
           "kind": "test",
           "isDefault": true

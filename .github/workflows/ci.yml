@@ -52,8 +52,13 @@ jobs:
         cd frontend
         flutter test
     
+    - name: Test (mynas_desktop)
+      run: |
+        cd mynas_desktop
+        flutter test
+    
     - name: Check formatting
-      run: dart format --set-exit-if-changed shared/ backend/ frontend/lib/ frontend/test/
+      run: dart format --set-exit-if-changed shared/ backend/ frontend/lib/ frontend/test/ mynas_desktop/lib/ mynas_desktop/test/
 
   build-and-push:
     runs-on: ubuntu-latest

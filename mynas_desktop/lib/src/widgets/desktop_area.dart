@@ -1,86 +1,44 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:mynas_frontend/providers/window_manager_provider.dart';
-import 'package:mynas_frontend/screens/dashboard_screen.dart';
-import 'package:mynas_frontend/screens/storage_screen.dart';
-import 'package:mynas_frontend/screens/shares_screen.dart';
-import 'package:mynas_frontend/screens/settings_screen.dart';
 
-class DesktopArea extends ConsumerWidget {
-  const DesktopArea({super.key});
+/// A desktop icon configuration
+class DesktopIcon {
+  final String id;
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  const DesktopIcon({
+    required this.id,
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
+}
+
+/// A generic desktop area that displays icons
+class DesktopArea extends StatelessWidget {
+  final List<DesktopIcon> icons;
+
+  const DesktopArea({super.key, this.icons = const []});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(32.0),
       child: Wrap(
         spacing: 24,
         runSpacing: 24,
-        children: [
-          _DesktopIcon(
-            icon: Icons.dashboard,
-            label: 'Dashboard',
-            onTap: () => _openApp(
-              ref,
-              'dashboard',
-              'Dashboard',
-              Icons.dashboard,
-              const DashboardScreen(),
-            ),
-          ),
-          _DesktopIcon(
-            icon: Icons.storage,
-            label: 'Storage',
-            onTap: () => _openApp(
-              ref,
-              'storage',
-              'Storage Manager',
-              Icons.storage,
-              const StorageScreen(),
-            ),
-          ),
-          _DesktopIcon(
-            icon: Icons.folder_shared,
-            label: 'Shares',
-            onTap: () => _openApp(
-              ref,
-              'shares',
-              'Share Manager',
-              Icons.folder_shared,
-              const SharesScreen(),
-            ),
-          ),
-          _DesktopIcon(
-            icon: Icons.settings,
-            label: 'Settings',
-            onTap: () => _openApp(
-              ref,
-              'settings',
-              'Settings',
-              Icons.settings,
-              const SettingsScreen(),
-            ),
-          ),
-        ],
+        children: icons
+            .map(
+              (icon) => _DesktopIcon(
+                icon: icon.icon,
+                label: icon.label,
+                onTap: icon.onTap,
+              ),
+            )
+            .toList(),
       ),
     );
-  }
-
-  void _openApp(
-    WidgetRef ref,
-    String id,
-    String title,
-    IconData icon,
-    Widget content,
-  ) {
-    ref
-        .read(windowManagerProvider.notifier)
-        .openWindowWithParams(
-          id: id,
-          title: title,
-          icon: icon,
-          content: content,
-        );
   }
 }
 

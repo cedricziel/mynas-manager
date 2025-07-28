@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mynas_frontend/models/window_state.dart';
-import 'package:mynas_frontend/widgets/desktop/resizable_window.dart';
+import 'package:mynas_desktop/src/models/window_state.dart';
+import 'package:mynas_desktop/src/widgets/resizable_window.dart';
 
 void main() {
   group('ResizableWindow', () {

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mynas_frontend/models/window_state.dart';
-import 'package:mynas_frontend/providers/window_manager_provider.dart';
+import 'package:mynas_desktop/src/models/window_state.dart';
+import 'package:mynas_desktop/src/providers/window_manager_provider.dart';
 
 void main() {
   group('WindowManagerProvider', () {

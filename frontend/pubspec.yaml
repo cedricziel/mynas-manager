@@ -57,12 +57,13 @@ dependencies:
   # Charts
   fl_chart: ^1.0.0
   
-  # Desktop UI
-  flutter_box_transform: ^0.4.5
-  
   # Shared models
   mynas_shared:
     path: ../shared
+  
+  # Desktop window management
+  mynas_desktop:
+    path: ../mynas_desktop
 
 dev_dependencies:
   flutter_test:

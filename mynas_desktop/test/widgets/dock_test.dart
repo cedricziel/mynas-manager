@@ -2,16 +2,53 @@ import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mynas_frontend/models/window_state.dart';
-import 'package:mynas_frontend/providers/window_manager_provider.dart';
-import 'package:mynas_frontend/widgets/desktop/dock.dart';
+import 'package:mynas_desktop/src/models/window_state.dart';
+import 'package:mynas_desktop/src/providers/window_manager_provider.dart';
+import 'package:mynas_desktop/src/widgets/dock.dart';
+
+// Test helper to create a Dock with test launchers
+class _TestDock extends ConsumerWidget {
+  const _TestDock();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    return Dock(
+      launchers: [
+        DockLauncher(
+          id: 'storage',
+          icon: Icons.storage,
+          label: 'Storage',
+          onTap: () {
+            final windowManager = ref.read(windowManagerProvider.notifier);
+            windowManager.openWindow(
+              const WindowState(
+                id: 'storage-app',
+                title: 'Storage Manager',
+                icon: Icons.storage,
+                content: Text('Storage App'),
+              ),
+            );
+          },
+        ),
+        DockLauncher(
+          id: 'apps',
+          icon: Icons.apps,
+          label: 'Apps',
+          onTap: () {
+            // Test app launcher
+          },
+        ),
+      ],
+    );
+  }
+}
 
 void main() {
   group('Dock', () {
     testWidgets('shows default app launchers', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(home: Scaffold(body: Dock())),
+        ProviderScope(
+          child: MaterialApp(home: Scaffold(body: const _TestDock())),
         ),
       );
 
@@ -24,8 +61,8 @@ void main() {
 
     testWidgets('shows tooltip on hover', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(home: Scaffold(body: Dock())),
+        ProviderScope(
+          child: MaterialApp(home: Scaffold(body: const _TestDock())),
         ),
       );
 
@@ -42,8 +79,8 @@ void main() {
       tester,
     ) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(home: Scaffold(body: Dock())),
+        ProviderScope(
+          child: MaterialApp(home: Scaffold(body: const _TestDock())),
         ),
       );
 
@@ -54,7 +91,7 @@ void main() {
 
       // Check that a window was opened
       final container = ProviderScope.containerOf(
-        tester.element(find.byType(Dock)),
+        tester.element(find.byType(_TestDock)),
       );
       final windowState = container.read(windowManagerProvider);
 
@@ -74,7 +111,7 @@ void main() {
           child: Builder(
             builder: (context) {
               container = ProviderScope.containerOf(context);
-              return const MaterialApp(home: Scaffold(body: Dock()));
+              return MaterialApp(home: Scaffold(body: const _TestDock()));
             },
           ),
         ),
@@ -124,7 +161,7 @@ void main() {
           child: Builder(
             builder: (context) {
               container = ProviderScope.containerOf(context);
-              return const MaterialApp(home: Scaffold(body: Dock()));
+              return MaterialApp(home: Scaffold(body: const _TestDock()));
             },
           ),
         ),
@@ -166,7 +203,7 @@ void main() {
           child: Builder(
             builder: (context) {
               container = ProviderScope.containerOf(context);
-              return const MaterialApp(home: Scaffold(body: Dock()));
+              return MaterialApp(home: Scaffold(body: const _TestDock()));
             },
           ),
         ),
@@ -211,7 +248,7 @@ void main() {
           child: Builder(
             builder: (context) {
               container = ProviderScope.containerOf(context);
-              return const MaterialApp(home: Scaffold(body: Dock()));
+              return MaterialApp(home: Scaffold(body: const _TestDock()));
             },
           ),
         ),
@@ -241,7 +278,10 @@ void main() {
       // We can verify by checking the dock contains more children
       final dock = tester.widget<Container>(
         find
-            .descendant(of: find.byType(Dock), matching: find.byType(Container))
+            .descendant(
+              of: find.byType(_TestDock),
+              matching: find.byType(Container),
+            )
             .last,
       );
       expect(dock, isNotNull);
@@ -256,7 +296,7 @@ void main() {
           child: Builder(
             builder: (context) {
               container = ProviderScope.containerOf(context);
-              return const MaterialApp(home: Scaffold(body: Dock()));
+              return MaterialApp(home: Scaffold(body: const _TestDock()));
             },
           ),
         ),
@@ -297,7 +337,7 @@ void main() {
           child: Builder(
             builder: (context) {
               container = ProviderScope.containerOf(context);
-              return const MaterialApp(home: Scaffold(body: Dock()));
+              return MaterialApp(home: Scaffold(body: const _TestDock()));
             },
           ),
         ),
@@ -335,7 +375,7 @@ void main() {
           child: Builder(
             builder: (context) {
               container = ProviderScope.containerOf(context);
-              return const MaterialApp(home: Scaffold(body: Dock()));
+              return MaterialApp(home: Scaffold(body: const _TestDock()));
             },
           ),
         ),
@@ -390,7 +430,7 @@ void main() {
           child: Builder(
             builder: (context) {
               container = ProviderScope.containerOf(context);
-              return const MaterialApp(home: Scaffold(body: Dock()));
+              return MaterialApp(home: Scaffold(body: const _TestDock()));
             },
           ),
         ),
@@ -422,8 +462,8 @@ void main() {
 
     testWidgets('dock has blur effect background', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(home: Scaffold(body: Dock())),
+        ProviderScope(
+          child: MaterialApp(home: Scaffold(body: const _TestDock())),
         ),
       );
 
@@ -436,8 +476,8 @@ void main() {
 
     testWidgets('dock items animate on hover', (tester) async {
       await tester.pumpWidget(
-        const ProviderScope(
-          child: MaterialApp(home: Scaffold(body: Dock())),
+        ProviderScope(
+          child: MaterialApp(home: Scaffold(body: const _TestDock())),
         ),
       );
 
