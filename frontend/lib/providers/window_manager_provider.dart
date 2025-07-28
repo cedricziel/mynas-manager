@@ -21,12 +21,14 @@ class WindowManagerState {
   WindowManagerState copyWith({
     List<WindowState>? windows,
     int? nextZIndex,
-    String? focusedWindowId,
+    String? Function()? focusedWindowId,
   }) {
     return WindowManagerState(
       windows: windows ?? this.windows,
       nextZIndex: nextZIndex ?? this.nextZIndex,
-      focusedWindowId: focusedWindowId ?? this.focusedWindowId,
+      focusedWindowId: focusedWindowId != null
+          ? focusedWindowId()
+          : this.focusedWindowId,
     );
   }
 }
@@ -57,7 +59,7 @@ class WindowManagerNotifier extends StateNotifier<WindowManagerState> {
     state = state.copyWith(
       windows: [...updatedWindows, newWindow],
       nextZIndex: state.nextZIndex + 1,
-      focusedWindowId: window.id,
+      focusedWindowId: () => window.id,
     );
   }
 
@@ -111,16 +113,15 @@ class WindowManagerNotifier extends StateNotifier<WindowManagerState> {
     state = state.copyWith(
       windows: [...updatedWindows, newWindow],
       nextZIndex: state.nextZIndex + 1,
-      focusedWindowId: id,
+      focusedWindowId: () => id,
     );
   }
 
   void closeWindow(String id) {
     state = state.copyWith(
       windows: state.windows.where((w) => w.id != id).toList(),
-      focusedWindowId: state.focusedWindowId == id
-          ? null
-          : state.focusedWindowId,
+      focusedWindowId: () =>
+          state.focusedWindowId == id ? null : state.focusedWindowId,
     );
   }
 
@@ -134,9 +135,8 @@ class WindowManagerNotifier extends StateNotifier<WindowManagerState> {
 
     state = state.copyWith(
       windows: updatedWindows,
-      focusedWindowId: state.focusedWindowId == id
-          ? null
-          : state.focusedWindowId,
+      focusedWindowId: () =>
+          state.focusedWindowId == id ? null : state.focusedWindowId,
     );
   }
 
@@ -167,7 +167,7 @@ class WindowManagerNotifier extends StateNotifier<WindowManagerState> {
     state = state.copyWith(
       windows: updatedWindows,
       nextZIndex: state.nextZIndex + 1,
-      focusedWindowId: id,
+      focusedWindowId: () => id,
     );
   }
 
@@ -191,7 +191,7 @@ class WindowManagerNotifier extends StateNotifier<WindowManagerState> {
     state = state.copyWith(
       windows: updatedWindows,
       nextZIndex: state.nextZIndex + 1,
-      focusedWindowId: id,
+      focusedWindowId: () => id,
     );
   }
 

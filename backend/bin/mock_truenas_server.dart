@@ -34,6 +34,9 @@ void handleConnection(WebSocket webSocket, Logger logger) {
   final channel = IOWebSocketChannel(webSocket);
   final peer = json_rpc.Peer(channel.cast<String>());
 
+  // Simple authentication state
+  // bool isAuthenticated = true; // Mock server auto-authenticates
+
   // Register mock methods
   registerMockMethods(peer, logger);
 
@@ -231,6 +234,113 @@ void registerMockMethods(json_rpc.Peer peer, Logger logger) {
     ];
   });
 
+  // Add pool.list method that mirrors the backend JSON-RPC interface
+  peer.registerMethod('pool.list', (params) {
+    logger.fine('Called pool.list with params: $params');
+    // Reuse the same logic as pool.query since backend calls pool.query internally
+    return [
+      {
+        'id': 1,
+        'name': 'tank',
+        'guid': '12345678901234567890',
+        'is_upgraded': true,
+        'path': '/mnt/tank',
+        'status': 'ONLINE',
+        'scan': {
+          'function': 'SCRUB',
+          'state': 'FINISHED',
+          'start_time': {
+            '\$date': DateTime.now()
+                .subtract(Duration(hours: 2))
+                .millisecondsSinceEpoch,
+          },
+          'end_time': {
+            '\$date': DateTime.now()
+                .subtract(Duration(hours: 1))
+                .millisecondsSinceEpoch,
+          },
+          'percentage': 100.0,
+          'bytes_to_process': 1000000000,
+          'bytes_processed': 1000000000,
+          'bytes_issued': 1000000000,
+          'pause': null,
+          'errors': 0,
+          'total_secs_left': null,
+        },
+        'topology': {
+          'data': [
+            {
+              'name': 'mirror-0',
+              'type': 'MIRROR',
+              'path': null,
+              'guid': '98765432109876543210',
+              'status': 'ONLINE',
+              'stats': {
+                'timestamp': DateTime.now().microsecondsSinceEpoch,
+                'read_errors': 0,
+                'write_errors': 0,
+                'checksum_errors': 0,
+                'ops': [0, 100, 200, 0, 0, 50, 0],
+                'bytes': [0, 1048576, 2097152, 0, 0, 524288, 0],
+                'size': 2000000000000,
+                'allocated': 1000000000000,
+                'fragmentation': 10,
+                'self_healed': 0,
+                'configured_ashift': 12,
+                'logical_ashift': 9,
+                'physical_ashift': 12,
+              },
+              'children': [
+                {
+                  'name': 'sda1',
+                  'type': 'DISK',
+                  'path': '/dev/sda1',
+                  'guid': '11111111111111111111',
+                  'status': 'ONLINE',
+                  'device': 'sda1',
+                  'disk': 'sda',
+                },
+                {
+                  'name': 'sdb1',
+                  'type': 'DISK',
+                  'path': '/dev/sdb1',
+                  'guid': '22222222222222222222',
+                  'status': 'ONLINE',
+                  'device': 'sdb1',
+                  'disk': 'sdb',
+                },
+              ],
+            },
+          ],
+          'log': [],
+          'cache': [],
+          'spare': [],
+          'special': [],
+          'dedup': [],
+        },
+        'healthy': true,
+        'warning': false,
+        'status_code': 'OK',
+        'status_detail': null,
+        'size': 2000000000000,
+        'allocated': 1000000000000,
+        'free': 1000000000000,
+        'freeing': 0,
+        'fragmentation': '10',
+        'size_str': '2000000000000',
+        'allocated_str': '1000000000000',
+        'free_str': '1000000000000',
+        'freeing_str': '0',
+        'autotrim': {
+          'value': 'on',
+          'rawvalue': 'on',
+          'parsed': 'on',
+          'source': 'LOCAL',
+        },
+      },
+    ];
+  });
+
   peer.registerMethod('pool.dataset.query', (params) {
     logger.fine('Called pool.dataset.query');
     return [
@@ -321,8 +431,22 @@ void registerMockMethods(json_rpc.Peer peer, Logger logger) {
   });
 
   peer.registerMethod('auth.me', (params) {
-    logger.fine('Called auth.me');
-    return {'id': 1, 'username': 'root', 'group': 'wheel', 'attributes': {}};
+    logger.info('Called auth.me - returning authenticated user');
+    return {
+      'id': 1,
+      'username': 'root',
+      'group': 'wheel',
+      'attributes': {},
+      'privilege': {'webui_access': true, 'web_shell': false},
+      'account_attributes': {},
+      'two_factor_auth_configured': false,
+    };
+  });
+
+  // Add auth.login for completeness (though we use API key auth)
+  peer.registerMethod('auth.login', (params) {
+    logger.info('Called auth.login - accepting any credentials for mock');
+    return true; // Mock always succeeds
   });
 
   peer.registerMethod('core.ping', (params) {
