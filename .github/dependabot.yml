@@ -1,4 +1,5 @@
 version: 2
+enable-beta-ecosystems: true
 updates:
   # Root workspace dependencies (dart_pre_commit, etc.)
   - package-ecosystem: "pub"
@@ -46,6 +47,20 @@ updates:
 
   - package-ecosystem: "pub"
     directory: "/shared"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "shared"
+    commit-message:
+      prefix: "chore"
+      include: "scope"
+
+  - package-ecosystem: "pub"
+    directory: "/mynas_desktop"
     schedule:
       interval: "weekly"
       day: "monday"
