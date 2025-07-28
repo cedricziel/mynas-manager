@@ -483,16 +483,16 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
         pool: poolId,
         status: _parseScrubStatus(scrub['state']?.toString() ?? 'finished'),
         startTime: scrub['start_time'] != null
-            ? DateTime.tryParse(scrub['start_time'])
+            ? DateTime.tryParse(scrub['start_time'] as String)
             : null,
         endTime: scrub['end_time'] != null
-            ? DateTime.tryParse(scrub['end_time'])
+            ? DateTime.tryParse(scrub['end_time'] as String)
             : null,
-        duration: scrub['duration'],
-        bytesProcessed: scrub['bytes_processed'],
-        bytesPerSecond: scrub['bytes_per_second'],
-        errorsFound: scrub['errors'],
-        description: scrub['description'] ?? '',
+        duration: scrub['duration'] as int?,
+        bytesProcessed: scrub['bytes_processed'] as int?,
+        bytesPerSecond: scrub['bytes_per_second'] as int?,
+        errorsFound: scrub['errors'] as int?,
+        description: (scrub['description'] as String?) ?? '',
       );
     }).toList();
   }
@@ -538,17 +538,17 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
           resilverData['state']?.toString() ?? 'idle',
         ),
         startTime: resilverData['start_time'] != null
-            ? DateTime.tryParse(resilverData['start_time'])
+            ? DateTime.tryParse(resilverData['start_time'] as String)
             : null,
         estimatedEndTime: resilverData['estimated_end_time'] != null
-            ? DateTime.tryParse(resilverData['estimated_end_time'])
+            ? DateTime.tryParse(resilverData['estimated_end_time'] as String)
             : null,
-        bytesProcessed: resilverData['bytes_processed'],
-        totalBytes: resilverData['total_bytes'],
+        bytesProcessed: resilverData['bytes_processed'] as int?,
+        totalBytes: resilverData['total_bytes'] as int?,
         percentComplete: (resilverData['percent_complete'] as num?)?.toDouble(),
-        bytesPerSecond: resilverData['bytes_per_second'],
-        errorsFound: resilverData['errors'],
-        description: resilverData['description'],
+        bytesPerSecond: resilverData['bytes_per_second'] as int?,
+        errorsFound: resilverData['errors'] as int?,
+        description: resilverData['description'] as String?,
       );
     } catch (e) {
       return null; // No active resilver
@@ -596,16 +596,16 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
         .map((datasetData) {
           final dataset = datasetData as Map<String, dynamic>;
           return Dataset(
-            id: dataset['id'] ?? '',
-            name: dataset['name'] ?? '',
-            pool: dataset['pool'] ?? '',
-            type: dataset['type'] ?? 'FILESYSTEM',
+            id: (dataset['id'] as String?) ?? '',
+            name: (dataset['name'] as String?) ?? '',
+            pool: (dataset['pool'] as String?) ?? '',
+            type: (dataset['type'] as String?) ?? 'FILESYSTEM',
             used: (dataset['used']?['parsed'] as num?)?.toInt() ?? 0,
             available: (dataset['available']?['parsed'] as num?)?.toInt() ?? 0,
             referenced:
                 (dataset['referenced']?['parsed'] as num?)?.toInt() ?? 0,
-            mountpoint: dataset['mountpoint'] ?? '',
-            encrypted: dataset['encrypted'] ?? false,
+            mountpoint: (dataset['mountpoint'] as String?) ?? '',
+            encrypted: (dataset['encrypted'] as bool?) ?? false,
             children:
                 (dataset['children'] as List?)
                     ?.map(
@@ -721,14 +721,16 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
     return result.map((snapshotData) {
       final snapshot = snapshotData as Map<String, dynamic>;
       return Snapshot(
-        id: snapshot['id'] ?? '',
-        name: snapshot['name'] ?? '',
+        id: (snapshot['id'] as String?) ?? '',
+        name: (snapshot['name'] as String?) ?? '',
         dataset: datasetId,
-        pool: snapshot['pool'] ?? '',
-        created: DateTime.tryParse(snapshot['created'] ?? '') ?? DateTime.now(),
+        pool: (snapshot['pool'] as String?) ?? '',
+        created:
+            DateTime.tryParse((snapshot['created'] as String?) ?? '') ??
+            DateTime.now(),
         used: (snapshot['used']?['parsed'] as num?)?.toInt() ?? 0,
         referenced: (snapshot['referenced']?['parsed'] as num?)?.toInt() ?? 0,
-        description: snapshot['description'],
+        description: snapshot['description'] as String?,
         properties: snapshot['properties'] as Map<String, dynamic>? ?? {},
       );
     }).toList();
@@ -750,21 +752,21 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
       final task = taskData as Map<String, dynamic>;
       return SnapshotTask(
         id: task['id']?.toString() ?? '',
-        dataset: task['dataset'] ?? '',
-        namingSchema: task['naming_schema'] ?? '',
-        schedule: task['schedule'] ?? '',
-        enabled: task['enabled'] ?? true,
-        recursive: task['recursive'] ?? false,
-        excludeEmpty: task['exclude_empty'] ?? false,
-        lifetimeValue: task['lifetime_value'] ?? 0,
-        lifetimeUnit: task['lifetime_unit'] ?? 'WEEK',
+        dataset: (task['dataset'] as String?) ?? '',
+        namingSchema: (task['naming_schema'] as String?) ?? '',
+        schedule: (task['schedule'] as String?) ?? '',
+        enabled: (task['enabled'] as bool?) ?? true,
+        recursive: (task['recursive'] as bool?) ?? false,
+        excludeEmpty: (task['exclude_empty'] as bool?) ?? false,
+        lifetimeValue: (task['lifetime_value'] as int?) ?? 0,
+        lifetimeUnit: (task['lifetime_unit'] as String?) ?? 'WEEK',
         nextRun: task['next_run'] != null
-            ? DateTime.tryParse(task['next_run'])
+            ? DateTime.tryParse(task['next_run'] as String)
             : null,
         lastRun: task['last_run'] != null
-            ? DateTime.tryParse(task['last_run'])
+            ? DateTime.tryParse(task['last_run'] as String)
             : null,
-        keepCount: task['keep_count'] ?? 0,
+        keepCount: (task['keep_count'] as int?) ?? 0,
         options: task,
       );
     }).toList();
@@ -854,16 +856,17 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
     );
 
     return Snapshot(
-      id: snapshotResult['id'] ?? '',
-      name: snapshotResult['name'] ?? '',
-      dataset: snapshotResult['dataset'] ?? '',
-      pool: snapshotResult['pool'] ?? '',
+      id: (snapshotResult['id'] as String?) ?? '',
+      name: (snapshotResult['name'] as String?) ?? '',
+      dataset: (snapshotResult['dataset'] as String?) ?? '',
+      pool: (snapshotResult['pool'] as String?) ?? '',
       created:
-          DateTime.tryParse(snapshotResult['created'] ?? '') ?? DateTime.now(),
+          DateTime.tryParse((snapshotResult['created'] as String?) ?? '') ??
+          DateTime.now(),
       used: (snapshotResult['used']?['parsed'] as num?)?.toInt() ?? 0,
       referenced:
           (snapshotResult['referenced']?['parsed'] as num?)?.toInt() ?? 0,
-      description: snapshotResult['description'],
+      description: snapshotResult['description'] as String?,
       properties: snapshotResult['properties'] as Map<String, dynamic>? ?? {},
     );
   }
@@ -930,11 +933,11 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
   Share _parseSmbShare(Map<String, dynamic> data) {
     return Share(
       id: data['id']?.toString() ?? '',
-      name: data['name'] ?? '',
-      path: data['path'] ?? '',
+      name: (data['name'] as String?) ?? '',
+      path: (data['path'] as String?) ?? '',
       type: ShareType.smb,
-      enabled: data['enabled'] ?? false,
-      comment: data['comment'],
+      enabled: (data['enabled'] as bool?) ?? false,
+      comment: data['comment'] as String?,
       config: data,
     );
   }
@@ -942,11 +945,11 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
   Share _parseNfsShare(Map<String, dynamic> data) {
     return Share(
       id: data['id']?.toString() ?? '',
-      name: data['comment'] ?? 'NFS Share ${data['id']}',
-      path: data['path'] ?? '',
+      name: (data['comment'] as String?) ?? 'NFS Share ${data['id']}',
+      path: (data['path'] as String?) ?? '',
       type: ShareType.nfs,
-      enabled: data['enabled'] ?? false,
-      comment: data['comment'],
+      enabled: (data['enabled'] as bool?) ?? false,
+      comment: data['comment'] as String?,
       config: data,
     );
   }
@@ -1276,7 +1279,7 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
   @override
   Future<List<Disk>> listDisks({bool includePools = true}) async {
     final result = await _call<List<dynamic>>('disk.query', {
-      'filters': [],
+      'filters': <dynamic>[],
       'options': {
         'extra': {'pools': includePools},
       },
@@ -1285,29 +1288,29 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
     return result.map((diskData) {
       final disk = diskData as Map<String, dynamic>;
       return Disk(
-        identifier: disk['identifier'] ?? '',
-        name: disk['name'] ?? '',
-        serial: disk['serial'],
-        lunid: disk['lunid'],
-        size: disk['size'] ?? 0,
-        description: disk['description'],
-        model: disk['model'] ?? 'Unknown',
-        type: _parseDiskType(disk['type']),
-        bus: disk['bus'] ?? 'Unknown',
-        devname: disk['devname'] ?? '',
-        rotationrate: disk['rotationrate'],
+        identifier: (disk['identifier'] as String?) ?? '',
+        name: (disk['name'] as String?) ?? '',
+        serial: disk['serial'] as String?,
+        lunid: disk['lunid'] as String?,
+        size: (disk['size'] as int?) ?? 0,
+        description: disk['description'] as String?,
+        model: (disk['model'] as String?) ?? 'Unknown',
+        type: _parseDiskType(disk['type'] as String?),
+        bus: (disk['bus'] as String?) ?? 'Unknown',
+        devname: (disk['devname'] as String?) ?? '',
+        rotationrate: disk['rotationrate'] as int?,
         zfsGuid: disk['zfs_guid']?.toString(),
-        pool: disk['pool'],
-        number: disk['number'] ?? 0,
-        subsystem: disk['subsystem'] ?? '',
-        transfermode: disk['transfermode'] ?? 'Auto',
-        hddstandby: disk['hddstandby'] ?? 'ALWAYS ON',
-        advpowermgmt: disk['advpowermgmt'] ?? 'DISABLED',
-        togglesmart: disk['togglesmart'] ?? true,
-        smartoptions: disk['smartoptions'] ?? '',
-        temperature: disk['temperature'],
-        supportsSmart: disk['supports_smart'],
-        enclosure: disk['enclosure'],
+        pool: disk['pool'] as String?,
+        number: (disk['number'] as int?) ?? 0,
+        subsystem: (disk['subsystem'] as String?) ?? '',
+        transfermode: (disk['transfermode'] as String?) ?? 'Auto',
+        hddstandby: (disk['hddstandby'] as String?) ?? 'ALWAYS ON',
+        advpowermgmt: (disk['advpowermgmt'] as String?) ?? 'DISABLED',
+        togglesmart: (disk['togglesmart'] as bool?) ?? true,
+        smartoptions: (disk['smartoptions'] as String?) ?? '',
+        temperature: disk['temperature'] as int?,
+        supportsSmart: disk['supports_smart'] as bool?,
+        enclosure: disk['enclosure'] as String?,
         health: _evaluateDiskHealth(disk),
       );
     }).toList();
@@ -1412,23 +1415,25 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
     for (final vdev in dataVdevs) {
       vdevGroups.add(
         VdevGroup(
-          type: vdev['type'] ?? 'stripe',
-          status: vdev['status'] ?? 'ONLINE',
-          disks: getDisksFromVdev(vdev['children'] ?? []),
-          name: vdev['name'],
+          type: (vdev['type'] as String?) ?? 'stripe',
+          status: (vdev['status'] as String?) ?? 'ONLINE',
+          disks: getDisksFromVdev((vdev['children'] as List<dynamic>?) ?? []),
+          name: vdev['name'] as String?,
           guid: vdev['guid']?.toString(),
         ),
       );
     }
 
     // Parse special vdevs (spares, cache, log)
-    final spares = getDisksFromVdev(topology['spare'] ?? []);
-    final cache = getDisksFromVdev(topology['cache'] ?? []);
-    final log = getDisksFromVdev(topology['log'] ?? []);
+    final spares = getDisksFromVdev(
+      (topology['spare'] as List<dynamic>?) ?? [],
+    );
+    final cache = getDisksFromVdev((topology['cache'] as List<dynamic>?) ?? []);
+    final log = getDisksFromVdev((topology['log'] as List<dynamic>?) ?? []);
 
     return PoolTopology(
       poolId: poolId,
-      poolName: poolConfig['name'] ?? poolId,
+      poolName: (poolConfig['name'] as String?) ?? poolId,
       vdevGroups: vdevGroups,
       spares: spares,
       cache: cache,
