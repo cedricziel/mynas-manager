@@ -12,7 +12,7 @@ environment:
   sdk: ^3.8.1
 
 dev_dependencies:
-  dart_pre_commit: ^5.4.5
+  dart_pre_commit: ^5.4.6
 
 # Pre-commit hook configuration
 dart_pre_commit:
