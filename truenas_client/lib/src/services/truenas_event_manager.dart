@@ -10,7 +10,7 @@ class TrueNasEventManager implements IEventManager {
       StreamController<TrueNasEvent>.broadcast();
 
   final IJsonRpcClient _jsonRpcClient;
-  StreamSubscription? _notificationSubscription;
+  StreamSubscription<JsonRpcNotification>? _notificationSubscription;
   bool _isSubscribed = false;
   EventSubscription? _currentSubscription;
 
@@ -23,7 +23,7 @@ class TrueNasEventManager implements IEventManager {
     // Listen to JSON-RPC notifications
     _notificationSubscription = _jsonRpcClient.notifications.listen(
       _handleNotification,
-      onError: (error) {
+      onError: (Object error) {
         _logger.severe('Notification stream error: $error');
       },
     );
@@ -45,7 +45,7 @@ class TrueNasEventManager implements IEventManager {
       }
 
       // Subscribe to events using TrueNAS WebSocket protocol
-      await _jsonRpcClient.call('core.subscribe', {
+      await _jsonRpcClient.call<dynamic>('core.subscribe', {
         'name': subscription.eventTypes,
       });
 
@@ -75,7 +75,7 @@ class TrueNasEventManager implements IEventManager {
 
     try {
       if (_currentSubscription != null) {
-        await _jsonRpcClient.call('core.unsubscribe', {
+        await _jsonRpcClient.call<dynamic>('core.unsubscribe', {
           'name': _currentSubscription!.eventTypes,
         });
       }

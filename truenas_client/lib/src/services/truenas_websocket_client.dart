@@ -245,7 +245,7 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
   @override
   Future<List<Pool>> listPools() async {
     final result = await _call<List<dynamic>>('pool.query', {
-      'filters': [],
+      'filters': <dynamic>[],
       'options': {
         'extra': {'is_upgraded': true},
       },
@@ -337,7 +337,7 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
 
   @override
   Future<bool> exportPool(String poolId, {bool destroy = false}) async {
-    await _call('pool.export', {'id': poolId, 'destroy': destroy});
+    await _call<dynamic>('pool.export', {'id': poolId, 'destroy': destroy});
     return true;
   }
 
@@ -432,13 +432,13 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
     String taskId,
     Map<String, dynamic> updates,
   ) async {
-    await _call('pool.scrub.update', {'id': taskId, ...updates});
+    await _call<dynamic>('pool.scrub.update', {'id': taskId, ...updates});
     return getScrubTask(taskId);
   }
 
   @override
   Future<bool> deleteScrubTask(String taskId) async {
-    await _call('pool.scrub.delete', {'id': taskId});
+    await _call<dynamic>('pool.scrub.delete', {'id': taskId});
     return true;
   }
 
@@ -560,7 +560,7 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
     String poolId,
     Map<String, dynamic> config,
   ) async {
-    await _call('pool.resilver.update', {'pool': poolId, ...config});
+    await _call<dynamic>('pool.resilver.update', {'pool': poolId, ...config});
     return true;
   }
 
@@ -675,13 +675,16 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
     String id,
     Map<String, dynamic> properties,
   ) async {
-    await _call('pool.dataset.update', {'id': id, ...properties});
+    await _call<dynamic>('pool.dataset.update', {'id': id, ...properties});
     return getDataset(id);
   }
 
   @override
   Future<bool> deleteDataset(String id, {bool recursive = false}) async {
-    await _call('pool.dataset.delete', {'id': id, 'recursive': recursive});
+    await _call<dynamic>('pool.dataset.delete', {
+      'id': id,
+      'recursive': recursive,
+    });
     return true;
   }
 
@@ -831,13 +834,16 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
     String taskId,
     Map<String, dynamic> updates,
   ) async {
-    await _call('pool.snapshottask.update', {'id': taskId, ...updates});
+    await _call<dynamic>('pool.snapshottask.update', {
+      'id': taskId,
+      ...updates,
+    });
     return getSnapshotTask(taskId);
   }
 
   @override
   Future<bool> deleteSnapshotTask(String taskId) async {
-    await _call('pool.snapshottask.delete', {'id': taskId});
+    await _call<dynamic>('pool.snapshottask.delete', {'id': taskId});
     return true;
   }
 
@@ -901,7 +907,7 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
     String dataset,
     List<String> snapshotNames,
   ) async {
-    await _call('pool.dataset.destroy_snapshots', {
+    await _call<dynamic>('pool.dataset.destroy_snapshots', {
       'dataset': dataset,
       'snapshots': snapshotNames,
     });
@@ -1005,7 +1011,7 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
   Future<Share> updateShare(Share shareData) async {
     switch (shareData.type) {
       case ShareType.smb:
-        await _call('sharing.smb.update', {
+        await _call<dynamic>('sharing.smb.update', {
           'id': shareData.id,
           'name': shareData.name,
           'path': shareData.path,
@@ -1015,7 +1021,7 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
         });
         break;
       case ShareType.nfs:
-        await _call('sharing.nfs.update', {
+        await _call<dynamic>('sharing.nfs.update', {
           'id': shareData.id,
           'path': shareData.path,
           'enabled': shareData.enabled,
@@ -1034,10 +1040,10 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
   Future<bool> deleteShare(String id) async {
     // Try both SMB and NFS deletion
     try {
-      await _call('sharing.smb.delete', {'id': id});
+      await _call<dynamic>('sharing.smb.delete', {'id': id});
       return true;
     } catch (e) {
-      await _call('sharing.nfs.delete', {'id': id});
+      await _call<dynamic>('sharing.nfs.delete', {'id': id});
       return true;
     }
   }
@@ -1075,7 +1081,7 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
 
   @override
   Future<bool> deleteUser(String username) async {
-    await _call('user.delete', {'username': username});
+    await _call<dynamic>('user.delete', {'username': username});
     return true;
   }
 
@@ -1113,7 +1119,7 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
 
   @override
   Future<bool> deleteGroup(String groupname) async {
-    await _call('group.delete', {'groupname': groupname});
+    await _call<dynamic>('group.delete', {'groupname': groupname});
     return true;
   }
 
@@ -1155,19 +1161,19 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
 
   @override
   Future<bool> startService(String serviceName) async {
-    await _call('service.start', {'service': serviceName});
+    await _call<dynamic>('service.start', {'service': serviceName});
     return true;
   }
 
   @override
   Future<bool> stopService(String serviceName) async {
-    await _call('service.stop', {'service': serviceName});
+    await _call<dynamic>('service.stop', {'service': serviceName});
     return true;
   }
 
   @override
   Future<bool> restartService(String serviceName) async {
-    await _call('service.restart', {'service': serviceName});
+    await _call<dynamic>('service.restart', {'service': serviceName});
     return true;
   }
 
@@ -1196,13 +1202,13 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
 
   @override
   Future<bool> startVM(String vmId) async {
-    await _call('vm.start', {'id': vmId});
+    await _call<dynamic>('vm.start', {'id': vmId});
     return true;
   }
 
   @override
   Future<bool> stopVM(String vmId) async {
-    await _call('vm.stop', {'id': vmId});
+    await _call<dynamic>('vm.stop', {'id': vmId});
     return true;
   }
 
@@ -1242,19 +1248,19 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
 
   @override
   Future<bool> deleteApp(String appId) async {
-    await _call('app.delete', {'id': appId});
+    await _call<dynamic>('app.delete', {'id': appId});
     return true;
   }
 
   @override
   Future<bool> reboot({int delay = 0}) async {
-    await _call('system.reboot', {'delay': delay});
+    await _call<dynamic>('system.reboot', {'delay': delay});
     return true;
   }
 
   @override
   Future<bool> shutdown({int delay = 0}) async {
-    await _call('system.shutdown', {'delay': delay});
+    await _call<dynamic>('system.shutdown', {'delay': delay});
     return true;
   }
 
@@ -1453,7 +1459,10 @@ class TrueNasWebSocketClient implements ITrueNasApiClient {
     required String diskName,
     required String testType,
   }) async {
-    await _call('smart.test.manual_test', {'disk': diskName, 'type': testType});
+    await _call<dynamic>('smart.test.manual_test', {
+      'disk': diskName,
+      'type': testType,
+    });
     return true;
   }
 

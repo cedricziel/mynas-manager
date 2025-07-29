@@ -12,7 +12,7 @@ class JsonRpcWebSocketClient implements IJsonRpcClient {
       StreamController<JsonRpcNotification>.broadcast();
 
   final Map<String, Completer<dynamic>> _pendingRequests = {};
-  StreamSubscription? _messageSubscription;
+  StreamSubscription<dynamic>? _messageSubscription;
   int _requestId = 1;
   bool _isReady = false;
 
@@ -34,7 +34,7 @@ class JsonRpcWebSocketClient implements IJsonRpcClient {
     // Listen to incoming messages
     _messageSubscription = _connectionManager.messageStream.listen(
       _handleMessage,
-      onError: (error) {
+      onError: (Object error) {
         _logger.severe('Message stream error: $error');
       },
     );
@@ -110,7 +110,7 @@ class JsonRpcWebSocketClient implements IJsonRpcClient {
       }
     } else if (_requiresEmptyParams(method)) {
       // Some methods require an empty array even when no parameters
-      request['params'] = [];
+      request['params'] = <dynamic>[];
     }
 
     return request;
@@ -210,7 +210,7 @@ class JsonRpcWebSocketClient implements IJsonRpcClient {
     } else {
       _logger.warning('Response missing result and error: $data');
       completer.completeError(
-        JsonRpcError(
+        const JsonRpcError(
           code: -32603,
           message: 'Invalid response: missing result and error',
         ),
@@ -233,7 +233,7 @@ class JsonRpcWebSocketClient implements IJsonRpcClient {
       'Handling disconnection - completing pending requests with error',
     );
 
-    final error = JsonRpcError(code: -32000, message: 'Connection lost');
+    const error = JsonRpcError(code: -32000, message: 'Connection lost');
 
     for (final completer in _pendingRequests.values) {
       if (!completer.isCompleted) {
@@ -252,7 +252,7 @@ class JsonRpcWebSocketClient implements IJsonRpcClient {
     await _messageSubscription?.cancel();
 
     // Complete any pending requests with error
-    final error = JsonRpcError(code: -32000, message: 'Client closed');
+    const error = JsonRpcError(code: -32000, message: 'Client closed');
 
     for (final completer in _pendingRequests.values) {
       if (!completer.isCompleted) {

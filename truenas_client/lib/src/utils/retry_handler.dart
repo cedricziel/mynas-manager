@@ -104,7 +104,7 @@ class RetryHandler {
           '$opName failed on attempt $attempt, retrying in ${delay.inMilliseconds}ms: $e',
         );
 
-        await Future.delayed(delay);
+        await Future<void>.delayed(delay);
       }
     }
 

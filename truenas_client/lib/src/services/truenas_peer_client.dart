@@ -13,7 +13,7 @@ class TrueNasPeerClient implements IJsonRpcClient {
       StreamController<JsonRpcNotification>.broadcast();
 
   json_rpc.Peer? _peer;
-  StreamSubscription? _stateSubscription;
+  StreamSubscription<ConnectionState>? _stateSubscription;
   Timer? _keepAliveTimer;
   bool _isReady = false;
 
@@ -59,7 +59,7 @@ class TrueNasPeerClient implements IJsonRpcClient {
             _logger.info('TrueNAS Peer connection closed');
             _handleDisconnection();
           })
-          .catchError((error) {
+          .catchError((Object error) {
             _logger.severe('TrueNAS Peer error: $error');
             _handleDisconnection();
           });
@@ -82,40 +82,42 @@ class TrueNasPeerClient implements IJsonRpcClient {
     // These allow TrueNAS to push updates to us
 
     // Pool events
-    _peer!.registerMethod('pool.changed', (params) {
+    _peer!.registerMethod('pool.changed', (json_rpc.Parameters params) {
       _handleNotification('pool.changed', _safeParamsAsMap(params));
     });
 
     // Dataset events
-    _peer!.registerMethod('dataset.changed', (params) {
+    _peer!.registerMethod('dataset.changed', (json_rpc.Parameters params) {
       _handleNotification('dataset.changed', _safeParamsAsMap(params));
     });
 
     // Alert events
-    _peer!.registerMethod('alert.added', (params) {
+    _peer!.registerMethod('alert.added', (json_rpc.Parameters params) {
       _handleNotification('alert.added', _safeParamsAsMap(params));
     });
 
-    _peer!.registerMethod('alert.removed', (params) {
+    _peer!.registerMethod('alert.removed', (json_rpc.Parameters params) {
       _handleNotification('alert.removed', _safeParamsAsMap(params));
     });
 
     // System events
-    _peer!.registerMethod('system.general.updated', (params) {
+    _peer!.registerMethod('system.general.updated', (
+      json_rpc.Parameters params,
+    ) {
       _handleNotification('system.general.updated', _safeParamsAsMap(params));
     });
 
     // Share events
-    _peer!.registerMethod('sharing.smb.changed', (params) {
+    _peer!.registerMethod('sharing.smb.changed', (json_rpc.Parameters params) {
       _handleNotification('sharing.smb.changed', _safeParamsAsMap(params));
     });
 
-    _peer!.registerMethod('sharing.nfs.changed', (params) {
+    _peer!.registerMethod('sharing.nfs.changed', (json_rpc.Parameters params) {
       _handleNotification('sharing.nfs.changed', _safeParamsAsMap(params));
     });
 
     // Real-time data updates (reporting.realtime collection)
-    _peer!.registerMethod('collection_update', (params) {
+    _peer!.registerMethod('collection_update', (json_rpc.Parameters params) {
       _handleNotification('collection_update', _safeParamsAsMap(params));
     });
 
@@ -188,11 +190,11 @@ class TrueNasPeerClient implements IJsonRpcClient {
         return params;
       }
       // Default to empty array for safety
-      return [];
+      return <dynamic>[];
     }
 
     // Default: empty array for TrueNAS compatibility
-    return [];
+    return <dynamic>[];
   }
 
   bool _usesObjectParams(String method) {
@@ -229,8 +231,8 @@ class TrueNasPeerClient implements IJsonRpcClient {
       case 'disk.query':
         // These methods take [filters, options]
         // Default: empty filters array and options object
-        final filters = params?['filters'] ?? [];
-        final options = params?['options'] ?? {};
+        final filters = params?['filters'] ?? <dynamic>[];
+        final options = params?['options'] ?? <String, dynamic>{};
         return [filters, options];
 
       case 'core.subscribe':
@@ -239,7 +241,7 @@ class TrueNasPeerClient implements IJsonRpcClient {
         return [event];
 
       default:
-        return [];
+        return <dynamic>[];
     }
   }
 
@@ -307,7 +309,7 @@ class TrueNasPeerClient implements IJsonRpcClient {
     _isReady = false;
   }
 
-  /// Safely converts JSON-RPC Parameters to Map<String, dynamic>
+  /// Safely converts JSON-RPC Parameters to `Map<String, dynamic>`
   Map<String, dynamic> _safeParamsAsMap(dynamic params) {
     try {
       if (params is json_rpc.Parameters) {

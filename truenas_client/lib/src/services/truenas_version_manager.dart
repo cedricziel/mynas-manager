@@ -27,7 +27,7 @@ class TrueNasVersionManager implements IVersionManager {
       // Method 1: Try system.info (most common)
       try {
         // system.info requires empty params array
-        result = await _jsonRpcClient.call('system.info', {});
+        result = await _jsonRpcClient.call<dynamic>('system.info', {});
         if (result is Map<String, dynamic> && result.containsKey('version')) {
           result = result['version'];
         }
@@ -36,19 +36,21 @@ class TrueNasVersionManager implements IVersionManager {
 
         // Method 2: Try system.version
         try {
-          result = await _jsonRpcClient.call('system.version');
+          result = await _jsonRpcClient.call<dynamic>('system.version');
         } catch (e2) {
           _logger.fine('system.version failed: $e2');
 
           // Method 3: Try core.get_version (legacy)
           try {
-            result = await _jsonRpcClient.call('core.get_version');
+            result = await _jsonRpcClient.call<dynamic>('core.get_version');
           } catch (e3) {
             _logger.fine('core.get_version failed: $e3');
 
             // Method 4: Try system.general.version
             try {
-              result = await _jsonRpcClient.call('system.general.version');
+              result = await _jsonRpcClient.call<dynamic>(
+                'system.general.version',
+              );
             } catch (e4) {
               _logger.warning(
                 'All version detection methods failed. Assuming default version.',

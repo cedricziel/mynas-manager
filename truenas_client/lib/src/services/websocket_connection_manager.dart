@@ -14,7 +14,7 @@ class WebSocketConnectionManager implements IConnectionManager {
       StreamController<String>.broadcast();
 
   WebSocketChannel? _channel;
-  StreamSubscription? _channelSubscription;
+  StreamSubscription<dynamic>? _channelSubscription;
   Timer? _reconnectTimer;
 
   ConnectionState _state = ConnectionState.disconnected;
@@ -201,7 +201,7 @@ class WebSocketConnectionManager implements IConnectionManager {
     // Create a sink controller that forwards messages to the WebSocket
     final sinkController = StreamController<String>();
     sinkController.stream.listen((data) {
-      send(data).catchError((error) {
+      send(data).catchError((Object error) {
         _logger.severe('Failed to send via StreamChannel: $error');
       });
     });

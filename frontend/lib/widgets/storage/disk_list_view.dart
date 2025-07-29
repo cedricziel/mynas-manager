@@ -27,13 +27,17 @@ class DiskListView extends ConsumerWidget {
             Icon(
               Icons.album_outlined,
               size: 64,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+              color: Theme.of(
+                context,
+              ).colorScheme.onSurface.withValues(alpha: 0.3),
             ),
             const SizedBox(height: 16),
             Text(
               'No disks found',
               style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -110,7 +114,7 @@ class DiskListView extends ConsumerWidget {
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: Theme.of(
                             context,
-                          ).colorScheme.onSurface.withOpacity(0.6),
+                          ).colorScheme.onSurface.withValues(alpha: 0.6),
                         ),
                       ),
                       const SizedBox(width: 16),
@@ -120,7 +124,7 @@ class DiskListView extends ConsumerWidget {
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                         color: Theme.of(
                           context,
-                        ).colorScheme.onSurface.withOpacity(0.6),
+                        ).colorScheme.onSurface.withValues(alpha: 0.6),
                       ),
                     ),
                     if (temperature != null &&
@@ -205,7 +209,7 @@ class DiskListView extends ConsumerWidget {
         break;
       case DiskType.unknown:
         icon = Icons.device_unknown;
-        color = Theme.of(context).colorScheme.onSurface.withOpacity(0.6);
+        color = Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6);
         break;
     }
 
@@ -213,7 +217,7 @@ class DiskListView extends ConsumerWidget {
       width: 48,
       height: 48,
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(8),
       ),
       child: Icon(icon, color: color),
@@ -242,7 +246,7 @@ class DiskListView extends ConsumerWidget {
         tooltip = 'Critical';
         break;
       case DiskHealth.unknown:
-        color = Theme.of(context).colorScheme.onSurface.withOpacity(0.3);
+        color = Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.3);
         icon = Icons.help_outline;
         tooltip = 'Unknown';
         break;
@@ -269,8 +273,8 @@ class DiskListView extends ConsumerWidget {
         '$temperature°C',
         style: TextStyle(color: color, fontSize: 12),
       ),
-      backgroundColor: color.withOpacity(0.1),
-      side: BorderSide(color: color.withOpacity(0.3)),
+      backgroundColor: color.withValues(alpha: 0.1),
+      side: BorderSide(color: color.withValues(alpha: 0.3)),
       visualDensity: VisualDensity.compact,
     );
   }

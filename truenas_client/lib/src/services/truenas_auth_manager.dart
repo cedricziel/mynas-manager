@@ -75,7 +75,7 @@ class TrueNasAuthManager implements IAuthManager {
 
     try {
       // Try to call a simple authenticated method
-      await _jsonRpcClient.call('auth.me');
+      await _jsonRpcClient.call<dynamic>('auth.me');
       return true;
     } catch (e) {
       _logger.warning('Session validation failed: $e');

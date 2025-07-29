@@ -21,14 +21,35 @@ A Dart client library for TrueNAS SCALE API integration using WebSocket connecti
 import 'package:truenas_client/truenas_client.dart';
 
 // Create client
-final client = TrueNasClientFactory.create(
-  baseUrl: 'ws://your-truenas-ip/api/current',
+final client = TrueNasClientFactory.createClient(
+  uri: 'ws://your-truenas-ip/api/current',
   apiKey: 'your-api-key',
 );
 
-// Connect and use
-await client.connect();
+// Connect and authenticate
+await client.connect(uri);
+await client.auth.authenticateWithApiKey(apiKey);
+
+// Use the client
 final pools = await client.listPools();
+```
+
+## Example
+
+See the [example/](example/) directory for a complete working example that demonstrates:
+
+- Environment variable configuration
+- Connection and authentication
+- Fetching system information
+- Listing storage pools
+- Error handling
+- Proper cleanup
+
+Run the example:
+```bash
+export TRUENAS_URL="ws://your-truenas-ip/api/current"
+export TRUENAS_API_KEY="your-api-key-here"
+dart run example/main.dart
 ```
 
 ## Authentication

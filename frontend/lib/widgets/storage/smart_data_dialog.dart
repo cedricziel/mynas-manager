@@ -284,7 +284,7 @@ class SmartDataDialog extends StatelessWidget {
                   ],
                 ),
               );
-            }).toList(),
+            }),
           ],
         ),
       ),

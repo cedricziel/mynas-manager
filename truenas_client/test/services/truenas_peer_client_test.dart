@@ -67,7 +67,7 @@ void main() {
           });
 
           // Make a call that requires empty array
-          final resultFuture = client.call('system.info');
+          final resultFuture = client.call<dynamic>('system.info');
 
           // Get the sent request
           final sentRequest = await requestCompleter.future;
@@ -99,7 +99,7 @@ void main() {
         });
 
         // Call with options
-        final resultFuture = client.call('pool.query', {
+        final resultFuture = client.call<dynamic>('pool.query', {
           'options': {
             'extra': {'is_upgraded': true},
           },
@@ -112,7 +112,7 @@ void main() {
         expect(
           request['params'],
           equals([
-            [], // filters
+            <dynamic>[], // filters
             {
               'extra': {'is_upgraded': true},
             }, // options
@@ -121,7 +121,11 @@ void main() {
 
         // Send mock response
         incomingController.add(
-          jsonEncode({'jsonrpc': '2.0', 'id': request['id'], 'result': []}),
+          jsonEncode({
+            'jsonrpc': '2.0',
+            'id': request['id'],
+            'result': <dynamic>[],
+          }),
         );
 
         await resultFuture;
@@ -135,7 +139,7 @@ void main() {
           }
         });
 
-        final resultFuture = client.call('core.subscribe', {
+        final resultFuture = client.call<dynamic>('core.subscribe', {
           'event': 'pool.query',
         });
 
@@ -161,7 +165,7 @@ void main() {
           }
         });
 
-        final resultFuture = client.call('auth.login', {
+        final resultFuture = client.call<dynamic>('auth.login', {
           'username': 'testuser',
           'password': 'testpass',
         });
@@ -185,7 +189,7 @@ void main() {
       test('should handle TrueNAS notifications', () async {
         // Setup notification listener
         final notifications = <JsonRpcNotification>[];
-        late StreamSubscription subscription;
+        late StreamSubscription<JsonRpcNotification> subscription;
         final notificationCompleter = Completer<void>();
 
         subscription = client.notifications.listen((notification) {
@@ -196,7 +200,7 @@ void main() {
         });
 
         // Wait for client to be ready
-        await Future.delayed(Duration(milliseconds: 50));
+        await Future<void>.delayed(const Duration(milliseconds: 50));
 
         // Clear any existing notifications
         notifications.clear();
@@ -211,7 +215,7 @@ void main() {
         );
 
         // Wait for notification to be processed
-        await notificationCompleter.future.timeout(Duration(seconds: 1));
+        await notificationCompleter.future.timeout(const Duration(seconds: 1));
         await subscription.cancel();
 
         expect(notifications.length, equals(1));
@@ -221,7 +225,7 @@ void main() {
 
       test('should handle collection_update notifications', () async {
         final notifications = <JsonRpcNotification>[];
-        late StreamSubscription subscription;
+        late StreamSubscription<JsonRpcNotification> subscription;
         final notificationCompleter = Completer<void>();
 
         subscription = client.notifications.listen((notification) {
@@ -232,7 +236,7 @@ void main() {
         });
 
         // Wait for client to be ready
-        await Future.delayed(Duration(milliseconds: 50));
+        await Future<void>.delayed(const Duration(milliseconds: 50));
 
         // Clear any existing notifications
         notifications.clear();
@@ -254,7 +258,7 @@ void main() {
         );
 
         // Wait for notification to be processed
-        await notificationCompleter.future.timeout(Duration(seconds: 1));
+        await notificationCompleter.future.timeout(const Duration(seconds: 1));
         await subscription.cancel();
 
         expect(notifications.length, equals(1));
@@ -273,7 +277,7 @@ void main() {
         outgoingController.stream.listen(outgoingMessages.add);
 
         // Wait for initial setup
-        await Future.delayed(Duration(milliseconds: 100));
+        await Future<void>.delayed(const Duration(milliseconds: 100));
 
         // Clear initial messages
         outgoingMessages.clear();
@@ -294,7 +298,7 @@ void main() {
           }
         });
 
-        final resultFuture = client.call('invalid.method');
+        final resultFuture = client.call<dynamic>('invalid.method');
 
         final sentRequest = await requestCompleter.future;
         final request = jsonDecode(sentRequest) as Map<String, dynamic>;

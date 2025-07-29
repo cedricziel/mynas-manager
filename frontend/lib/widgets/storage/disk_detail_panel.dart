@@ -48,7 +48,7 @@ class _DiskDetailPanelState extends ConsumerState<DiskDetailPanel>
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
+            color: Colors.black.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -121,8 +121,8 @@ class _DiskDetailPanelState extends ConsumerState<DiskDetailPanel>
                     Text(
                       widget.disk.model,
                       style: theme.textTheme.bodyLarge?.copyWith(
-                        color: theme.colorScheme.onPrimaryContainer.withOpacity(
-                          0.8,
+                        color: theme.colorScheme.onPrimaryContainer.withValues(
+                          alpha: 0.8,
                         ),
                       ),
                     ),
@@ -170,7 +170,7 @@ class _DiskDetailPanelState extends ConsumerState<DiskDetailPanel>
                 _buildStatCard(
                   'Temperature',
                   'N/A',
-                  theme.colorScheme.onPrimaryContainer.withOpacity(0.5),
+                  theme.colorScheme.onPrimaryContainer.withValues(alpha: 0.5),
                   theme,
                 ),
             ],
@@ -195,7 +195,7 @@ class _DiskDetailPanelState extends ConsumerState<DiskDetailPanel>
         break;
       case DiskType.unknown:
         icon = Icons.device_unknown;
-        color = theme.colorScheme.onSurface.withOpacity(0.6);
+        color = theme.colorScheme.onSurface.withValues(alpha: 0.6);
         break;
     }
 
@@ -203,7 +203,7 @@ class _DiskDetailPanelState extends ConsumerState<DiskDetailPanel>
       width: 56,
       height: 56,
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface.withOpacity(0.3),
+        color: theme.colorScheme.surface.withValues(alpha: 0.3),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Icon(icon, color: color, size: 32),
@@ -220,7 +220,7 @@ class _DiskDetailPanelState extends ConsumerState<DiskDetailPanel>
       child: Container(
         padding: const EdgeInsets.all(12),
         decoration: BoxDecoration(
-          color: theme.colorScheme.surface.withOpacity(0.3),
+          color: theme.colorScheme.surface.withValues(alpha: 0.3),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Column(
@@ -229,7 +229,9 @@ class _DiskDetailPanelState extends ConsumerState<DiskDetailPanel>
             Text(
               label,
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onPrimaryContainer.withOpacity(0.8),
+                color: theme.colorScheme.onPrimaryContainer.withValues(
+                  alpha: 0.8,
+                ),
               ),
             ),
             const SizedBox(height: 4),

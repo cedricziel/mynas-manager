@@ -76,7 +76,7 @@ class TokenBucketRateLimiter implements IRateLimiter {
         _logger.fine(
           'Waiting ${waitTime.inMilliseconds}ms for rate limit reset',
         );
-        await Future.delayed(
+        await Future<void>.delayed(
           Duration(milliseconds: waitTime.inMilliseconds.clamp(0, 1000)),
         );
       } else {

@@ -85,11 +85,11 @@ void main() {
       // Test expected transformations
 
       // pool.query with no params should get [[], {}]
-      final expectedPoolQuery = [[], {}];
+      final expectedPoolQuery = [<dynamic>[], <String, dynamic>{}];
 
       // pool.query with options
       final expectedPoolQueryWithOptions = [
-        [], // filters
+        <dynamic>[], // filters
         {
           'extra': {'is_upgraded': true},
         }, // options
@@ -102,7 +102,7 @@ void main() {
       final expectedAuth = ['testuser', 'testpass'];
 
       // Just verify the expected formats
-      expect(expectedPoolQuery, isA<List>());
+      expect(expectedPoolQuery, isA<List<dynamic>>());
       expect(expectedPoolQuery.length, equals(2));
       expect(
         expectedPoolQueryWithOptions[1],

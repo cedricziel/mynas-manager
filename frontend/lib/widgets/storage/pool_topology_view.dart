@@ -263,13 +263,13 @@ class _PoolTopologyViewState extends ConsumerState<PoolTopologyView> {
   Color _getDiskBorderColor(DiskHealth health) {
     switch (health) {
       case DiskHealth.healthy:
-        return Colors.green.withOpacity(0.5);
+        return Colors.green.withValues(alpha: 0.5);
       case DiskHealth.warning:
-        return Colors.orange.withOpacity(0.5);
+        return Colors.orange.withValues(alpha: 0.5);
       case DiskHealth.critical:
-        return Colors.red.withOpacity(0.5);
+        return Colors.red.withValues(alpha: 0.5);
       case DiskHealth.unknown:
-        return Colors.grey.withOpacity(0.5);
+        return Colors.grey.withValues(alpha: 0.5);
     }
   }
 
