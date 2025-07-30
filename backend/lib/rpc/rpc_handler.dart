@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:shelf/shelf.dart';
 import 'package:logging/logging.dart';
 import 'package:truenas_client/truenas_client.dart';
-import 'package:mynas_shared/mynas_shared.dart';
 
 class RpcHandler {
   final _logger = Logger('RpcHandler');
