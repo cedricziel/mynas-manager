@@ -30,11 +30,29 @@ void main(List<String> args) async {
     );
   }
 
+  // Check authentication modes
+  final useSessionAuth =
+      env['USE_SESSION_AUTH'] == 'true' || env['AUTH_MODE'] == 'truenas';
+  final useHybridAuth =
+      env['USE_HYBRID_AUTH'] == 'true' || env['AUTH_MODE'] == 'hybrid';
+
   // Pass environment to server if available
   final server = Server(
     trueNasUrl: env['TRUENAS_URL'],
     trueNasApiKey: env['TRUENAS_API_KEY'],
+    useSessionAuth: useSessionAuth,
+    useHybridAuth: useHybridAuth,
   );
+
+  if (useHybridAuth) {
+    print('Running in hybrid authentication mode');
+    print(
+      'Backend services use API key, frontend users authenticate with TrueNAS credentials',
+    );
+  } else if (useSessionAuth) {
+    print('Running in session-based authentication mode');
+    print('Users will authenticate with their TrueNAS credentials');
+  }
 
   try {
     await server.start(host: host, port: port);
