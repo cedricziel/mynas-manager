@@ -4,12 +4,48 @@ import 'package:crypto/crypto.dart';
 import 'package:logging/logging.dart';
 import 'package:truenas_client/truenas_client.dart';
 
+enum SessionEventType {
+  created,
+  expired,
+  expiringSoon,
+  removed,
+  activityUpdated,
+}
+
+class SessionEvent {
+  final SessionEventType type;
+  final String sessionId;
+  final String? username;
+  final DateTime timestamp;
+  final Duration? timeRemaining;
+
+  SessionEvent({
+    required this.type,
+    required this.sessionId,
+    this.username,
+    required this.timestamp,
+    this.timeRemaining,
+  });
+
+  Map<String, dynamic> toJson() => {
+    'type': type.name,
+    'sessionId': sessionId,
+    'username': username,
+    'timestamp': timestamp.toIso8601String(),
+    'timeRemaining': timeRemaining?.inSeconds,
+  };
+}
+
 class SessionManager {
   final _logger = Logger('SessionManager');
   final Map<String, UserSession> _sessions = {};
   final Duration sessionTimeout;
   final Duration inactivityTimeout;
   Timer? _cleanupTimer;
+
+  // Session event stream
+  final _sessionEventController = StreamController<SessionEvent>.broadcast();
+  Stream<SessionEvent> get sessionEvents => _sessionEventController.stream;
 
   SessionManager({
     this.sessionTimeout = const Duration(hours: 24),
@@ -39,6 +75,16 @@ class SessionManager {
 
     _sessions[sessionId] = session;
     _logger.info('Created session for user: $username (ID: $sessionId)');
+
+    // Emit session created event
+    _sessionEventController.add(
+      SessionEvent(
+        type: SessionEventType.created,
+        sessionId: sessionId,
+        username: username,
+        timestamp: DateTime.now(),
+      ),
+    );
 
     return session;
   }
@@ -75,17 +121,54 @@ class SessionManager {
   void _cleanupExpiredSessions() {
     final now = DateTime.now();
     final sessionsToRemove = <String>[];
+    final warningThreshold = const Duration(minutes: 5);
 
     _sessions.forEach((id, session) {
+      final timeSinceCreation = now.difference(session.createdAt);
+      final timeSinceActivity = now.difference(session.lastActivity);
+
       // Check for session timeout
-      if (now.difference(session.createdAt) > sessionTimeout) {
+      if (timeSinceCreation > sessionTimeout) {
         sessionsToRemove.add(id);
         _logger.info('Session expired (timeout): $id');
+        _sessionEventController.add(
+          SessionEvent(
+            type: SessionEventType.expired,
+            sessionId: id,
+            username: session.username,
+            timestamp: now,
+          ),
+        );
       }
       // Check for inactivity timeout
-      else if (now.difference(session.lastActivity) > inactivityTimeout) {
+      else if (timeSinceActivity > inactivityTimeout) {
         sessionsToRemove.add(id);
         _logger.info('Session expired (inactivity): $id');
+        _sessionEventController.add(
+          SessionEvent(
+            type: SessionEventType.expired,
+            sessionId: id,
+            username: session.username,
+            timestamp: now,
+          ),
+        );
+      }
+      // Check if session is expiring soon (within 5 minutes)
+      else if (timeSinceActivity > inactivityTimeout - warningThreshold &&
+          timeSinceActivity < inactivityTimeout) {
+        final timeRemaining = inactivityTimeout - timeSinceActivity;
+        _sessionEventController.add(
+          SessionEvent(
+            type: SessionEventType.expiringSoon,
+            sessionId: id,
+            username: session.username,
+            timestamp: now,
+            timeRemaining: timeRemaining,
+          ),
+        );
+        _logger.info(
+          'Session expiring soon: $id (${timeRemaining.inMinutes} minutes remaining)',
+        );
       }
     });
 
@@ -114,6 +197,7 @@ class SessionManager {
     await Future.wait(futures);
 
     _sessions.clear();
+    await _sessionEventController.close();
     _logger.info('SessionManager disposed');
   }
 

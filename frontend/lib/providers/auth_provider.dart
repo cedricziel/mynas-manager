@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mynas_frontend/services/rpc_client.dart';
 
@@ -13,6 +15,7 @@ class AuthState {
   final String? sessionId;
   final Map<String, dynamic>? userInfo;
   final String? error;
+  final Duration? sessionExpiringIn;
 
   const AuthState({
     this.isAuthenticated = false,
@@ -21,6 +24,7 @@ class AuthState {
     this.sessionId,
     this.userInfo,
     this.error,
+    this.sessionExpiringIn,
   });
 
   AuthState copyWith({
@@ -30,6 +34,7 @@ class AuthState {
     String? sessionId,
     Map<String, dynamic>? userInfo,
     String? error,
+    Duration? sessionExpiringIn,
   }) {
     return AuthState(
       isAuthenticated: isAuthenticated ?? this.isAuthenticated,
@@ -38,14 +43,69 @@ class AuthState {
       sessionId: sessionId ?? this.sessionId,
       userInfo: userInfo ?? this.userInfo,
       error: error,
+      sessionExpiringIn: sessionExpiringIn ?? this.sessionExpiringIn,
     );
   }
 }
 
+// Separate notifier for router refresh
+class AuthRouterRefreshNotifier extends ChangeNotifier {
+  AuthRouterRefreshNotifier(Ref ref) {
+    // Listen to auth state changes
+    ref.listen<AuthState>(authProvider, (_, next) {
+      notifyListeners();
+    });
+  }
+}
+
+final authRouterRefreshProvider = Provider<AuthRouterRefreshNotifier>((ref) {
+  return AuthRouterRefreshNotifier(ref);
+});
+
 class AuthNotifier extends StateNotifier<AuthState> {
   final RpcClient _rpcClient;
+  StreamSubscription<Map<String, dynamic>>? _sessionEventSubscription;
 
-  AuthNotifier(this._rpcClient) : super(const AuthState());
+  AuthNotifier(this._rpcClient) : super(const AuthState()) {
+    _listenToSessionEvents();
+  }
+
+  void _listenToSessionEvents() {
+    _sessionEventSubscription = _rpcClient.sessionEvents.listen((event) {
+      final eventType = event['type'] as String?;
+
+      switch (eventType) {
+        case 'expired':
+          _handleSessionExpired();
+          break;
+        case 'expiringSoon':
+          _handleSessionExpiringSoon(event);
+          break;
+      }
+    });
+  }
+
+  void _handleSessionExpired() {
+    state = const AuthState(
+      isAuthenticated: false,
+      error: 'Your session has expired. Please log in again.',
+    );
+  }
+
+  void _handleSessionExpiringSoon(Map<String, dynamic> event) {
+    final timeRemaining = event['timeRemaining'] as int?;
+    if (timeRemaining != null) {
+      state = state.copyWith(
+        sessionExpiringIn: Duration(seconds: timeRemaining),
+      );
+    }
+  }
+
+  @override
+  void dispose() {
+    _sessionEventSubscription?.cancel();
+    super.dispose();
+  }
 
   Future<bool> login({
     required String username,

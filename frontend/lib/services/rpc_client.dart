@@ -19,6 +19,12 @@ class RpcClient {
   String? _sessionId;
   Timer? _heartbeatTimer;
 
+  // Session event stream
+  final _sessionEventController =
+      StreamController<Map<String, dynamic>>.broadcast();
+  Stream<Map<String, dynamic>> get sessionEvents =>
+      _sessionEventController.stream;
+
   bool get isConnected => _isConnected;
   String? get sessionId => _sessionId;
 
@@ -38,6 +44,18 @@ class RpcClient {
 
       // Create JSON-RPC peer
       _peer = json_rpc.Peer(_channel!.cast<String>());
+
+      // Register notification handlers
+      _peer!.registerMethod('session.event', (json_rpc.Parameters params) {
+        _logger.info('Received session event: ${params.asMap}');
+        _sessionEventController.add(params.asMap.cast<String, dynamic>());
+      });
+
+      _peer!.registerMethod('truenas.connectionStatusChanged', (
+        json_rpc.Parameters params,
+      ) {
+        _logger.info('TrueNAS connection status changed: ${params.asMap}');
+      });
 
       // Start listening
       unawaited(
@@ -69,6 +87,7 @@ class RpcClient {
     await _channel?.sink.close();
     _isConnected = false;
     _sessionId = null;
+    await _sessionEventController.close();
     _logger.info('Disconnected from backend');
   }
 

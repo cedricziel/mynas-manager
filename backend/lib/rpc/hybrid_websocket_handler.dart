@@ -3,7 +3,8 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:json_rpc_2/json_rpc_2.dart' as json_rpc;
 import 'package:logging/logging.dart';
 import 'package:truenas_client/truenas_client.dart';
-import 'package:mynas_backend/services/session_manager.dart';
+import 'package:mynas_backend/services/session_manager.dart'
+    show SessionManager, UserSession, SessionEvent;
 
 /// Handles WebSocket connections with hybrid authentication support.
 ///
@@ -27,6 +28,7 @@ class HybridWebSocketHandler {
   final _connectionStatusController =
       StreamController<Map<String, dynamic>>.broadcast();
   StreamSubscription<ConnectionStatus>? _heartbeatSubscription;
+  StreamSubscription<SessionEvent>? _sessionEventSubscription;
 
   HybridWebSocketHandler(
     this._channel,
@@ -43,6 +45,14 @@ class HybridWebSocketHandler {
 
     // Register all methods
     _registerMethods();
+
+    // Listen for session events
+    _sessionEventSubscription = _sessionManager.sessionEvents.listen((event) {
+      // Only notify about events for the current session
+      if (_currentSession != null && event.sessionId == _currentSession!.id) {
+        _notifySessionEvent(event);
+      }
+    });
 
     // Start listening
     _peer
@@ -177,7 +187,20 @@ class HybridWebSocketHandler {
 
     await _sessionManager.updateSessionActivity(_currentSession!.id);
 
-    return {'success': true, 'timestamp': DateTime.now().toIso8601String()};
+    // Calculate time remaining before inactivity timeout
+    final now = DateTime.now();
+    final timeSinceActivity = now.difference(_currentSession!.lastActivity);
+    final timeRemaining = _sessionManager.inactivityTimeout - timeSinceActivity;
+
+    return {
+      'success': true,
+      'timestamp': now.toIso8601String(),
+      'sessionStatus': {
+        'active': true,
+        'timeRemainingSeconds': timeRemaining.inSeconds,
+        'expiresAt': now.add(timeRemaining).toIso8601String(),
+      },
+    };
   }
 
   Future<Map<String, dynamic>> _getSessionInfo(
@@ -213,6 +236,17 @@ class HybridWebSocketHandler {
       } catch (e) {
         _logger.warning('Failed to send connection status notification: $e');
       }
+    }
+  }
+
+  void _notifySessionEvent(SessionEvent event) {
+    try {
+      _peer.sendNotification('session.event', event.toJson());
+      _logger.info(
+        'Sent session event: ${event.type.name} for session ${event.sessionId}',
+      );
+    } catch (e) {
+      _logger.warning('Failed to send session event notification: $e');
     }
   }
 
@@ -355,6 +389,7 @@ class HybridWebSocketHandler {
 
   void _cleanup() {
     _heartbeatSubscription?.cancel();
+    _sessionEventSubscription?.cancel();
     _connectionStatusController.close();
     // Note: We don't remove the session here as the user might reconnect
   }
