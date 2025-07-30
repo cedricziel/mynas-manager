@@ -8,10 +8,18 @@ class WebSocketHandler {
   final _logger = Logger('WebSocketHandler');
   final WebSocketChannel _channel;
   final ITrueNasClient _trueNasClient;
+  final bool isAuthenticated;
   late final json_rpc.Peer _peer;
 
-  WebSocketHandler(WebSocketChannel webSocket, this._trueNasClient)
-    : _channel = webSocket;
+  // Connection status for clients
+  final _connectionStatusController =
+      StreamController<Map<String, dynamic>>.broadcast();
+
+  WebSocketHandler(
+    WebSocketChannel webSocket,
+    this._trueNasClient, {
+    this.isAuthenticated = false,
+  }) : _channel = webSocket;
 
   void start() {
     _logger.info('New WebSocket connection established');
@@ -57,6 +65,26 @@ class WebSocketHandler {
     // Connection methods
     _peer.registerMethod('truenas.connect', _connectToTrueNAS);
     _peer.registerMethod('truenas.disconnect', _disconnectFromTrueNAS);
+    _peer.registerMethod('truenas.connectionStatus', _getConnectionStatus);
+  }
+
+  void notifyConnectionStatus(ConnectionStatus status) {
+    if (!_connectionStatusController.isClosed) {
+      _connectionStatusController.add({
+        'status': status.name,
+        'timestamp': DateTime.now().toIso8601String(),
+      });
+
+      // Send notification to client
+      try {
+        _peer.sendNotification('truenas.connectionStatusChanged', {
+          'status': status.name,
+          'timestamp': DateTime.now().toIso8601String(),
+        });
+      } catch (e) {
+        _logger.warning('Failed to send connection status notification: $e');
+      }
+    }
   }
 
   // TrueNAS connection methods
@@ -70,7 +98,15 @@ class WebSocketHandler {
   }
 
   Future<void> _disconnectFromTrueNAS(json_rpc.Parameters params) async {
-    // TODO: Disconnect from TrueNAS
+    await _trueNasClient.disconnect();
+  }
+
+  Future<Map<String, dynamic>> _getConnectionStatus(
+    json_rpc.Parameters params,
+  ) async {
+    // This would need to be implemented based on the heartbeat service
+    // For now, return a simple status
+    return {'connected': true, 'timestamp': DateTime.now().toIso8601String()};
   }
 
   // System methods
@@ -180,5 +216,9 @@ class WebSocketHandler {
   Future<bool> _deleteShare(json_rpc.Parameters params) async {
     final id = params['id'].asString;
     return await _trueNasClient.deleteShare(id);
+  }
+
+  void dispose() {
+    _connectionStatusController.close();
   }
 }
