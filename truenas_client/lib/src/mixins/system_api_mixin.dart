@@ -6,7 +6,7 @@ import '../interfaces/system_api.dart';
 mixin SystemApiMixin on IConnectionApi implements ISystemApi {
   @override
   Future<SystemInfo> getSystemInfo() async {
-    final data = await call<Map<String, dynamic>>('system.info');
+    final data = await call<Map<String, dynamic>>('system.info', []);
 
     // Map TrueNAS response to our model
     return SystemInfo(
@@ -16,11 +16,11 @@ mixin SystemApiMixin on IConnectionApi implements ISystemApi {
       cpuUsage: 0.0, // TODO: Get from appropriate endpoint
       cpuTemperature: 0.0, // TODO: Get from appropriate endpoint
       memory: MemoryInfo(
-        total: (data['physmem'] as int?) ?? 0,
+        total: int.tryParse(data['physmem']?.toString() ?? '0') ?? 0,
         used:
-            ((data['physmem'] as int?) ?? 0) -
-            ((data['physmem_free'] as int?) ?? 0),
-        free: (data['physmem_free'] as int?) ?? 0,
+            (int.tryParse(data['physmem']?.toString() ?? '0') ?? 0) -
+            (int.tryParse(data['physmem_free']?.toString() ?? '0') ?? 0),
+        free: int.tryParse(data['physmem_free']?.toString() ?? '0') ?? 0,
         cached: 0, // TODO: Get from appropriate endpoint
       ),
     );
@@ -28,7 +28,7 @@ mixin SystemApiMixin on IConnectionApi implements ISystemApi {
 
   @override
   Future<List<Alert>> getAlerts() async {
-    final data = await call<List<dynamic>>('alert.list');
+    final data = await call<List<dynamic>>('alert.list', []);
 
     return data.map((alert) {
       final alertMap = alert as Map<String, dynamic>;

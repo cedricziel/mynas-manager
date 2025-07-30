@@ -10,7 +10,7 @@ mixin ShareApiMixin on IConnectionApi implements IShareApi {
     final shares = <Share>[];
 
     if (type == null || type == ShareType.smb) {
-      final smbShares = await call<List<dynamic>>('sharing.smb.query');
+      final smbShares = await call<List<dynamic>>('sharing.smb.query', []);
       shares.addAll(
         smbShares.map((share) {
           final shareMap = share as Map<String, dynamic>;
@@ -27,7 +27,7 @@ mixin ShareApiMixin on IConnectionApi implements IShareApi {
     }
 
     if (type == null || type == ShareType.nfs) {
-      final nfsShares = await call<List<dynamic>>('sharing.nfs.query');
+      final nfsShares = await call<List<dynamic>>('sharing.nfs.query', []);
       shares.addAll(
         nfsShares.map((share) {
           final shareMap = share as Map<String, dynamic>;
@@ -97,12 +97,14 @@ mixin ShareApiMixin on IConnectionApi implements IShareApi {
         ? 'sharing.smb.create'
         : 'sharing.nfs.create';
 
-    final data = await call<Map<String, dynamic>>(method, {
-      'name': share.name,
-      'path': share.path,
-      'enabled': share.enabled,
-      'comment': share.comment,
-    });
+    final data = await call<Map<String, dynamic>>(method, [
+      {
+        'name': share.name,
+        'path': share.path,
+        'enabled': share.enabled,
+        'comment': share.comment,
+      },
+    ]);
 
     return share.copyWith(id: data['id']?.toString() ?? '');
   }

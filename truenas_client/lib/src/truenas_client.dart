@@ -38,4 +38,13 @@ class TrueNasClient extends TrueNasClientBase
   }) {
     return TrueNasClient._(uri: uri, username: username, password: password);
   }
+
+  /// Create client with username/API key authentication
+  factory TrueNasClient.withUsernameApiKey({
+    required String uri,
+    required String username,
+    required String apiKey,
+  }) {
+    return TrueNasClient._(uri: uri, username: username, apiKey: apiKey);
+  }
 }

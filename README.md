@@ -50,11 +50,26 @@ Create a `.env` file in the backend directory:
 cp backend/.env.example backend/.env
 ```
 
-Edit the `.env` file with your TrueNAS configuration:
+Edit the `.env` file with your TrueNAS configuration. Choose one of the authentication options:
 
+**Option 1: API Key only**
 ```env
-TRUENAS_URL=http://your-truenas-ip/api/v2.0
+TRUENAS_URL=ws://your-truenas-ip/api/current
 TRUENAS_API_KEY=your-api-key-here
+```
+
+**Option 2: Username + API Key (recommended for user-specific access)**
+```env
+TRUENAS_URL=ws://your-truenas-ip/api/current
+TRUENAS_USERNAME=your-username
+TRUENAS_API_KEY=your-api-key-here
+```
+
+**Option 3: Username + Password (use with caution)**
+```env
+TRUENAS_URL=ws://your-truenas-ip/api/current
+TRUENAS_USERNAME=your-username
+TRUENAS_PASSWORD=your-password
 ```
 
 ### 3. Run the Application

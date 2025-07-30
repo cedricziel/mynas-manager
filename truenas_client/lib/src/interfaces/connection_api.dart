@@ -7,5 +7,6 @@ abstract class IConnectionApi {
   Future<void> disconnect();
 
   /// Make a raw JSON-RPC call
-  Future<T> call<T>(String method, [dynamic params]);
+  /// [params] must be a List as per JSON-RPC 2.0 specification
+  Future<T> call<T>(String method, [List<dynamic> params = const []]);
 }

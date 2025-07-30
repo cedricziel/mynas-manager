@@ -35,3 +35,21 @@ class TrueNasNotFoundException extends TrueNasException {
   @override
   String toString() => 'TrueNasNotFoundException: $message';
 }
+
+/// OTP required for authentication
+class TrueNasOtpRequiredException extends TrueNasAuthException {
+  const TrueNasOtpRequiredException()
+    : super('OTP token required for authentication');
+
+  @override
+  String toString() => 'TrueNasOtpRequiredException: $message';
+}
+
+/// Authentication credentials have expired
+class TrueNasExpiredCredentialsException extends TrueNasAuthException {
+  const TrueNasExpiredCredentialsException()
+    : super('Authentication credentials have expired');
+
+  @override
+  String toString() => 'TrueNasExpiredCredentialsException: $message';
+}
