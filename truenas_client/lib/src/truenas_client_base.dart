@@ -4,6 +4,7 @@ import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:logging/logging.dart';
 import 'interfaces/connection_api.dart';
+import 'models/connection_status.dart';
 import 'truenas_exceptions.dart';
 
 /// Base TrueNAS client with connection functionality
@@ -16,6 +17,8 @@ abstract class TrueNasClientBase implements IConnectionApi {
 
   WebSocketChannel? _channel;
   json_rpc.Peer? _peer;
+  Timer? _heartbeatTimer;
+  StreamController<ConnectionStatus>? _heartbeatController;
 
   TrueNasClientBase({
     required this.uri,
@@ -147,6 +150,9 @@ abstract class TrueNasClientBase implements IConnectionApi {
   Future<void> disconnect() async {
     _logger.info('Disconnecting from TrueNAS');
 
+    // Stop heartbeat monitoring
+    await stopHeartbeat();
+
     try {
       // Close the peer first to stop listening
       if (_peer != null) {
@@ -181,5 +187,89 @@ abstract class TrueNasClientBase implements IConnectionApi {
       _logger.severe('Unexpected error calling $method: $e');
       rethrow;
     }
+  }
+
+  @override
+  Stream<ConnectionStatus> heartbeat({
+    Duration interval = const Duration(seconds: 30),
+  }) {
+    // Stop any existing heartbeat
+    stopHeartbeat();
+
+    // Create new stream controller
+    _heartbeatController = StreamController<ConnectionStatus>.broadcast();
+
+    // Start heartbeat timer
+    _heartbeatTimer = Timer.periodic(interval, (_) async {
+      if (_heartbeatController == null || _heartbeatController!.isClosed) {
+        return;
+      }
+
+      try {
+        // Check if we're connected
+        if (_peer == null || _channel == null) {
+          _heartbeatController!.add(ConnectionStatus.disconnected);
+          return;
+        }
+
+        // Try to ping the server using a lightweight call
+        // Using 'core.ping' which is a standard JSON-RPC method
+        // If not available, fall back to 'system.info' which should always work
+        try {
+          await call<dynamic>('core.ping').timeout(
+            const Duration(seconds: 5),
+            onTimeout: () {
+              throw TimeoutException('Ping timeout');
+            },
+          );
+          _heartbeatController!.add(ConnectionStatus.connected);
+        } on json_rpc.RpcException catch (e) {
+          // If core.ping is not available, try system.info
+          if (e.code == -32601) {
+            // Method not found, try alternative
+            await call<Map<String, dynamic>>('system.info').timeout(
+              const Duration(seconds: 5),
+              onTimeout: () {
+                throw TimeoutException('System info timeout');
+              },
+            );
+            _heartbeatController!.add(ConnectionStatus.connected);
+          } else {
+            _logger.warning('Heartbeat error: ${e.message}');
+            _heartbeatController!.add(ConnectionStatus.error);
+          }
+        }
+      } on TimeoutException {
+        _logger.warning('Heartbeat timeout');
+        _heartbeatController!.add(ConnectionStatus.error);
+      } catch (e) {
+        _logger.warning('Heartbeat failed: $e');
+        _heartbeatController!.add(ConnectionStatus.error);
+      }
+    });
+
+    // Send initial status
+    if (_peer != null && _channel != null) {
+      _heartbeatController!.add(ConnectionStatus.connected);
+    } else {
+      _heartbeatController!.add(ConnectionStatus.disconnected);
+    }
+
+    return _heartbeatController!.stream;
+  }
+
+  @override
+  Future<void> stopHeartbeat() async {
+    _logger.fine('Stopping heartbeat');
+
+    // Cancel timer
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = null;
+
+    // Close stream controller
+    if (_heartbeatController != null && !_heartbeatController!.isClosed) {
+      await _heartbeatController!.close();
+    }
+    _heartbeatController = null;
   }
 }

@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:truenas_client/truenas_client.dart';
 
@@ -66,6 +67,8 @@ Future<void> main() async {
   print('Username: $username');
   print('');
 
+  StreamSubscription<ConnectionStatus>? heartbeatSubscription;
+
   try {
     // Step 1: Create the TrueNAS client with username and API key
     print('📡 Creating TrueNAS client with username/API key authentication...');
@@ -79,6 +82,15 @@ Future<void> main() async {
     print('🔌 Connecting to TrueNAS server...');
     await client.connect();
     print('✅ Connected and authenticated successfully!');
+
+    // Step 3: Start heartbeat monitoring
+    print('💗 Starting connection heartbeat monitoring...');
+    heartbeatSubscription = client
+        .heartbeat(interval: const Duration(seconds: 5))
+        .listen(
+          (status) => print('   Connection status: ${status.name}'),
+          onError: (Object error) => print('   ⚠️  Heartbeat error: $error'),
+        );
 
     // Step 4: Get system information
     print('ℹ️  Fetching system information...');
@@ -130,6 +142,7 @@ Future<void> main() async {
 
     // Step 7: Clean up
     print('🧹 Cleaning up connection...');
+    await heartbeatSubscription.cancel();
     await client.disconnect();
     print('✅ Disconnected successfully!');
   } on TrueNasAuthException catch (e) {
@@ -139,6 +152,9 @@ Future<void> main() async {
     print('❌ TrueNAS error: ${e.message}');
   } catch (e) {
     print('❌ Unexpected error: $e');
+  } finally {
+    // Ensure cleanup happens even on error
+    await heartbeatSubscription?.cancel();
   }
 }
 
