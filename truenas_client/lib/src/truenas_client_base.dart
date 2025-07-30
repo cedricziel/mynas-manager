@@ -23,7 +23,12 @@ abstract class TrueNasClientBase implements IConnectionApi {
     this.username,
     this.password,
   }) {
-    if (apiKey == null && (username == null || password == null)) {
+    // Check for empty strings as well as null values
+    final hasApiKey = apiKey != null && apiKey!.isNotEmpty;
+    final hasUsername = username != null && username!.isNotEmpty;
+    final hasPassword = password != null && password!.isNotEmpty;
+
+    if (!hasApiKey && (!hasUsername || !hasPassword)) {
       throw ArgumentError(
         'Either apiKey or username/password must be provided',
       );
@@ -50,9 +55,17 @@ abstract class TrueNasClientBase implements IConnectionApi {
       _logger.info('Connected, authenticating...');
 
       // Authenticate based on provided credentials
-      if (apiKey != null) {
+      final hasApiKey = apiKey != null && apiKey!.isNotEmpty;
+      final hasUsername = username != null && username!.isNotEmpty;
+
+      if (hasApiKey && hasUsername) {
+        // Username/API key authentication (new)
+        await _authenticateWithUsernameApiKey(username!, apiKey!);
+      } else if (hasApiKey) {
+        // API key only authentication
         await _authenticateWithApiKey();
       } else {
+        // Username/password authentication
         await _authenticateWithCredentials();
       }
 
@@ -75,13 +88,58 @@ abstract class TrueNasClientBase implements IConnectionApi {
   }
 
   Future<void> _authenticateWithCredentials() async {
-    _logger.fine('Authenticating with username/password');
+    _logger.fine('Authenticating with username/password using auth.login_ex');
 
-    // TrueNAS expects username and password as array parameters
-    final success = await call<bool>('auth.login', [username, password]);
+    // Use auth.login_ex for more flexible authentication
+    final response = await call<Map<String, dynamic>>('auth.login_ex', {
+      'mechanism': 'PASSWORD_PLAIN',
+      'username': username,
+      'password': password,
+    });
 
-    if (!success) {
-      throw const TrueNasAuthException('Invalid username or password');
+    _handleAuthResponse(response);
+  }
+
+  Future<void> _authenticateWithUsernameApiKey(
+    String username,
+    String apiKey,
+  ) async {
+    _logger.fine('Authenticating with username/API key using auth.login_ex');
+
+    final response = await call<Map<String, dynamic>>('auth.login_ex', {
+      'mechanism': 'API_KEY',
+      'username': username,
+      'api_key': apiKey,
+    });
+
+    _handleAuthResponse(response);
+  }
+
+  void _handleAuthResponse(Map<String, dynamic> response) {
+    final responseType = response['response_type'] as String?;
+
+    switch (responseType) {
+      case 'SUCCESS':
+        // Authentication successful
+        _logger.info('Authentication successful');
+        return;
+      case 'OTP_REQUIRED':
+        throw const TrueNasOtpRequiredException();
+      case 'AUTH_ERR':
+        throw TrueNasAuthException(
+          (response['error_message'] as String?) ?? 'Authentication failed',
+        );
+      case 'EXPIRED':
+        throw const TrueNasExpiredCredentialsException();
+      case 'REDIRECT':
+        // Handle redirect if needed in the future
+        throw TrueNasAuthException(
+          'Authentication redirect: ${response['redirect_url']}',
+        );
+      default:
+        throw TrueNasAuthException(
+          'Unknown authentication response: $responseType',
+        );
     }
   }
 

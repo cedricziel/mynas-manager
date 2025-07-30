@@ -20,30 +20,64 @@ class Server {
   // Store configuration
   late final String _trueNasUrl;
   late final String? _trueNasApiKey;
+  late final String? _trueNasUsername;
+  late final String? _trueNasPassword;
 
-  Server({String? trueNasUrl, String? trueNasApiKey}) {
+  Server({
+    String? trueNasUrl,
+    String? trueNasApiKey,
+    String? trueNasUsername,
+    String? trueNasPassword,
+  }) {
     // Get configuration from environment or parameters
     _trueNasUrl =
         trueNasUrl ??
         Platform.environment['TRUENAS_URL'] ??
         'ws://localhost/api/current';
     _trueNasApiKey = trueNasApiKey ?? Platform.environment['TRUENAS_API_KEY'];
+    _trueNasUsername =
+        trueNasUsername ?? Platform.environment['TRUENAS_USERNAME'];
+    _trueNasPassword =
+        trueNasPassword ?? Platform.environment['TRUENAS_PASSWORD'];
 
     _logger.info('Server configuration:');
-    _logger.info('  TrueNAS URL (param): $trueNasUrl');
-    _logger.info('  TrueNAS URL (env): ${Platform.environment['TRUENAS_URL']}');
-    _logger.info('  Final URL: $_trueNasUrl');
+    _logger.info('  TrueNAS URL: $_trueNasUrl');
     _logger.info('  Has API Key: ${_trueNasApiKey != null ? 'yes' : 'no'}');
+    _logger.info('  Has Username: ${_trueNasUsername != null ? 'yes' : 'no'}');
+    _logger.info('  Has Password: ${_trueNasPassword != null ? 'yes' : 'no'}');
 
     // Create client based on available credentials
-    if (_trueNasApiKey != null) {
+    if (_trueNasApiKey != null && _trueNasUsername != null) {
+      // Username/API key authentication (preferred)
+      _trueNasClient = TrueNasClient.withUsernameApiKey(
+        uri: _trueNasUrl,
+        username: _trueNasUsername,
+        apiKey: _trueNasApiKey,
+      );
+    } else if (_trueNasApiKey != null) {
+      // API key only authentication
       _trueNasClient = TrueNasClient.withApiKey(
         uri: _trueNasUrl,
         apiKey: _trueNasApiKey,
       );
+    } else if (_trueNasUsername != null && _trueNasPassword != null) {
+      // Username/password authentication
+      _logger.warning(
+        'Using username/password authentication. Consider using API key for better security.',
+      );
+      _trueNasClient = TrueNasClient.withCredentials(
+        uri: _trueNasUrl,
+        username: _trueNasUsername,
+        password: _trueNasPassword,
+      );
     } else {
-      // For now, throw an error if no API key is provided
-      throw ArgumentError('TRUENAS_API_KEY environment variable must be set');
+      // No valid credentials provided
+      throw ArgumentError(
+        'Authentication credentials must be provided. Set either:\n'
+        '  - TRUENAS_API_KEY (for API key authentication)\n'
+        '  - TRUENAS_USERNAME and TRUENAS_API_KEY (for username/API key authentication)\n'
+        '  - TRUENAS_USERNAME and TRUENAS_PASSWORD (for username/password authentication)',
+      );
     }
     _rpcHandler = RpcHandler(_trueNasClient);
     _setupRoutes();
