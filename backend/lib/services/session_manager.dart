@@ -243,6 +243,11 @@ class UserSession {
         .listen(onStatusChange);
   }
 
+  void stopHeartbeatMonitoring() {
+    _heartbeatSubscription?.cancel();
+    _heartbeatSubscription = null;
+  }
+
   Future<void> dispose() async {
     await _heartbeatSubscription?.cancel();
     await trueNasClient.stopHeartbeat();

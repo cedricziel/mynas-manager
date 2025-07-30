@@ -396,5 +396,14 @@ class HybridWebSocketHandler {
 
   void dispose() {
     _cleanup();
+    // Stop heartbeat monitoring to prevent memory leaks when connection is closed
+    if (_currentSession != null) {
+      _logger.info(
+        'Stopping heartbeat monitoring for session ${_currentSession!.id}',
+      );
+      _currentSession!.stopHeartbeatMonitoring();
+      // We keep the session alive in case the user reconnects
+      // The session will eventually be cleaned up by SessionManager's cleanup timer
+    }
   }
 }
