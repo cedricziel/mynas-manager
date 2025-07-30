@@ -13,7 +13,7 @@ import 'package:truenas_client/truenas_client.dart';
 class Server {
   final _logger = Logger('Server');
   late final Router _router;
-  late final ITrueNasApiClient _trueNasClient;
+  late final ITrueNasClient _trueNasClient;
   late final RpcHandler _rpcHandler;
   HttpServer? _server;
 
@@ -35,10 +35,16 @@ class Server {
     _logger.info('  Final URL: $_trueNasUrl');
     _logger.info('  Has API Key: ${_trueNasApiKey != null ? 'yes' : 'no'}');
 
-    _trueNasClient = TrueNasClientFactory.createClient(
-      uri: _trueNasUrl,
-      apiKey: _trueNasApiKey,
-    );
+    // Create client based on available credentials
+    if (_trueNasApiKey != null) {
+      _trueNasClient = TrueNasClient.withApiKey(
+        uri: _trueNasUrl,
+        apiKey: _trueNasApiKey,
+      );
+    } else {
+      // For now, throw an error if no API key is provided
+      throw ArgumentError('TRUENAS_API_KEY environment variable must be set');
+    }
     _rpcHandler = RpcHandler(_trueNasClient);
     _setupRoutes();
   }
@@ -95,20 +101,8 @@ class Server {
     try {
       _logger.info('Initializing TrueNAS client connection...');
 
-      // Connect to TrueNAS using stored configuration
-      await _trueNasClient.connect(_trueNasUrl);
-
-      // Authenticate if API key is available
-      final apiKey = _trueNasApiKey;
-
-      if (apiKey != null) {
-        _logger.info('Authenticating with API key...');
-        await _trueNasClient.auth.authenticateWithApiKey(apiKey);
-      } else {
-        _logger.warning(
-          'No API key provided - authentication may be required for certain operations',
-        );
-      }
+      // Connect to TrueNAS (authentication happens automatically)
+      await _trueNasClient.connect();
 
       _logger.info('TrueNAS client initialized successfully');
     } catch (e) {
@@ -124,7 +118,7 @@ class Server {
 
     // Dispose TrueNAS client
     try {
-      await _trueNasClient.dispose();
+      await _trueNasClient.disconnect();
       _logger.info('TrueNAS client disposed');
     } catch (e) {
       _logger.warning('Error disposing TrueNAS client: $e');

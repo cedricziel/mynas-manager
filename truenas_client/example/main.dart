@@ -4,14 +4,18 @@ import 'package:truenas_client/truenas_client.dart';
 /// Example demonstrating how to authenticate with TrueNAS using an API key
 /// and list all available pools.
 ///
+/// IMPORTANT: TrueNAS SCALE requires HTTPS/TLS for API key authentication!
+/// Using ws:// (insecure WebSocket) will cause your API key to be REVOKED.
+/// Always use wss:// for production environments with API key authentication.
+///
 /// Before running this example:
-/// 1. Set TRUENAS_URL environment variable (e.g., ws://192.168.1.100/api/current)
+/// 1. Set TRUENAS_URL environment variable (e.g., wss://192.168.1.100/api/current)
 /// 2. Set TRUENAS_API_KEY environment variable with your API key
 /// 3. Generate an API key in TrueNAS: System Settings > API Keys > Add
 ///
 /// Run with:
 /// ```bash
-/// export TRUENAS_URL="ws://your-truenas-ip/api/current"
+/// export TRUENAS_URL="wss://your-truenas-ip/api/current"
 /// export TRUENAS_API_KEY="your-api-key-here"
 /// dart run example/main.dart
 /// ```
@@ -25,15 +29,30 @@ Future<void> main() async {
     print('');
     print('Please set the following environment variables:');
     print(
-      '  TRUENAS_URL     - WebSocket URL (e.g., ws://192.168.1.100/api/current)',
+      '  TRUENAS_URL     - WebSocket URL (e.g., wss://192.168.1.100/api/current)',
+    );
+    print(
+      '                    WARNING: Use wss:// for API key auth, not ws://!',
     );
     print('  TRUENAS_API_KEY  - Your TrueNAS API key');
     print('');
     print('Example:');
-    print('  export TRUENAS_URL="ws://192.168.1.100/api/current"');
+    print('  export TRUENAS_URL="wss://192.168.1.100/api/current"');
     print('  export TRUENAS_API_KEY="your-api-key-here"');
     print('  dart run example/main.dart');
     exit(1);
+  }
+
+  // Warn if using insecure WebSocket with API key
+  if (trueNasUrl.startsWith('ws://') && !trueNasUrl.startsWith('wss://')) {
+    print(
+      '⚠️  WARNING: Using insecure WebSocket (ws://) with API key authentication!',
+    );
+    print(
+      '   TrueNAS will REVOKE your API key when used over insecure connections.',
+    );
+    print('   Use wss:// for production environments.');
+    print('');
   }
 
   print('🔧 TrueNAS Client Example - Pool Listing');
@@ -42,22 +61,14 @@ Future<void> main() async {
   print('');
 
   try {
-    // Step 1: Create the TrueNAS client
+    // Step 1: Create the TrueNAS client with API key
     print('📡 Creating TrueNAS client...');
-    final client = TrueNasClientFactory.createClient(
-      uri: trueNasUrl,
-      apiKey: apiKey,
-    );
+    final client = TrueNasClient.withApiKey(uri: trueNasUrl, apiKey: apiKey);
 
-    // Step 2: Connect to TrueNAS
+    // Step 2: Connect and authenticate (happens automatically)
     print('🔌 Connecting to TrueNAS server...');
-    await client.connect(trueNasUrl);
-    print('✅ Connected successfully!');
-
-    // Step 3: Authenticate using API key
-    print('🔐 Authenticating with API key...');
-    await client.auth.authenticateWithApiKey(apiKey);
-    print('✅ Authenticated successfully!');
+    await client.connect();
+    print('✅ Connected and authenticated successfully!');
 
     // Step 4: Get system information
     print('ℹ️  Fetching system information...');
@@ -109,14 +120,11 @@ Future<void> main() async {
 
     // Step 7: Clean up
     print('🧹 Cleaning up connection...');
-    await client.dispose();
+    await client.disconnect();
     print('✅ Disconnected successfully!');
-  } on TrueNasAuthenticationException catch (e) {
+  } on TrueNasAuthException catch (e) {
     print('❌ Authentication failed: ${e.message}');
     print('💡 Check your API key and ensure it has sufficient permissions.');
-  } on TrueNasConnectionException catch (e) {
-    print('❌ Connection failed: ${e.message}');
-    print('💡 Check your TrueNAS URL and network connectivity.');
   } on TrueNasException catch (e) {
     print('❌ TrueNAS error: ${e.message}');
   } catch (e) {

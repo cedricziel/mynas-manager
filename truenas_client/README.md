@@ -22,7 +22,7 @@ import 'package:truenas_client/truenas_client.dart';
 
 // Create client
 final client = TrueNasClientFactory.createClient(
-  uri: 'ws://your-truenas-ip/api/current',
+  uri: 'wss://your-truenas-ip/api/current',  // Use wss:// for API key auth!
   apiKey: 'your-api-key',
 );
 
@@ -47,7 +47,7 @@ See the [example/](example/) directory for a complete working example that demon
 
 Run the example:
 ```bash
-export TRUENAS_URL="ws://your-truenas-ip/api/current"
+export TRUENAS_URL="wss://your-truenas-ip/api/current"
 export TRUENAS_API_KEY="your-api-key-here"
 dart run example/main.dart
 ```
@@ -55,6 +55,8 @@ dart run example/main.dart
 ## Authentication
 
 The client supports API key authentication using the `auth.login_with_api_key` method.
+
+**IMPORTANT:** TrueNAS SCALE requires HTTPS/TLS (wss://) for API key authentication. Using ws:// (insecure WebSocket) will cause TrueNAS to automatically revoke your API key for security reasons. Always use wss:// in production environments when using API key authentication.
 
 ## API Coverage
 

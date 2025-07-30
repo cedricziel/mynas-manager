@@ -7,7 +7,7 @@ import 'package:mynas_shared/mynas_shared.dart';
 
 class RpcHandler {
   final _logger = Logger('RpcHandler');
-  final ITrueNasApiClient _trueNasClient;
+  final ITrueNasClient _trueNasClient;
 
   RpcHandler(this._trueNasClient);
 
@@ -119,18 +119,12 @@ class RpcHandler {
     TrueNasException exception,
     dynamic requestId,
   ) {
-    if (exception is TrueNasAuthenticationException) {
+    // Check specific exceptions first
+    if (exception is TrueNasAuthException) {
       return _errorResponse(
         requestId,
         401,
         'Authentication required',
-        exception.message,
-      );
-    } else if (exception is TrueNasAuthorizationException) {
-      return _errorResponse(
-        requestId,
-        403,
-        'Insufficient permissions',
         exception.message,
       );
     } else if (exception is TrueNasNotFoundException) {
@@ -138,53 +132,17 @@ class RpcHandler {
         requestId,
         404,
         'Resource not found',
-        '${exception.resourceType} with id ${exception.resourceId} not found',
-      );
-    } else if (exception is TrueNasValidationException) {
-      return _errorResponse(
-        requestId,
-        -32602,
-        'Invalid params',
-        jsonEncode(exception.validationErrors),
-      );
-    } else if (exception is TrueNasRateLimitException) {
-      return _errorResponse(
-        requestId,
-        429,
-        'Rate limit exceeded',
-        'Retry after ${exception.retryAfter.inSeconds} seconds',
-      );
-    } else if (exception is TrueNasConnectionException) {
-      return _errorResponse(
-        requestId,
-        -32603,
-        'Connection error',
         exception.message,
       );
-    } else if (exception is TrueNasNetworkException) {
+    } else if (exception is TrueNasRpcException) {
       return _errorResponse(
         requestId,
-        -32603,
-        'Network error',
+        exception.code,
+        'RPC error',
         exception.message,
       );
-    } else if (exception is TrueNasTimeoutException) {
-      return _errorResponse(
-        requestId,
-        -32603,
-        'Request timeout',
-        'Operation timed out after ${exception.timeout.inSeconds} seconds',
-      );
-    } else if (exception is TrueNasVersionException) {
-      return _errorResponse(
-        requestId,
-        -32603,
-        'Version incompatible',
-        'Required: ${exception.requiredVersion}, Found: ${exception.actualVersion}',
-      );
-    } else if (exception is TrueNasServerException) {
-      final code = exception.statusCode ?? -32603;
-      return _errorResponse(requestId, code, 'Server error', exception.message);
+      // Note: We don't need a generic TrueNasException check here
+      // because we've already handled all specific TrueNAS exception types
     } else {
       return _errorResponse(
         requestId,
@@ -237,20 +195,14 @@ class RpcHandler {
         return await _listDisks(params);
       case 'disk.get':
         return await _getDisk(params);
-      case 'disk.temperatures':
-        return await _getDiskTemperatures(params);
-      case 'disk.temperature_alerts':
-        return await _getDiskTemperatureAlerts(params);
-      case 'disk.temperature_history':
-        return await _getDiskTemperatureHistory(params);
-      case 'pool.disks':
-        return await _getPoolDisks(params);
-      case 'pool.topology':
-        return await _getPoolTopology(params);
-      case 'disk.smart_data':
-        return await _getDiskSmartData(params);
-      case 'disk.run_smart_test':
-        return await _runSmartTest(params);
+      // The following methods are not yet implemented:
+      // case 'disk.temperatures':
+      // case 'disk.temperature_alerts':
+      // case 'disk.temperature_history':
+      // case 'pool.disks':
+      // case 'pool.topology':
+      // case 'disk.smart_data':
+      // case 'disk.run_smart_test':
 
       default:
         throw Exception('Method not found: $method');
@@ -355,8 +307,8 @@ class RpcHandler {
   Future<List<Map<String, dynamic>>> _listDisks(
     Map<String, dynamic> params,
   ) async {
-    final includePools = params['includePools'] as bool? ?? true;
-    final disks = await _trueNasClient.listDisks(includePools: includePools);
+    // Note: includePools parameter is ignored in the simplified client
+    final disks = await _trueNasClient.listDisks();
     return disks.map((d) => d.toJson()).toList();
   }
 
@@ -366,61 +318,13 @@ class RpcHandler {
     return disk.toJson();
   }
 
-  Future<List<Map<String, dynamic>>> _getDiskTemperatures(
-    Map<String, dynamic> params,
-  ) async {
-    final diskNames = (params['diskNames'] as List).cast<String>();
-    final temperatures = await _trueNasClient.getDiskTemperatures(diskNames);
-    return temperatures.map((t) => t.toJson()).toList();
-  }
-
-  Future<Map<String, dynamic>> _getDiskTemperatureAlerts(
-    Map<String, dynamic> params,
-  ) async {
-    final diskNames = (params['diskNames'] as List).cast<String>();
-    return await _trueNasClient.getDiskTemperatureAlerts(diskNames);
-  }
-
-  Future<Map<String, dynamic>> _getDiskTemperatureHistory(
-    Map<String, dynamic> params,
-  ) async {
-    final diskNames = (params['diskNames'] as List).cast<String>();
-    final days = params['days'] as int;
-    return await _trueNasClient.getDiskTemperatureHistory(
-      diskNames: diskNames,
-      days: days,
-    );
-  }
-
-  Future<List<Map<String, dynamic>>> _getPoolDisks(
-    Map<String, dynamic> params,
-  ) async {
-    final poolId = params['poolId'] as String;
-    final disks = await _trueNasClient.getPoolDisks(poolId);
-    return disks.map((d) => d.toJson()).toList();
-  }
-
-  Future<Map<String, dynamic>> _getPoolTopology(
-    Map<String, dynamic> params,
-  ) async {
-    final poolId = params['poolId'] as String;
-    final topology = await _trueNasClient.getPoolTopology(poolId);
-    return topology.toJson();
-  }
-
-  Future<Map<String, dynamic>> _getDiskSmartData(
-    Map<String, dynamic> params,
-  ) async {
-    final diskName = params['diskName'] as String;
-    return await _trueNasClient.getDiskSmartData(diskName);
-  }
-
-  Future<bool> _runSmartTest(Map<String, dynamic> params) async {
-    final diskName = params['diskName'] as String;
-    final testType = params['testType'] as String;
-    return await _trueNasClient.runSmartTest(
-      diskName: diskName,
-      testType: testType,
-    );
-  }
+  // Note: The following methods are not yet implemented in the simplified client:
+  // - getDiskTemperatures
+  // - getDiskTemperatureAlerts
+  // - getDiskTemperatureHistory
+  // - getPoolDisks
+  // - getPoolTopology
+  // - getDiskSmartData
+  // - runSmartTest
+  // These would need to be added to the TrueNAS client interfaces if needed
 }

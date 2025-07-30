@@ -8,7 +8,7 @@ import 'package:mynas_shared/mynas_shared.dart';
 class WebSocketHandler {
   final _logger = Logger('WebSocketHandler');
   final WebSocketChannel _channel;
-  final ITrueNasApiClient _trueNasClient;
+  final ITrueNasClient _trueNasClient;
   late final json_rpc.Peer _peer;
 
   WebSocketHandler(WebSocketChannel webSocket, this._trueNasClient)

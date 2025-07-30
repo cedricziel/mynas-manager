@@ -1,13 +1,14 @@
-// Interfaces
-export 'src/interfaces/truenas_api_client.dart';
+library;
 
-// Services
-export 'src/services/truenas_websocket_client.dart';
-export 'src/services/truenas_auth_manager.dart';
-export 'src/services/truenas_peer_client.dart';
+// Main client exports
+export 'src/truenas_client_interface.dart';
+export 'src/truenas_client.dart';
+export 'src/truenas_exceptions.dart';
 
-// Exceptions
-export 'src/exceptions/truenas_exceptions.dart';
-
-// Client factory
-export 'src/client/truenas_client_factory.dart';
+// Individual API interfaces for selective mocking
+export 'src/interfaces/connection_api.dart';
+export 'src/interfaces/system_api.dart';
+export 'src/interfaces/pool_api.dart';
+export 'src/interfaces/dataset_api.dart';
+export 'src/interfaces/share_api.dart';
+export 'src/interfaces/disk_api.dart';
