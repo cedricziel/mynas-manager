@@ -19,20 +19,33 @@ Future<void> main() async {
   });
 
   // Read configuration from environment variables
-  final trueNasUrl =
-      Platform.environment['TRUENAS_URL'] ?? 'ws://192.168.178.6/api/current';
-  final apiKey =
-      Platform.environment['TRUENAS_API_KEY'] ??
-      '8-hYklnPVCrDEb3B6BqTi14BFe3AJcB8kcQsAbF8HinbyHvBNEQu27vUDE86hzBWQu';
+  final trueNasUrl = Platform.environment['TRUENAS_URL'];
+  final username = Platform.environment['TRUENAS_USERNAME'];
+  final apiKey = Platform.environment['TRUENAS_API_KEY'];
+
+  if (trueNasUrl == null || username == null || apiKey == null) {
+    print('❌ Missing required environment variables!');
+    print('');
+    print('Please set the following environment variables:');
+    print('  TRUENAS_URL      - WebSocket URL');
+    print('  TRUENAS_USERNAME - Your TrueNAS username');
+    print('  TRUENAS_API_KEY  - Your TrueNAS API key');
+    exit(1);
+  }
 
   print('Testing TrueNAS authentication');
   print('URL: $trueNasUrl');
+  print('Username: $username');
   print('');
 
   try {
-    // Create client
-    print('Creating client...');
-    final client = TrueNasClient.withApiKey(uri: trueNasUrl, apiKey: apiKey);
+    // Create client with username/API key authentication
+    print('Creating client with username/API key authentication...');
+    final client = TrueNasClient.withUsernameApiKey(
+      uri: trueNasUrl,
+      username: username,
+      apiKey: apiKey,
+    );
 
     // Connect (authentication happens automatically)
     print('Connecting and authenticating...');

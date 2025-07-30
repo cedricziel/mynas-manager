@@ -6,9 +6,9 @@ This directory contains examples demonstrating how to use the TrueNAS client lib
 
 The `main.dart` file shows a complete example of:
 
-1. **Creating a TrueNAS client** with factory method
+1. **Creating a TrueNAS client** with username/API key authentication
 2. **Connecting** to TrueNAS server via WebSocket
-3. **Authenticating** using an API key
+3. **Authenticating** using the auth.login_ex method
 4. **Fetching system information**
 5. **Listing storage pools** with detailed information
 6. **Error handling** for common scenarios
@@ -16,27 +16,33 @@ The `main.dart` file shows a complete example of:
 
 ### Prerequisites
 
-1. **TrueNAS SCALE server** running and accessible
+1. **TrueNAS SCALE server** running and accessible (version 25.10+ recommended)
 2. **API key** generated in TrueNAS (System Settings > API Keys > Add)
-3. **Network access** to TrueNAS WebSocket endpoint
+3. **Username** with appropriate permissions
+4. **Network access** to TrueNAS WebSocket endpoint
 
 ### Setup
 
 1. **Set environment variables** with your TrueNAS connection details:
    ```bash
-   export TRUENAS_URL="ws://your-truenas-ip/api/current"
+   export TRUENAS_URL="wss://your-truenas-ip/api/current"
+   export TRUENAS_USERNAME="your-username"
    export TRUENAS_API_KEY="your-api-key-here"
    ```
 
 2. **Replace the placeholders**:
    - `your-truenas-ip`: Your TrueNAS server IP address (e.g., `192.168.1.100`)
+   - `your-username`: Your TrueNAS username
    - `your-api-key-here`: Your generated API key
+
+⚠️ **Important**: Use `wss://` for secure connections when using API key authentication.
 
 ### Running the Example
 
 ```bash
 # Set environment variables
-export TRUENAS_URL="ws://192.168.1.100/api/current"
+export TRUENAS_URL="wss://192.168.1.100/api/current"
+export TRUENAS_USERNAME="your-username"
 export TRUENAS_API_KEY="1-AbCdEfGhIjKlMnOpQrStUvWxYz1234567890"
 
 # Run the example from the truenas_client directory
@@ -50,7 +56,8 @@ For convenience during development, you can create a `.env` file:
 ```bash
 # Create .env file in the example directory
 cat > example/.env << EOF
-TRUENAS_URL=ws://192.168.1.100/api/current
+TRUENAS_URL=wss://192.168.1.100/api/current
+TRUENAS_USERNAME=your-username
 TRUENAS_API_KEY=your-api-key-here
 EOF
 
@@ -65,13 +72,12 @@ env $(cat example/.env | xargs) dart run example/main.dart
 ```
 🔧 TrueNAS Client Example - Pool Listing
 =========================================
-Connecting to: ws://192.168.1.100/api/current
+Connecting to: wss://192.168.1.100/api/current
+Username: your-username
 
-📡 Creating TrueNAS client...
+📡 Creating TrueNAS client with username/API key authentication...
 🔌 Connecting to TrueNAS server...
-✅ Connected successfully!
-🔐 Authenticating with API key...
-✅ Authenticated successfully!
+✅ Connected and authenticated successfully!
 ℹ️  Fetching system information...
 📋 System: truenas.local (TrueNAS-SCALE-24.04.0)
 ⏱️  Uptime: 15 days, 8:42:30

@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:truenas_client/truenas_client.dart';
 
-/// Example demonstrating how to authenticate with TrueNAS using an API key
+/// Example demonstrating how to authenticate with TrueNAS using username/API key
 /// and list all available pools.
 ///
 /// IMPORTANT: TrueNAS SCALE requires HTTPS/TLS for API key authentication!
@@ -10,34 +10,39 @@ import 'package:truenas_client/truenas_client.dart';
 ///
 /// Before running this example:
 /// 1. Set TRUENAS_URL environment variable (e.g., wss://192.168.1.100/api/current)
-/// 2. Set TRUENAS_API_KEY environment variable with your API key
-/// 3. Generate an API key in TrueNAS: System Settings > API Keys > Add
+/// 2. Set TRUENAS_USERNAME environment variable with your username
+/// 3. Set TRUENAS_API_KEY environment variable with your API key
+/// 4. Generate an API key in TrueNAS: System Settings > API Keys > Add
 ///
 /// Run with:
 /// ```bash
 /// export TRUENAS_URL="wss://your-truenas-ip/api/current"
+/// export TRUENAS_USERNAME="your-username"
 /// export TRUENAS_API_KEY="your-api-key-here"
 /// dart run example/main.dart
 /// ```
 Future<void> main() async {
   // Read configuration from environment variables
   final trueNasUrl = Platform.environment['TRUENAS_URL'];
+  final username = Platform.environment['TRUENAS_USERNAME'];
   final apiKey = Platform.environment['TRUENAS_API_KEY'];
 
-  if (trueNasUrl == null || apiKey == null) {
+  if (trueNasUrl == null || username == null || apiKey == null) {
     print('❌ Missing required environment variables!');
     print('');
     print('Please set the following environment variables:');
     print(
-      '  TRUENAS_URL     - WebSocket URL (e.g., wss://192.168.1.100/api/current)',
+      '  TRUENAS_URL      - WebSocket URL (e.g., wss://192.168.1.100/api/current)',
     );
     print(
-      '                    WARNING: Use wss:// for API key auth, not ws://!',
+      '                     WARNING: Use wss:// for API key auth, not ws://!',
     );
+    print('  TRUENAS_USERNAME - Your TrueNAS username');
     print('  TRUENAS_API_KEY  - Your TrueNAS API key');
     print('');
     print('Example:');
     print('  export TRUENAS_URL="wss://192.168.1.100/api/current"');
+    print('  export TRUENAS_USERNAME="your-username"');
     print('  export TRUENAS_API_KEY="your-api-key-here"');
     print('  dart run example/main.dart');
     exit(1);
@@ -58,12 +63,17 @@ Future<void> main() async {
   print('🔧 TrueNAS Client Example - Pool Listing');
   print('=========================================');
   print('Connecting to: $trueNasUrl');
+  print('Username: $username');
   print('');
 
   try {
-    // Step 1: Create the TrueNAS client with API key
-    print('📡 Creating TrueNAS client...');
-    final client = TrueNasClient.withApiKey(uri: trueNasUrl, apiKey: apiKey);
+    // Step 1: Create the TrueNAS client with username and API key
+    print('📡 Creating TrueNAS client with username/API key authentication...');
+    final client = TrueNasClient.withUsernameApiKey(
+      uri: trueNasUrl,
+      username: username,
+      apiKey: apiKey,
+    );
 
     // Step 2: Connect and authenticate (happens automatically)
     print('🔌 Connecting to TrueNAS server...');
