@@ -148,13 +148,20 @@ abstract class TrueNasClientBase implements IConnectionApi {
     _logger.info('Disconnecting from TrueNAS');
 
     try {
-      await _channel?.sink.close();
-    } catch (e) {
-      _logger.warning('Error closing WebSocket: $e');
-    }
+      // Close the peer first to stop listening
+      if (_peer != null) {
+        _peer!.close();
+        _peer = null;
+      }
 
-    _channel = null;
-    _peer = null;
+      // Then close the WebSocket channel
+      if (_channel != null) {
+        await _channel!.sink.close();
+        _channel = null;
+      }
+    } catch (e) {
+      _logger.warning('Error during disconnect: $e');
+    }
   }
 
   @override

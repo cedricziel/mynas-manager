@@ -16,11 +16,11 @@ mixin SystemApiMixin on IConnectionApi implements ISystemApi {
       cpuUsage: 0.0, // TODO: Get from appropriate endpoint
       cpuTemperature: 0.0, // TODO: Get from appropriate endpoint
       memory: MemoryInfo(
-        total: (data['physmem'] as int?) ?? 0,
+        total: int.tryParse(data['physmem']?.toString() ?? '0') ?? 0,
         used:
-            ((data['physmem'] as int?) ?? 0) -
-            ((data['physmem_free'] as int?) ?? 0),
-        free: (data['physmem_free'] as int?) ?? 0,
+            (int.tryParse(data['physmem']?.toString() ?? '0') ?? 0) -
+            (int.tryParse(data['physmem_free']?.toString() ?? '0') ?? 0),
+        free: int.tryParse(data['physmem_free']?.toString() ?? '0') ?? 0,
         cached: 0, // TODO: Get from appropriate endpoint
       ),
     );

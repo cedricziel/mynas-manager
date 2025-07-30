@@ -16,10 +16,10 @@ mixin PoolApiMixin on IConnectionApi implements IPoolApi {
         id: poolMap['id']?.toString() ?? '',
         name: (poolMap['name'] as String?) ?? '',
         status: (poolMap['status'] as String?) ?? 'UNKNOWN',
-        size: (poolMap['size'] as int?) ?? 0,
-        allocated: (poolMap['allocated'] as int?) ?? 0,
-        free: (poolMap['free'] as int?) ?? 0,
-        fragmentation: (poolMap['fragmentation'] as num?)?.toDouble() ?? 0.0,
+        size: _parseIntOrString(poolMap['size']),
+        allocated: _parseIntOrString(poolMap['allocated']),
+        free: _parseIntOrString(poolMap['free']),
+        fragmentation: _parseDoubleOrString(poolMap['fragmentation']),
         path: poolMap['path'] as String?,
         isHealthy: (poolMap['healthy'] as bool?) ?? false,
         vdevs: [], // TODO: Parse topology if needed
@@ -45,13 +45,29 @@ mixin PoolApiMixin on IConnectionApi implements IPoolApi {
       id: poolMap['id']?.toString() ?? '',
       name: (poolMap['name'] as String?) ?? '',
       status: (poolMap['status'] as String?) ?? 'UNKNOWN',
-      size: (poolMap['size'] as int?) ?? 0,
-      allocated: (poolMap['allocated'] as int?) ?? 0,
-      free: (poolMap['free'] as int?) ?? 0,
-      fragmentation: (poolMap['fragmentation'] as num?)?.toDouble() ?? 0.0,
+      size: _parseIntOrString(poolMap['size']),
+      allocated: _parseIntOrString(poolMap['allocated']),
+      free: _parseIntOrString(poolMap['free']),
+      fragmentation: _parseDoubleOrString(poolMap['fragmentation']),
       path: poolMap['path'] as String?,
       isHealthy: (poolMap['healthy'] as bool?) ?? false,
       vdevs: [],
     );
+  }
+
+  // Helper method to parse int from either int or string
+  int _parseIntOrString(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
+  }
+
+  // Helper method to parse double from either num or string
+  double _parseDoubleOrString(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is num) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
   }
 }
