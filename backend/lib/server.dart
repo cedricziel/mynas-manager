@@ -9,6 +9,7 @@ import 'package:logging/logging.dart';
 import 'package:mynas_backend/rpc/rpc_handler.dart';
 import 'package:mynas_backend/rpc/websocket_handler.dart';
 import 'package:mynas_backend/rpc/session_websocket_handler.dart';
+import 'package:mynas_backend/rpc/hybrid_websocket_handler.dart';
 import 'package:mynas_backend/middleware/auth.dart';
 import 'package:mynas_backend/services/truenas_heartbeat_service.dart';
 import 'package:mynas_backend/services/session_manager.dart';
@@ -24,8 +25,9 @@ class Server {
   late final SessionManager _sessionManager;
   HttpServer? _server;
 
-  // Session mode flag
+  // Authentication mode
   final bool useSessionAuth;
+  final bool useHybridAuth;
 
   // Active WebSocket handlers
   final List<dynamic> _activeHandlers = [];
@@ -42,6 +44,7 @@ class Server {
     String? trueNasUsername,
     String? trueNasPassword,
     this.useSessionAuth = false,
+    this.useHybridAuth = false,
   }) {
     // Get configuration from environment or parameters
     _trueNasUrl =
@@ -57,7 +60,7 @@ class Server {
     _logger.info('Server configuration:');
     _logger.info('  TrueNAS URL: $_trueNasUrl');
     _logger.info(
-      '  Session Auth Mode: ${useSessionAuth ? 'enabled' : 'disabled'}',
+      '  Auth Mode: ${useHybridAuth ? 'hybrid' : (useSessionAuth ? 'session' : 'legacy')}',
     );
 
     // Initialize authentication middleware
@@ -67,9 +70,9 @@ class Server {
     // Initialize session manager
     _sessionManager = SessionManager();
 
-    if (useSessionAuth) {
-      // Session-based authentication mode
-      _logger.info('Using session-based authentication');
+    if (useSessionAuth && !useHybridAuth) {
+      // Session-only authentication mode
+      _logger.info('Using session-only authentication');
       // No shared TrueNAS client needed
       _trueNasClient = null;
       _rpcHandler = null;
@@ -137,8 +140,26 @@ class Server {
   }
 
   void _handleWebSocket(dynamic webSocket, dynamic _) {
-    if (useSessionAuth) {
-      // Session-based authentication mode
+    if (useHybridAuth) {
+      // Hybrid authentication mode (both API key and session)
+      final handler = HybridWebSocketHandler(
+        webSocket,
+        _sessionManager,
+        _trueNasClient,
+        _trueNasUrl,
+      );
+      _activeHandlers.add(handler);
+
+      // Listen for heartbeat status changes if we have a shared client
+      if (_heartbeatService != null) {
+        _heartbeatService.connectionStatus.listen((status) {
+          handler.notifyConnectionStatus(status);
+        });
+      }
+
+      handler.start();
+    } else if (useSessionAuth) {
+      // Session-only authentication mode
       final handler = SessionWebSocketHandler(
         webSocket,
         _sessionManager,
@@ -179,8 +200,8 @@ class Server {
   }
 
   Future<void> start({required String host, required int port}) async {
-    if (!useSessionAuth) {
-      // Initialize TrueNAS client connection for shared mode
+    if (!useSessionAuth || useHybridAuth) {
+      // Initialize TrueNAS client connection for shared/hybrid mode
       await _initializeTrueNasClient();
 
       // Start heartbeat service
@@ -235,6 +256,8 @@ class Server {
       if (handler is WebSocketHandler) {
         handler.dispose();
       } else if (handler is SessionWebSocketHandler) {
+        handler.dispose();
+      } else if (handler is HybridWebSocketHandler) {
         handler.dispose();
       }
     }
