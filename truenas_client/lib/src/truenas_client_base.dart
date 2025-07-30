@@ -90,12 +90,14 @@ abstract class TrueNasClientBase implements IConnectionApi {
   Future<void> _authenticateWithCredentials() async {
     _logger.fine('Authenticating with username/password using auth.login_ex');
 
-    // Use auth.login_ex for more flexible authentication
-    final response = await call<Map<String, dynamic>>('auth.login_ex', {
-      'mechanism': 'PASSWORD_PLAIN',
-      'username': username,
-      'password': password,
-    });
+    // Use auth.login_ex with array parameters
+    final response = await call<Map<String, dynamic>>('auth.login_ex', [
+      {
+        'mechanism': 'PASSWORD_PLAIN',
+        'username': username,
+        'password': password,
+      },
+    ]);
 
     _handleAuthResponse(response);
   }
@@ -106,11 +108,9 @@ abstract class TrueNasClientBase implements IConnectionApi {
   ) async {
     _logger.fine('Authenticating with username/API key using auth.login_ex');
 
-    final response = await call<Map<String, dynamic>>('auth.login_ex', {
-      'mechanism': 'API_KEY',
-      'username': username,
-      'api_key': apiKey,
-    });
+    final response = await call<Map<String, dynamic>>('auth.login_ex', [
+      {'mechanism': 'API_KEY_PLAIN', 'username': username, 'api_key': apiKey},
+    ]);
 
     _handleAuthResponse(response);
   }
@@ -158,13 +158,13 @@ abstract class TrueNasClientBase implements IConnectionApi {
   }
 
   @override
-  Future<T> call<T>(String method, [dynamic params]) async {
+  Future<T> call<T>(String method, [List<dynamic> params = const []]) async {
     if (_peer == null) {
       throw const TrueNasException('Not connected to TrueNAS');
     }
 
     try {
-      _logger.fine('Calling $method');
+      _logger.fine('Calling $method with params: $params');
       final result = await _peer!.sendRequest(method, params);
       return result as T;
     } on json_rpc.RpcException catch (e) {

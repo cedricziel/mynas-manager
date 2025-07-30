@@ -7,7 +7,7 @@ import '../interfaces/disk_api.dart';
 mixin DiskApiMixin on IConnectionApi implements IDiskApi {
   @override
   Future<List<Disk>> listDisks() async {
-    final data = await call<List<dynamic>>('disk.query');
+    final data = await call<List<dynamic>>('disk.query', []);
 
     return data.map((disk) {
       final diskMap = disk as Map<String, dynamic>;

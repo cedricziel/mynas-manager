@@ -7,7 +7,7 @@ import '../interfaces/dataset_api.dart';
 mixin DatasetApiMixin on IConnectionApi implements IDatasetApi {
   @override
   Future<List<Dataset>> listDatasets({String? poolId}) async {
-    final data = await call<List<dynamic>>('pool.dataset.query');
+    final data = await call<List<dynamic>>('pool.dataset.query', []);
 
     return data
         .where((dataset) {
@@ -66,10 +66,9 @@ mixin DatasetApiMixin on IConnectionApi implements IDatasetApi {
     required String name,
     Map<String, dynamic>? properties,
   }) async {
-    final data = await call<Map<String, dynamic>>('pool.dataset.create', {
-      'name': '$pool/$name',
-      ...?properties,
-    });
+    final data = await call<Map<String, dynamic>>('pool.dataset.create', [
+      {'name': '$pool/$name', ...?properties},
+    ]);
 
     return Dataset(
       id: (data['id'] as String?) ?? '',

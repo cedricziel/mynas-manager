@@ -7,7 +7,7 @@ import '../interfaces/pool_api.dart';
 mixin PoolApiMixin on IConnectionApi implements IPoolApi {
   @override
   Future<List<Pool>> listPools() async {
-    final data = await call<List<dynamic>>('pool.query');
+    final data = await call<List<dynamic>>('pool.query', []);
 
     return data.map((pool) {
       final poolMap = pool as Map<String, dynamic>;
