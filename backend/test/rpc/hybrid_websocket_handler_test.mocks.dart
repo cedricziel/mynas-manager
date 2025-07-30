@@ -454,6 +454,14 @@ class MockSessionManager extends _i1.Mock implements _i5.SessionManager {
           as Duration);
 
   @override
+  _i4.Stream<_i5.SessionEvent> get sessionEvents =>
+      (super.noSuchMethod(
+            Invocation.getter(#sessionEvents),
+            returnValue: _i4.Stream<_i5.SessionEvent>.empty(),
+          )
+          as _i4.Stream<_i5.SessionEvent>);
+
+  @override
   int get activeSessionCount =>
       (super.noSuchMethod(
             Invocation.getter(#activeSessionCount),

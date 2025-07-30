@@ -11,6 +11,19 @@ import 'dart:async';
 import 'hybrid_websocket_handler_test.mocks.dart';
 
 void main() {
+  // Provide dummy values for Mockito
+  provideDummy<SystemInfo>(
+    const SystemInfo(
+      hostname: 'dummy-nas',
+      version: '0.0.0',
+      uptime: '0 hours',
+      cpuUsage: 0.0,
+      memory: MemoryInfo(total: 0, used: 0, free: 0, cached: 0),
+      cpuTemperature: 0.0,
+      alerts: [],
+    ),
+  );
+
   group('HybridWebSocketHandler', () {
     late MockWebSocketChannel mockChannel;
     late MockITrueNasClient mockSharedClient;
