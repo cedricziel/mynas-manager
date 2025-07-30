@@ -8,6 +8,7 @@ A Dart client library for TrueNAS SCALE API integration using WebSocket connecti
 - JSON-RPC 2.0 protocol support
 - API key authentication
 - Connection management with automatic reconnection
+- Heartbeat monitoring for connection health
 - Comprehensive coverage of TrueNAS API endpoints:
   - Pool management
   - Dataset operations
@@ -43,8 +44,19 @@ final client = TrueNasClient.withCredentials(
 // Connect (authentication happens automatically)
 await client.connect();
 
+// Start heartbeat monitoring (optional)
+final heartbeatStream = client.heartbeat(
+  interval: Duration(seconds: 30),
+);
+heartbeatStream.listen((status) {
+  print('Connection status: ${status.name}');
+});
+
 // Use the client
 final pools = await client.listPools();
+
+// Clean up
+await client.disconnect();
 ```
 
 ## Example

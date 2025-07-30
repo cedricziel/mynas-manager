@@ -7,3 +7,4 @@ export 'models/pool_scrub.dart';
 export 'models/snapshot.dart';
 export 'models/pool_resilver.dart';
 export 'models/disk.dart';
+export 'models/connection_status.dart';
