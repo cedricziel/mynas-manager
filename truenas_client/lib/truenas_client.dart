@@ -12,3 +12,6 @@ export 'src/interfaces/pool_api.dart';
 export 'src/interfaces/dataset_api.dart';
 export 'src/interfaces/share_api.dart';
 export 'src/interfaces/disk_api.dart';
+
+// TrueNAS API Models
+export 'src/models.dart';

@@ -3,6 +3,7 @@ description: Shared models and utilities for MyNAS Manager
 version: 1.0.0
 license: AGPL-3.0
 resolution: workspace
+publish_to: none
 
 environment:
   sdk: ^3.8.1
@@ -11,6 +12,8 @@ dependencies:
   freezed_annotation: ^3.1.0
   json_annotation: ^4.9.0
   equatable: ^2.0.5
+  truenas_client:
+    path: ../truenas_client
 
 dev_dependencies:
   lints: ^6.0.0

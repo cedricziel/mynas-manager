@@ -1,4 +1,4 @@
-import 'package:mynas_shared/mynas_shared.dart';
+import '../models.dart';
 import '../truenas_exceptions.dart';
 import '../interfaces/connection_api.dart';
 import '../interfaces/share_api.dart';

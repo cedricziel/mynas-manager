@@ -1,4 +1,4 @@
-import 'package:mynas_shared/mynas_shared.dart';
+import '../models.dart';
 
 /// System API interface
 abstract class ISystemApi {
