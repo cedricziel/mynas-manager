@@ -1,4 +1,4 @@
-import 'package:mynas_shared/mynas_shared.dart';
+import '../models.dart';
 
 /// Disk API interface
 abstract class IDiskApi {
