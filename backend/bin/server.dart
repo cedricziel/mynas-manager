@@ -30,11 +30,21 @@ void main(List<String> args) async {
     );
   }
 
+  // Check if session auth mode is enabled
+  final useSessionAuth =
+      env['USE_SESSION_AUTH'] == 'true' || env['AUTH_MODE'] == 'truenas';
+
   // Pass environment to server if available
   final server = Server(
     trueNasUrl: env['TRUENAS_URL'],
     trueNasApiKey: env['TRUENAS_API_KEY'],
+    useSessionAuth: useSessionAuth,
   );
+
+  if (useSessionAuth) {
+    print('Running in session-based authentication mode');
+    print('Users will authenticate with their TrueNAS credentials');
+  }
 
   try {
     await server.start(host: host, port: port);
