@@ -8,7 +8,7 @@ jobs:
   lint-commits:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
       with:
         fetch-depth: 0
     
@@ -21,7 +21,7 @@ jobs:
   check-licenses:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     
     - name: Setup Dart
       uses: dart-lang/setup-dart@v1
@@ -41,7 +41,7 @@ jobs:
   size-check:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
