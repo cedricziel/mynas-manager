@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mynas_frontend/providers/auth_provider.dart';
 import 'package:mynas_frontend/screens/login_screen.dart';
 import 'package:mynas_frontend/screens/desktop_screen.dart';
 import 'package:mynas_frontend/screens/dashboard_screen.dart';
@@ -7,12 +9,68 @@ import 'package:mynas_frontend/screens/storage_screen.dart';
 import 'package:mynas_frontend/screens/shares_screen.dart';
 import 'package:mynas_frontend/screens/settings_screen.dart';
 import 'package:mynas_frontend/widgets/app_shell.dart';
+import 'package:mynas_frontend/widgets/session_monitor.dart';
 
-class MyNasApp extends StatelessWidget {
+class MyNasApp extends ConsumerWidget {
   const MyNasApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final router = GoRouter(
+      initialLocation: '/login',
+      refreshListenable: ref.watch(authRouterRefreshProvider),
+      redirect: (context, state) {
+        final authState = ref.read(authProvider);
+        final isAuthenticated = authState.isAuthenticated;
+        final isLoginRoute = state.matchedLocation == '/login';
+
+        if (!isAuthenticated && !isLoginRoute) {
+          // Not authenticated and trying to access protected route
+          return '/login';
+        }
+
+        if (isAuthenticated && isLoginRoute) {
+          // Already authenticated, redirect to desktop
+          return '/desktop';
+        }
+
+        // No redirect needed
+        return null;
+      },
+      routes: [
+        GoRoute(
+          path: '/login',
+          builder: (context, state) => const LoginScreen(),
+        ),
+        GoRoute(
+          path: '/desktop',
+          builder: (context, state) => const DesktopScreen(),
+        ),
+        // Keep the old routes for now - they can be opened as windows
+        ShellRoute(
+          builder: (context, state, child) => AppShell(child: child),
+          routes: [
+            GoRoute(
+              path: '/dashboard',
+              builder: (context, state) => const DashboardScreen(),
+            ),
+            GoRoute(
+              path: '/storage',
+              builder: (context, state) => const StorageScreen(),
+            ),
+            GoRoute(
+              path: '/shares',
+              builder: (context, state) => const SharesScreen(),
+            ),
+            GoRoute(
+              path: '/settings',
+              builder: (context, state) => const SettingsScreen(),
+            ),
+          ],
+        ),
+      ],
+    );
+
     return MaterialApp.router(
       title: 'MyNAS Manager',
       theme: ThemeData(
@@ -29,40 +87,8 @@ class MyNasApp extends StatelessWidget {
         ),
         useMaterial3: true,
       ),
-      routerConfig: _router,
+      routerConfig: router,
+      builder: (context, child) => SessionMonitor(child: child!),
     );
   }
-
-  static final _router = GoRouter(
-    initialLocation: '/login',
-    routes: [
-      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
-      GoRoute(
-        path: '/desktop',
-        builder: (context, state) => const DesktopScreen(),
-      ),
-      // Keep the old routes for now - they can be opened as windows
-      ShellRoute(
-        builder: (context, state, child) => AppShell(child: child),
-        routes: [
-          GoRoute(
-            path: '/dashboard',
-            builder: (context, state) => const DashboardScreen(),
-          ),
-          GoRoute(
-            path: '/storage',
-            builder: (context, state) => const StorageScreen(),
-          ),
-          GoRoute(
-            path: '/shares',
-            builder: (context, state) => const SharesScreen(),
-          ),
-          GoRoute(
-            path: '/settings',
-            builder: (context, state) => const SettingsScreen(),
-          ),
-        ],
-      ),
-    ],
-  );
 }

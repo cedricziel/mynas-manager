@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:mynas_desktop/mynas_desktop.dart';
 import 'package:mynas_frontend/widgets/desktop/mynas_desktop_area.dart';
 import 'package:mynas_frontend/widgets/desktop/mynas_dock.dart';
+import 'package:mynas_frontend/widgets/desktop/status_bar.dart';
 
 class DesktopScreen extends ConsumerWidget {
   const DesktopScreen({super.key});
@@ -33,6 +34,9 @@ class DesktopScreen extends ConsumerWidget {
 
             // Desktop area with icons
             const MyNASDesktopArea(),
+
+            // Status bar at the top
+            const Positioned(left: 0, right: 0, top: 0, child: StatusBar()),
 
             // Dock at the bottom
             const Positioned(left: 0, right: 0, bottom: 0, child: MyNASDock()),

@@ -16,8 +16,17 @@ class RpcClient {
   json_rpc.Peer? _peer;
   final _connectionCompleter = Completer<void>();
   bool _isConnected = false;
+  String? _sessionId;
+  Timer? _heartbeatTimer;
+
+  // Session event stream
+  final _sessionEventController =
+      StreamController<Map<String, dynamic>>.broadcast();
+  Stream<Map<String, dynamic>> get sessionEvents =>
+      _sessionEventController.stream;
 
   bool get isConnected => _isConnected;
+  String? get sessionId => _sessionId;
 
   Future<void> connect({
     String host = 'localhost',
@@ -35,6 +44,18 @@ class RpcClient {
 
       // Create JSON-RPC peer
       _peer = json_rpc.Peer(_channel!.cast<String>());
+
+      // Register notification handlers
+      _peer!.registerMethod('session.event', (json_rpc.Parameters params) {
+        _logger.info('Received session event: ${params.asMap}');
+        _sessionEventController.add(params.asMap.cast<String, dynamic>());
+      });
+
+      _peer!.registerMethod('truenas.connectionStatusChanged', (
+        json_rpc.Parameters params,
+      ) {
+        _logger.info('TrueNAS connection status changed: ${params.asMap}');
+      });
 
       // Start listening
       unawaited(
@@ -61,9 +82,12 @@ class RpcClient {
   }
 
   Future<void> disconnect() async {
+    _stopHeartbeat();
     await _peer?.close();
     await _channel?.sink.close();
     _isConnected = false;
+    _sessionId = null;
+    await _sessionEventController.close();
     _logger.info('Disconnected from backend');
   }
 
@@ -153,5 +177,55 @@ class RpcClient {
 
   Future<bool> deleteShare(String id) async {
     return await sendRequest('share.delete', {'id': id});
+  }
+
+  // Authentication methods
+  Future<Map<String, dynamic>> login({
+    required String username,
+    required String password,
+    String? trueNasUrl,
+  }) async {
+    final result = await sendRequest<Map<String, dynamic>>('auth.login', {
+      'username': username,
+      'password': password,
+      if (trueNasUrl != null) 'trueNasUrl': trueNasUrl,
+    });
+
+    // Store session ID
+    _sessionId = result['sessionId'] as String?;
+
+    // Start heartbeat
+    if (_sessionId != null) {
+      _startHeartbeat();
+    }
+
+    return result;
+  }
+
+  Future<Map<String, dynamic>> logout() async {
+    final result = await sendRequest<Map<String, dynamic>>('auth.logout');
+    _sessionId = null;
+    _stopHeartbeat();
+    return result;
+  }
+
+  Future<Map<String, dynamic>> getSessionInfo() async {
+    return await sendRequest('session.info');
+  }
+
+  void _startHeartbeat() {
+    _stopHeartbeat();
+    _heartbeatTimer = Timer.periodic(const Duration(seconds: 30), (_) async {
+      try {
+        await sendRequest('session.heartbeat');
+      } catch (e) {
+        _logger.warning('Heartbeat failed: $e');
+      }
+    });
+  }
+
+  void _stopHeartbeat() {
+    _heartbeatTimer?.cancel();
+    _heartbeatTimer = null;
   }
 }
